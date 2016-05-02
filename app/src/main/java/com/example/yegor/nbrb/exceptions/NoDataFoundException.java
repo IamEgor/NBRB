@@ -1,6 +1,8 @@
 package com.example.yegor.nbrb.exceptions;
 
-public class NoDataFoundException extends Exception {
+import java.io.IOException;
+
+public class NoDataFoundException extends IOException {
 
     @Override
     public String getMessage() {

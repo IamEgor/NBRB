@@ -10,6 +10,8 @@ import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
 
+import java.io.IOException;
+
 public class RatesByDateLoader extends AsyncTaskLoader<ContentWrapper<DailyExRatesOnDateModel>> {
 
     private String currency;
@@ -25,7 +27,7 @@ public class RatesByDateLoader extends AsyncTaskLoader<ContentWrapper<DailyExRat
     @Override
     public ContentWrapper<DailyExRatesOnDateModel> loadInBackground() {
 
-        if (!Utils.hasConnection()){
+        if (!Utils.hasConnection()) {
             try {
                 Thread.sleep(350);//for beauty
             } catch (InterruptedException e) {
@@ -34,7 +36,12 @@ public class RatesByDateLoader extends AsyncTaskLoader<ContentWrapper<DailyExRat
             return new ContentWrapper<>(new NoConnectionException());
         }
 
-        DailyExRatesOnDateModel rate = SoapUtils.getCurrencyByDate(currency, date);
+        DailyExRatesOnDateModel rate;
+        try {
+            rate = SoapUtils.getCurrencyByDate(currency, date);
+        } catch (IOException e) {
+            return new ContentWrapper<>(e);
+        }
 
         if (rate != null)
             return new ContentWrapper<>(rate);

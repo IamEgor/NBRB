@@ -4,6 +4,7 @@ package com.example.yegor.nbrb.utils;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
@@ -11,7 +12,6 @@ import com.example.yegor.nbrb.models.ExRatesDynModel;
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
-import org.ksoap2.transport.HttpResponseException;
 import org.ksoap2.transport.HttpTransportSE;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -50,7 +50,7 @@ public class SoapUtils {
     private static final String SOAP_ACTION3 = "http://www.nbrb.by/CurrenciesRef";
     private static final String PROPERTY3 = "Periodicity";
 
-    public static List<CurrencyModel> getCurrenciesList() {
+    public static List<CurrencyModel> getCurrenciesList() throws IOException {
 
         List<CurrencyModel> list = new ArrayList<>(231);
 
@@ -69,7 +69,8 @@ public class SoapUtils {
 
     }
 
-    public static DailyExRatesOnDateModel getCurrencyByDate(@NonNull String currency, @NonNull String time) {
+    public static DailyExRatesOnDateModel getCurrencyByDate(@NonNull String currency, @NonNull String time)
+            throws IOException {
 
         Map<String, String> map = new HashMap<>();
         map.put(PROPERTY, time);
@@ -86,7 +87,7 @@ public class SoapUtils {
         return null;
     }
 
-    public static List<DailyExRatesOnDateModel> getCurrenciesNow() {
+    public static List<DailyExRatesOnDateModel> getCurrenciesNow() throws IOException {
 
         List<DailyExRatesOnDateModel> list = new ArrayList<>(16);
 
@@ -105,28 +106,30 @@ public class SoapUtils {
 
     }
 
-    public static List<ExRatesDynModel> getRatesDyn(int curId, long fromDate, long toDate) {
+    public static List<ExRatesDynModel> getRatesDyn(String curId, String fromDate, String toDate)
+            throws IOException {
 
         List<ExRatesDynModel> list = new ArrayList<>(16);
 
         Map<String, String> map = new HashMap<>(3);
 
-        map.put(PROPERTY_CUR_ID, String.valueOf(curId));
-        map.put(PROPERTY_FROM_DATE, format.format(fromDate));
-        map.put(PROPERTY_TO_DATE, String.valueOf(toDate));
+        map.put(PROPERTY_CUR_ID, curId);
+        map.put(PROPERTY_FROM_DATE, fromDate);
+        map.put(PROPERTY_TO_DATE, toDate);
 
         SoapObject response = getResponse(new RequestProps(METHOD_NAME2, SOAP_ACTION2, map));
         SoapObject dailyExRatesOnDate;
 
         for (int k = 0; k < response.getPropertyCount(); k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
+            //TODO Utils.date2Long() вместо substring
             list.add(new ExRatesDynModel(dailyExRatesOnDate));
         }
 
         return list;
     }
 
-    public static SoapObject getResponse(RequestProps props) {
+    public static SoapObject getResponse(RequestProps props) throws IOException {//HttpResponseException, SoapFault
 
         SoapObject request = new SoapObject(NAMESPACE, props.getMethod());
 
@@ -145,21 +148,23 @@ public class SoapUtils {
 
         try {
 
-            System.out.println("[SoapUtils] action - " + props.getAction());
             httpTransport.call(props.getAction(), envelope);
 
             SoapObject response = (SoapObject) envelope.getResponse();
+
+            System.out.println("[SoapUtils]  envelope.getResponse() - " +  envelope.getResponse());
+            Log.w("SoapUtils", "  envelope.getResponse() - " +  envelope.getResponse());
+
+            if(response == null)
+                throw new NoDataFoundException();
+
+            //if (!response.hasProperty("diffgram"))
+              //  throw new NoDataFoundException();
             response = (SoapObject) response.getProperty(1);//anyType
             response = (SoapObject) response.getProperty(0);//newDataSet
 
             return response;
 
-        } catch (HttpResponseException e) {
-            Log.e(TAG, "HttpResponseException : " + e.getMessage());
-            throw new RuntimeException();
-        } catch (IOException e) {
-            Log.e(TAG, "IOException : " + e.getMessage());
-            throw new RuntimeException();
         } catch (XmlPullParserException e) {
             Log.e(TAG, "XmlPullParserException : " + e.getMessage());
             throw new RuntimeException();

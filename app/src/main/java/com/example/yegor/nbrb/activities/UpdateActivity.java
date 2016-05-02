@@ -8,24 +8,27 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.example.yegor.nbrb.R;
+import com.example.yegor.nbrb.exceptions.NoConnectionException;
+import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.UpdateCurrenciesLoader;
+import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.storage.AppPrefs;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.Utils;
 
+import org.ksoap2.transport.HttpResponseException;
+
 import java.util.Calendar;
 import java.util.List;
 
 public class UpdateActivity extends AppCompatActivity implements
-        LoaderManager.LoaderCallbacks<List<CurrencyModel>> {
+        LoaderManager.LoaderCallbacks<ContentWrapper<List<CurrencyModel>>> {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (!Utils.need2Update()) {
-            System.out.println("Utils.need2Update() - " + Utils.need2Update() );
-            Toast.makeText(this, "need2Update", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(this, Main2Activity.class));
+            startActivity(new Intent(this, MainActivity.class));
             finish();
         }
 
@@ -36,25 +39,37 @@ public class UpdateActivity extends AppCompatActivity implements
     }
 
     @Override
-    public Loader<List<CurrencyModel>> onCreateLoader(int id, Bundle args) {
-        Toast.makeText(this, "Update start", Toast.LENGTH_SHORT).show();
+    public Loader<ContentWrapper<List<CurrencyModel>>> onCreateLoader(int id, Bundle args) {
         return new UpdateCurrenciesLoader(this);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<CurrencyModel>> loader, List<CurrencyModel> data) {
+    public void onLoadFinished(Loader<ContentWrapper<List<CurrencyModel>>> loader,
+                               ContentWrapper<List<CurrencyModel>> data) {
 
-        MySQLiteClass mySQLiteClass = new MySQLiteClass(this);
-        mySQLiteClass.addCurrencies(data);
+        if (data.getException() == null && data.getContent() != null) {
 
-        AppPrefs.setLastUpdate(Calendar.getInstance().getTimeInMillis());
+            MySQLiteClass mySQLiteClass = new MySQLiteClass(this);
+            mySQLiteClass.addCurrencies(data.getContent());
 
-        startActivity(new Intent(this, Main2Activity.class));
-        finish();
+            AppPrefs.setLastUpdate(Calendar.getInstance().getTimeInMillis());
+
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+
+        } else if (data.getException() instanceof NoConnectionException) {
+            Toast.makeText(this, "NoConnectionException", Toast.LENGTH_LONG).show();
+        } else if (data.getException() instanceof NoDataFoundException) {
+            Toast.makeText(this, "NoDataFoundException", Toast.LENGTH_LONG).show();
+        } else if (data.getException() instanceof HttpResponseException) {
+            Toast.makeText(this, "HttpResponseException", Toast.LENGTH_LONG).show();
+        } else
+            throw new RuntimeException("Unknown exception");
+
     }
 
     @Override
-    public void onLoaderReset(Loader<List<CurrencyModel>> loader) {
+    public void onLoaderReset(Loader<ContentWrapper<List<CurrencyModel>>> loader) {
 
     }
 

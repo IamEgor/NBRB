@@ -35,7 +35,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_3d_rotation_black_24dp" />
+            android:src="@drawable/ic_date_range_black_24dp" />
 
     </RelativeLayout>
 

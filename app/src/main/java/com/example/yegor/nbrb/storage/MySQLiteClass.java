@@ -136,31 +136,25 @@ public class MySQLiteClass {
 
     }
 
-
-    public List<String[]> getCurrenciesNames2() {
-
-        List<String[]> list = new ArrayList<>(64);
+    public String getIdByAbbr(String abbr) {
 
         open(false);
 
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
-                new String[]{CurrencyModel.ABBR, CurrencyModel.NAME},
-                CurrencyModel.DATE_END + " != ",
-                new String[]{"NULL"},
+                new String[]{CurrencyModel.ID},
+                CurrencyModel.ABBR + " =?",
+                new String[]{abbr},
                 null, null, null);
 
-        if (cursor.moveToFirst()) {
-            do {
-                list.add(new String[]{cursor.getString(0), cursor.getString(1)});
-            } while (cursor.moveToNext());
-        }
+        cursor.moveToFirst();
+
+        String id = cursor.getString(0);
 
         cursor.close();
         close();
 
-        return list;
-
+        return id;
     }
 
 

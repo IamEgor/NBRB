@@ -16,7 +16,7 @@ public class ExRatesDynModel {
     }
 
     public ExRatesDynModel(SoapObject soapObject) {
-        date = soapObject.getProperty(DATE).toString();
+        date = soapObject.getProperty(DATE).toString().substring(0, 10);
         rate = Float.parseFloat(soapObject.getProperty(RATE).toString());
     }
 

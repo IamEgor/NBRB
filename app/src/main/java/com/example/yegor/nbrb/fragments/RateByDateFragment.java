@@ -22,6 +22,8 @@ import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
+import org.ksoap2.transport.HttpResponseException;
+
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -98,15 +100,12 @@ public class RateByDateFragment extends Fragment implements
             }
         });
 
-        // Creating adapter for spinner
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
                 android.R.layout.simple_spinner_item,
                 (new MySQLiteClass(getContext())).getCurrenciesAbbr());
 
-        // Drop down layout style - list view with radio button
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        // attaching data adapter to spinner
         spinner.setAdapter(dataAdapter);
 
         return rootView;
@@ -135,6 +134,9 @@ public class RateByDateFragment extends Fragment implements
             setStatus(Status.FAILED);
         } else if (data.getException() instanceof NoDataFoundException) {
             errorMessage.setText("No rate for the given currency on that day");
+            setStatus(Status.FAILED);
+        } else if (data.getException() instanceof HttpResponseException) {
+            errorMessage.setText("Wrong data input");
             setStatus(Status.FAILED);
         } else
             throw new RuntimeException("Unknown exception");
