@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.yegor.nbrb.models.CurrencyModel;
+import com.example.yegor.nbrb.models.SpinnerModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,21 +112,25 @@ public class MySQLiteClass {
         return currencies;
     }
 
-    public List<String> getCurrenciesAbbr() {
+    public List<SpinnerModel> getCurrenciesAbbr2() {
 
-        List<String> list = new ArrayList<>(64);
+        List<SpinnerModel> list = new ArrayList<>(64);
 
         open(false);
 
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
-                new String[]{CurrencyModel.ABBR},
+                new String[]{CurrencyModel.ABBR, CurrencyModel.NAME, CurrencyModel.DATE_END},
                 null,//CurrencyModel.DATE_END + " = \"\" OR  " + CurrencyModel.DATE_END + " IS NULL",
                 null, null, null, null);
 
         if (cursor.moveToFirst()) {
             do {
-                list.add(cursor.getString(0));
+                list.add(
+                        new SpinnerModel(cursor.getString(0),
+                                cursor.getString(1),
+                                cursor.getString(2)));
+
             } while (cursor.moveToNext());
         }
 
@@ -156,6 +161,8 @@ public class MySQLiteClass {
 
         return id;
     }
+
+
 
 
     private class DBHelp extends SQLiteOpenHelper {

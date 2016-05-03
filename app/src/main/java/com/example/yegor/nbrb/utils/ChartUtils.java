@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 
 import com.example.yegor.nbrb.App;
-import com.example.yegor.nbrb.MyMarkerView;
+import com.example.yegor.nbrb.views.MyMarkerView;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
 import com.github.mikephil.charting.charts.LineChart;

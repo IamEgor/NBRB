@@ -12,5 +12,6 @@
     <string name="from_date">%s\n Set start date</string>
     <string name="to_date">%s\n Set end date</string>
     <string name="retry">Retry</string>
+    <string name="until_date">Until %s</string>
 
 </resources>

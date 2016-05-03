@@ -23,7 +23,7 @@
         android:id="@+id/line_chart"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/buttons"
+        android:layout_above="@+id/pick_currency"
         android:layout_below="@+id/progress" />
 
     <include layout="@layout/item_error_view"/>
@@ -35,15 +35,23 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/progress"
+        android:visibility="invisible"
         android:layout_margin="2dp"
         android:background="@null"
         android:src="@drawable/ic_fullscreen_black_24dp"
         android:tint="@color/colorAccent" />
 
+    <android.support.v7.widget.AppCompatSpinner
+        android:id="@+id/pick_currency"
+        android:layout_above="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp" />
+
     <LinearLayout
         android:id="@+id/buttons"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="56dp"
         android:layout_alignParentBottom="true">
 
         <android.support.v7.widget.AppCompatButton
@@ -53,12 +61,6 @@
             android:layout_weight="1"
             android:text="@string/from_date"
             android:textAllCaps="false" />
-
-        <android.support.v7.widget.AppCompatSpinner
-            android:id="@+id/spinner"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1.2" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/to_date"

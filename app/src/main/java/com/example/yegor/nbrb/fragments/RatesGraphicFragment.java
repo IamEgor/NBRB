@@ -10,15 +10,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.yegor.nbrb.R;
+import com.example.yegor.nbrb.adapters.SpinnerAdapter;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
+import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.utils.SoapUtils;
@@ -71,18 +72,14 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
         fromDate = (AppCompatButton) rootView.findViewById(R.id.from_date);
         toDate = (AppCompatButton) rootView.findViewById(R.id.to_date);
-        spinner = (AppCompatSpinner) rootView.findViewById(R.id.spinner);
+        spinner = (AppCompatSpinner) rootView.findViewById(R.id.pick_currency);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
 
-        //TODO вынести обращение из UI
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_spinner_item,
-                (new MySQLiteClass(getContext())).getCurrenciesAbbr());
-
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        SpinnerAdapter dataAdapter = new SpinnerAdapter(getContext(),
+                (new MySQLiteClass(getContext()).getCurrenciesAbbr2()));
 
         spinner.setAdapter(dataAdapter);
-        spinner.setSelection(dataAdapter.getPosition("USD"));
+        spinner.setSelection(dataAdapter.getPosition(new SpinnerModel("USD", "Доллар США", "")));
         spinner.setOnItemSelectedListener(this);
 
         rootView.findViewById(R.id.retry_btn).setOnClickListener((v -> restartLoader()));
@@ -170,7 +167,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
 
         Bundle bundle = new Bundle();
 
-        bundle.putString(ABBR, spinner.getSelectedItem().toString());
+        bundle.putString(ABBR, ((SpinnerModel) spinner.getSelectedItem()).getAbbr());
         bundle.putString(FROM_DATE, Utils.format((Long) fromDate.getTag()));
         bundle.putString(TO_DATE, Utils.format((Long) toDate.getTag()));
 

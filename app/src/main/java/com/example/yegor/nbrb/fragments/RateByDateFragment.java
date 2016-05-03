@@ -8,13 +8,14 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.yegor.nbrb.R;
+import com.example.yegor.nbrb.adapters.SpinnerAdapter;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
+import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
@@ -83,11 +84,10 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
                 restartLoader();
         });
 
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
-                android.R.layout.simple_spinner_item,
-                (new MySQLiteClass(getContext())).getCurrenciesAbbr());
-
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        SpinnerAdapter dataAdapter = new SpinnerAdapter(getContext(),
+                (new MySQLiteClass(getContext()).getCurrenciesAbbr2()));
+        //TODO setDropDownViewResource
+        //dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         spinner.setAdapter(dataAdapter);
 
@@ -104,7 +104,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     protected Bundle getBundleArgs() {
 
         Bundle bundle = new Bundle();
-        bundle.putString(CURRENCY, spinner.getSelectedItem().toString());
+        bundle.putString(CURRENCY, ((SpinnerModel) spinner.getSelectedItem()).getAbbr());
         bundle.putString(DATE, editText.getText().toString());
 
         return bundle;

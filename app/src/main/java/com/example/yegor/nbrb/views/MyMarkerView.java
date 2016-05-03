@@ -1,8 +1,9 @@
-package com.example.yegor.nbrb;
+package com.example.yegor.nbrb.views;
 
 import android.content.Context;
 import android.widget.TextView;
 
+import com.example.yegor.nbrb.R;
 import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
