@@ -1,34 +1,31 @@
 package com.example.yegor.nbrb.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.adapters.CurrentRatesAdapter;
-import com.example.yegor.nbrb.exceptions.NoConnectionException;
-import com.example.yegor.nbrb.exceptions.NoDataFoundException;
-import com.example.yegor.nbrb.loaders.CurrentRatesLoader;
+import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
-
-import org.ksoap2.transport.HttpResponseException;
+import com.example.yegor.nbrb.utils.SoapUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CurrentRatesFragment extends Fragment implements
-        LoaderManager.LoaderCallbacks<ContentWrapper<List<DailyExRatesOnDateModel>>> {
+public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRatesOnDateModel>> {
 
     private RecyclerView rv;
     private CurrentRatesAdapter adapter;
+    private View loadingView;
+    private View errorView;
+    private TextView errorMessage;
 
     public CurrentRatesFragment() {
     }
@@ -42,12 +39,17 @@ public class CurrentRatesFragment extends Fragment implements
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_current_rates, container, false);
 
-        adapter = new CurrentRatesAdapter(new ArrayList<DailyExRatesOnDateModel>(0));
+        adapter = new CurrentRatesAdapter(new ArrayList<>(0));
 
         rv = (RecyclerView) rootView.findViewById(R.id.rv);
+        loadingView = rootView.findViewById(R.id.loading_view);
+        errorView = rootView.findViewById(R.id.error_view);
+        errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         rv.setAdapter(adapter);
+
+        rootView.findViewById(R.id.retry_btn).setOnClickListener((view) -> restartLoader());
 
         getLoaderManager().initLoader(0, null, this).forceLoad();
 
@@ -55,31 +57,57 @@ public class CurrentRatesFragment extends Fragment implements
     }
 
     @Override
-    public Loader<ContentWrapper<List<DailyExRatesOnDateModel>>> onCreateLoader(int id, Bundle args) {
-        return new CurrentRatesLoader(getContext());
+    protected Bundle getBundleArgs() {
+        return null;
     }
 
     @Override
-    public void onLoadFinished(Loader<ContentWrapper<List<DailyExRatesOnDateModel>>> loader,
-                               ContentWrapper<List<DailyExRatesOnDateModel>> data) {
+    public Loader<ContentWrapper<List<DailyExRatesOnDateModel>>> onCreateLoader(int id, Bundle args) {
+        setStatus(Status.LOADING);
+        return new AbstractLoader<>(getContext(), SoapUtils::getCurrenciesNow);
+    }
 
-        if (data.getException() == null && data.getContent() != null) {
-            adapter.setModels(data.getContent());
-        } else if (data.getException() instanceof NoConnectionException) {
-            Toast.makeText(getContext(), "NoConnectionException", Toast.LENGTH_LONG).show();
-        } else if (data.getException() instanceof NoDataFoundException) {
-            Toast.makeText(getContext(), "NoDataFoundException", Toast.LENGTH_LONG).show();
-        } else if (data.getException() instanceof HttpResponseException) {
-            Toast.makeText(getContext(), "HttpResponseException", Toast.LENGTH_LONG).show();
-        } else
-            throw new RuntimeException("[Unknown exception] "  + data.getException().getMessage()) ;
+    @Override
+    protected void onDataReceived(List<DailyExRatesOnDateModel> models) {
+        adapter.setModels(models);
+        setStatus(Status.OK);
+    }
 
-
+    @Override
+    protected void onFailure(Exception e) {
+        errorMessage.setText(e.getMessage());
+        setStatus(Status.FAILED);
     }
 
     @Override
     public void onLoaderReset(Loader<ContentWrapper<List<DailyExRatesOnDateModel>>> loader) {
-        adapter.setModels(new ArrayList<DailyExRatesOnDateModel>(0));
+        adapter.setModels(new ArrayList<>(0));
+    }
+
+    protected void setStatus(Status status) {
+
+        switch (status) {
+            case LOADING:
+                rv.setVisibility(View.GONE);
+                errorView.setVisibility(View.GONE);
+                loadingView.setVisibility(View.VISIBLE);
+                break;
+            case OK:
+                errorView.setVisibility(View.GONE);
+                loadingView.setVisibility(View.GONE);
+                rv.setVisibility(View.VISIBLE);
+                break;
+            case FAILED:
+                loadingView.setVisibility(View.GONE);
+                rv.setVisibility(View.GONE);
+                errorView.setVisibility(View.VISIBLE);
+                break;
+        }
+
+    }
+
+    enum Status {
+        LOADING, OK, FAILED
     }
 
 }

@@ -10,11 +10,12 @@ import android.widget.Toast;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.exceptions.NoConnectionException;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
-import com.example.yegor.nbrb.loaders.UpdateCurrenciesLoader;
+import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.storage.AppPrefs;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
 
 import org.ksoap2.transport.HttpResponseException;
@@ -40,7 +41,7 @@ public class UpdateActivity extends AppCompatActivity implements
 
     @Override
     public Loader<ContentWrapper<List<CurrencyModel>>> onCreateLoader(int id, Bundle args) {
-        return new UpdateCurrenciesLoader(this);
+        return new AbstractLoader<>(this, SoapUtils::getCurrenciesList);
     }
 
     @Override

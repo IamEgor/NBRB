@@ -6,30 +6,22 @@ import android.support.v4.content.AsyncTaskLoader;
 import com.example.yegor.nbrb.exceptions.NoConnectionException;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.models.ContentWrapper;
-import com.example.yegor.nbrb.models.ExRatesDynModel;
-import com.example.yegor.nbrb.storage.MySQLiteClass;
-import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
 
 import java.io.IOException;
-import java.util.List;
 
-public class GraphicDynLoader extends AsyncTaskLoader<ContentWrapper<List<ExRatesDynModel>>> {
+public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
 
-    private String abbr, fromDate, toDate;
-    private Context context;
+    AbstractLoaderInterface<T> action;
 
-    public GraphicDynLoader(Context context, String[] params) {
+    public AbstractLoader(Context context, AbstractLoaderInterface<T> action) {
         super(context);
 
-        this.context = context;
-        abbr = params[0];
-        fromDate = params[1];
-        toDate = params[2];
+        this.action = action;
     }
 
     @Override
-    public ContentWrapper<List<ExRatesDynModel>> loadInBackground() {
+    public ContentWrapper<T> loadInBackground() {
 
         if (!Utils.hasConnection()) {
             try {
@@ -40,18 +32,16 @@ public class GraphicDynLoader extends AsyncTaskLoader<ContentWrapper<List<ExRate
             return new ContentWrapper<>(new NoConnectionException());
         }
 
-        String id = (new MySQLiteClass(context)).getIdByAbbr(abbr);
-
-        List<ExRatesDynModel> ratesDyn;
+        T data;
 
         try {
-            ratesDyn = SoapUtils.getRatesDyn(id, fromDate, toDate);
+            data = action.action();
         } catch (IOException e) {
             return new ContentWrapper<>(e);
         }
 
-        if (ratesDyn != null)
-            return new ContentWrapper<>(ratesDyn);
+        if (data != null)
+            return new ContentWrapper<>(data);
         else
             return new ContentWrapper<>(new NoDataFoundException());
 

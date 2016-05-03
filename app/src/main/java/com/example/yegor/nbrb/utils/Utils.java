@@ -12,9 +12,10 @@ import com.example.yegor.nbrb.storage.AppPrefs;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
-public class Utils {
+public final class Utils {
 
     private static final SimpleDateFormat format =
             new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -36,6 +37,10 @@ public class Utils {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
+    public static String format(GregorianCalendar time) {
+        return format(time.getTimeInMillis());
+    }
+
     public static String format(long time) {
         return format.format(time);
     }
@@ -51,4 +56,23 @@ public class Utils {
     public static int getSDKInt() {
         return android.os.Build.VERSION.SDK_INT;
     }
+
+    public static void logT(String tag, Object... objects) {
+        String message = "";
+        for (Object o : objects)
+            message += o.toString() + " | ";
+        System.out.println("[" + tag + "] " + message);
+        Log.w(tag, message);
+    }
+
+    public static final String TAG = "[APP_LOGS]";
+
+    public static void log(Object... objects) {
+        String message = "";
+        for (Object o : objects)
+            message += o.toString() + " | ";
+        System.out.println(TAG + " " + message);
+        Log.w(TAG, message);
+    }
+
 }

@@ -2,8 +2,6 @@ package com.example.yegor.nbrb.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatSpinner;
@@ -14,22 +12,21 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.example.yegor.nbrb.R;
-import com.example.yegor.nbrb.exceptions.NoConnectionException;
-import com.example.yegor.nbrb.exceptions.NoDataFoundException;
-import com.example.yegor.nbrb.loaders.RatesByDateLoader;
+import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.utils.SoapUtils;
+import com.example.yegor.nbrb.utils.Utils;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import org.ksoap2.transport.HttpResponseException;
 
 import java.util.Calendar;
-import java.util.Locale;
+import java.util.GregorianCalendar;
 
-public class RateByDateFragment extends Fragment implements
-        DatePickerDialog.OnDateSetListener,
-        LoaderManager.LoaderCallbacks<ContentWrapper<DailyExRatesOnDateModel>> {
+public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDateModel> implements
+        DatePickerDialog.OnDateSetListener {
 
     public static final String CURRENCY = "CURRENCY";
     public static final String DATE = "DATE";
@@ -59,45 +56,31 @@ public class RateByDateFragment extends Fragment implements
         editText = (AppCompatEditText) rootView.findViewById(R.id.date);
 
         cv = rootView.findViewById(R.id.cv);
-        loadingView = rootView.findViewById(R.id.avloadingIndicatorView);
+        loadingView = rootView.findViewById(R.id.loading_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
         currency = (TextView) rootView.findViewById(R.id.currency);
         rate = (TextView) rootView.findViewById(R.id.rate);
 
-        rootView.findViewById(R.id.pick_date).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Calendar now = Calendar.getInstance();
-                DatePickerDialog dpd = DatePickerDialog.newInstance(
-                        RateByDateFragment.this,
-                        now.get(Calendar.YEAR),
-                        now.get(Calendar.MONTH),
-                        now.get(Calendar.DAY_OF_MONTH)
-                );
-                dpd.setThemeDark(true);
-                dpd.show(getActivity().getFragmentManager(), "Datepickerdialog");
-            }
-        });
-
-        rootView.findViewById(R.id.find).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!editText.getText().toString().matches("\\d{4}-\\d{2}-\\d{2}"))
-                    editText.setError(String.format("Should match input patterm [%s]",
-                            getString(R.string.input_date_pattern)));
-                else {
-
-                    Bundle bundle = new Bundle();
-                    bundle.putString(CURRENCY, spinner.getSelectedItem().toString());
-                    bundle.putString(DATE, editText.getText().toString());
-
-                    getActivity()
-                            .getSupportLoaderManager()
-                            .restartLoader(0, bundle, RateByDateFragment.this)
-                            .forceLoad();
+        rootView.findViewById(R.id.pick_date).setOnClickListener((view) -> {
+                    Calendar now = Calendar.getInstance();
+                    DatePickerDialog dpd = DatePickerDialog.newInstance(
+                            RateByDateFragment.this,
+                            now.get(Calendar.YEAR),
+                            now.get(Calendar.MONTH),
+                            now.get(Calendar.DAY_OF_MONTH)
+                    );
+                    dpd.setThemeDark(true);
+                    dpd.show(getActivity().getFragmentManager(), "Datepickerdialog");
                 }
-            }
+        );
+
+        rootView.findViewById(R.id.find).setOnClickListener(v -> {
+            if (!editText.getText().toString().matches("\\d{4}-\\d{2}-\\d{2}"))
+                editText.setError(String.format("Should match input patterm [%s]",
+                        getString(R.string.input_date_pattern)));
+            else
+                restartLoader();
         });
 
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(getContext(),
@@ -114,38 +97,40 @@ public class RateByDateFragment extends Fragment implements
 
     @Override
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-        editText.setText(String.format(Locale.getDefault(), "%1$04d-%2$02d-%3$02d", year, monthOfYear, dayOfMonth));
+        editText.setText(Utils.format(new GregorianCalendar(year, monthOfYear, dayOfMonth)));
+    }
+
+    @Override
+    protected Bundle getBundleArgs() {
+
+        Bundle bundle = new Bundle();
+        bundle.putString(CURRENCY, spinner.getSelectedItem().toString());
+        bundle.putString(DATE, editText.getText().toString());
+
+        return bundle;
     }
 
     @Override
     public Loader<ContentWrapper<DailyExRatesOnDateModel>> onCreateLoader(int id, Bundle args) {
         setStatus(Status.LOADING);
-        return new RatesByDateLoader(getContext(), args.getString(CURRENCY), args.getString(DATE));
+        return new AbstractLoader<>(getContext(),
+                () -> SoapUtils.getCurrencyByDate(args.getString(CURRENCY), args.getString(DATE)));
     }
 
     @Override
-    public void onLoadFinished(Loader<ContentWrapper<DailyExRatesOnDateModel>> loader, ContentWrapper<DailyExRatesOnDateModel> data) {
-        if (data.getException() == null && data.getContent() != null) {
-            currency.setText(data.getContent().getAbbreviation());
-            rate.setText(String.valueOf(data.getContent().getRate()));
-            setStatus(Status.OK);
-        } else if (data.getException() instanceof NoConnectionException) {
-            errorMessage.setText(data.getException().getMessage());
-            setStatus(Status.FAILED);
-        } else if (data.getException() instanceof NoDataFoundException) {
-            errorMessage.setText("No rate for the given currency on that day");
-            setStatus(Status.FAILED);
-        } else if (data.getException() instanceof HttpResponseException) {
+    protected void onDataReceived(DailyExRatesOnDateModel model) {
+        currency.setText(model.getAbbreviation());
+        rate.setText(String.valueOf(model.getRate()));
+        setStatus(Status.OK);
+    }
+
+    @Override
+    protected void onFailure(Exception e) {
+        if (e instanceof HttpResponseException)
             errorMessage.setText("Wrong data input");
-            setStatus(Status.FAILED);
-        } else
-            throw new RuntimeException("Unknown exception");
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<ContentWrapper<DailyExRatesOnDateModel>> loader) {
-
+        else
+            errorMessage.setText(e.getMessage());
+        setStatus(Status.FAILED);
     }
 
     private void setStatus(Status status) {

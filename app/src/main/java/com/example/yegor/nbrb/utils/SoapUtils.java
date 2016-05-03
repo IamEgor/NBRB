@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class SoapUtils {
+public final class SoapUtils {
 
     private static final String TAG = SoapUtils.class.getName();
     private static final SimpleDateFormat format =

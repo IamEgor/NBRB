@@ -14,12 +14,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:layout_above="@+id/avloadingIndicatorView"
+        android:layout_above="@+id/loading_view"
         android:layout_centerHorizontal="true"
         android:text="Database Update" />
 
     <com.wang.avi.AVLoadingIndicatorView
-        android:id="@+id/avloadingIndicatorView"
+        android:id="@+id/loading_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
