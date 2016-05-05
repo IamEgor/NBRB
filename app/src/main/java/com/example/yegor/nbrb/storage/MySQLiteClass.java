@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
 
@@ -23,7 +24,7 @@ public class MySQLiteClass {
     private DBHelp dbhelp;
     private SQLiteDatabase thisDataBase;
 
-    public MySQLiteClass(Context context) {
+    private MySQLiteClass(Context context) {
         this.context = context;
     }
 
@@ -35,6 +36,7 @@ public class MySQLiteClass {
             thisDataBase = dbhelp.getWritableDatabase();
         else
             thisDataBase = dbhelp.getReadableDatabase();
+
         return this;
     }
 
@@ -64,12 +66,12 @@ public class MySQLiteClass {
 
     public void addCurrencies(List<CurrencyModel> currencies) {
 
-        open(true);
+        //open(true);
 
         for (CurrencyModel currency : currencies)
             addCurrency(currency);
 
-        close();
+        //close();
 
     }
 
@@ -79,7 +81,7 @@ public class MySQLiteClass {
 
         String selectQuery = "SELECT  * FROM " + CURRENCY_TABLE;
 
-        open(false);
+        //open(false);
 
         Cursor cursor = thisDataBase.rawQuery(selectQuery, null);
 
@@ -107,16 +109,16 @@ public class MySQLiteClass {
         }
 
         cursor.close();
-        close();
+        //close();
 
         return currencies;
     }
 
-    public List<SpinnerModel> getCurrenciesAbbr2() {
+    public List<SpinnerModel> getCurrenciesDescription() {
 
         List<SpinnerModel> list = new ArrayList<>(64);
 
-        open(false);
+        //open(false);
 
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
@@ -135,7 +137,7 @@ public class MySQLiteClass {
         }
 
         cursor.close();
-        close();
+        //close();
 
         return list;
 
@@ -143,7 +145,7 @@ public class MySQLiteClass {
 
     public String getIdByAbbr(String abbr) {
 
-        open(false);
+        //open(false);
 
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
@@ -157,13 +159,21 @@ public class MySQLiteClass {
         String id = cursor.getString(0);
 
         cursor.close();
-        close();
+        //close();
 
         return id;
     }
 
+    private static MySQLiteClass instance;
 
+    public static MySQLiteClass getInstance() {
 
+        if (instance == null)
+            instance = new MySQLiteClass(App.getContext());
+
+        return instance.open(true);
+
+    }
 
     private class DBHelp extends SQLiteOpenHelper {
 
@@ -193,6 +203,7 @@ public class MySQLiteClass {
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         }
+
     }
 
 }

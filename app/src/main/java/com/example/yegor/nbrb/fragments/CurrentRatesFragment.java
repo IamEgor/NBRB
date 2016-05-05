@@ -106,8 +106,4 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
 
     }
 
-    enum Status {
-        LOADING, OK, FAILED
-    }
-
 }

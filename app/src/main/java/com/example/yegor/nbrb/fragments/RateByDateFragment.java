@@ -13,10 +13,10 @@ import android.widget.TextView;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.adapters.SpinnerAdapter;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
+import com.example.yegor.nbrb.loaders.AdapterDataAsync;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
-import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
@@ -84,12 +84,16 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
                 restartLoader();
         });
 
+        /*
         SpinnerAdapter dataAdapter = new SpinnerAdapter(getContext(),
-                (new MySQLiteClass(getContext()).getCurrenciesAbbr2()));
+                MySQLiteClass.getInstance().getCurrenciesDescription());
         //TODO setDropDownViewResource
         //dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         spinner.setAdapter(dataAdapter);
+        */
+        (new InstallAdapter()).execute();
+        ;
 
         return rootView;
 
@@ -153,8 +157,11 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         }
     }
 
-    enum Status {
-        LOADING, OK, FAILED
+    private class InstallAdapter extends AdapterDataAsync {
+        @Override
+        protected void onPostExecute(SpinnerAdapter adapter) {
+            spinner.setAdapter(adapter);
+        }
     }
 
 }

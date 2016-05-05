@@ -50,8 +50,7 @@ public class UpdateActivity extends AppCompatActivity implements
 
         if (data.getException() == null && data.getContent() != null) {
 
-            MySQLiteClass mySQLiteClass = new MySQLiteClass(this);
-            mySQLiteClass.addCurrencies(data.getContent());
+            MySQLiteClass.getInstance().addCurrencies(data.getContent());
 
             AppPrefs.setLastUpdate(Calendar.getInstance().getTimeInMillis());
 

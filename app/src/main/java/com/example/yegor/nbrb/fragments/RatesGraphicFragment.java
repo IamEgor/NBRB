@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.adapters.SpinnerAdapter;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
+import com.example.yegor.nbrb.loaders.AdapterDataAsync;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
@@ -75,11 +76,8 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         spinner = (AppCompatSpinner) rootView.findViewById(R.id.pick_currency);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
 
-        SpinnerAdapter dataAdapter = new SpinnerAdapter(getContext(),
-                (new MySQLiteClass(getContext()).getCurrenciesAbbr2()));
+        (new InstallAdapter()).execute();
 
-        spinner.setAdapter(dataAdapter);
-        spinner.setSelection(dataAdapter.getPosition(new SpinnerModel("USD", "Доллар США", "")));
         spinner.setOnItemSelectedListener(this);
 
         rootView.findViewById(R.id.retry_btn).setOnClickListener((v -> restartLoader()));
@@ -157,7 +155,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         setStatus(Status.LOADING);
 
         return new AbstractLoader<>(getContext(), () -> {
-            String curId = (new MySQLiteClass(getContext())).getIdByAbbr(args.getString(ABBR));
+            String curId = MySQLiteClass.getInstance().getIdByAbbr(args.getString(ABBR));
             return SoapUtils.getRatesDyn(curId, args.getString(FROM_DATE), args.getString(TO_DATE));
         });
     }
@@ -227,9 +225,14 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         }
     }
 
+    private class InstallAdapter extends AdapterDataAsync {
 
-    enum Status {
-        LOADING, OK, FAILED
+        @Override
+        protected void onPostExecute(SpinnerAdapter adapter) {
+            spinner.setAdapter(adapter);
+            spinner.setSelection(adapter.getPosition(new SpinnerModel("USD", "Доллар США", "")));
+        }
+
     }
 
 }

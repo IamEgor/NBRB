@@ -53,7 +53,7 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
 
     protected abstract void onFailure(Exception e);
 
-    enum Status {
+    protected enum Status {
         LOADING, OK, FAILED
     }
 
