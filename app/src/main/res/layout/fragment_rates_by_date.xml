@@ -17,14 +17,23 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp">
 
-        <android.support.v7.widget.AppCompatEditText
-            android:id="@+id/date"
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/pick_date"
             android:layout_toStartOf="@+id/pick_date"
-            android:hint="@string/input_date_pattern" />
+            style="@style/ErrorStyle"
+            app:errorEnabled="true">
+
+            <EditText
+                android:id="@+id/date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:hint="@string/input_date_pattern" />
+
+        </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/pick_date"

@@ -76,12 +76,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         spinner = (AppCompatSpinner) rootView.findViewById(R.id.pick_currency);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
 
-        (new InstallAdapter()).execute();
-
-        spinner.setOnItemSelectedListener(this);
-
-        rootView.findViewById(R.id.retry_btn).setOnClickListener((v -> restartLoader()));
-
         Calendar calendar = Calendar.getInstance();
         toDate.setTag(calendar.getTimeInMillis());
         toDate.setText(String.format(getString(R.string.from_date),
@@ -95,7 +89,10 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         toDate.setOnClickListener(this);
         fullscreen.setOnClickListener(this);
 
-        restartLoader();
+        (new InstallAdapter()).execute();
+
+        spinner.setOnItemSelectedListener(this);
+        rootView.findViewById(R.id.retry_btn).setOnClickListener((v -> restartLoader()));
 
         return rootView;
     }
@@ -165,6 +162,9 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
 
         Bundle bundle = new Bundle();
 
+        Utils.log(spinner);
+        Utils.log(spinner.getSelectedItem());
+
         bundle.putString(ABBR, ((SpinnerModel) spinner.getSelectedItem()).getAbbr());
         bundle.putString(FROM_DATE, Utils.format((Long) fromDate.getTag()));
         bundle.putString(TO_DATE, Utils.format((Long) toDate.getTag()));
@@ -182,6 +182,27 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
     protected void onFailure(Exception e) {
         errorMessage.setText(e.getMessage());
         setStatus(Status.FAILED);
+    }
+
+    @Override
+    protected void setStatus(Status status) {
+        switch (status) {
+            case LOADING:
+                //mChart.setVisibility(View.VISIBLE);
+                loadingView.setVisibility(View.VISIBLE);
+                //errorView.setVisibility(View.GONE);
+                break;
+            case OK:
+                mChart.setVisibility(View.VISIBLE);
+                loadingView.setVisibility(View.INVISIBLE);
+                errorView.setVisibility(View.GONE);
+                break;
+            case FAILED:
+                mChart.setVisibility(View.INVISIBLE);
+                loadingView.setVisibility(View.INVISIBLE);
+                errorView.setVisibility(View.VISIBLE);
+                break;
+        }
     }
 
     private void showDialog(View view) {
@@ -205,32 +226,13 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         pickerDialog.show(getActivity().getFragmentManager(), "Datepickerdialog");
     }
 
-    private void setStatus(Status status) {
-        switch (status) {
-            case LOADING:
-                //mChart.setVisibility(View.VISIBLE);
-                loadingView.setVisibility(View.VISIBLE);
-                //errorView.setVisibility(View.GONE);
-                break;
-            case OK:
-                mChart.setVisibility(View.VISIBLE);
-                loadingView.setVisibility(View.INVISIBLE);
-                errorView.setVisibility(View.GONE);
-                break;
-            case FAILED:
-                mChart.setVisibility(View.INVISIBLE);
-                loadingView.setVisibility(View.INVISIBLE);
-                errorView.setVisibility(View.VISIBLE);
-                break;
-        }
-    }
-
     private class InstallAdapter extends AdapterDataAsync {
 
         @Override
         protected void onPostExecute(SpinnerAdapter adapter) {
             spinner.setAdapter(adapter);
             spinner.setSelection(adapter.getPosition(new SpinnerModel("USD", "Доллар США", "")));
+            restartLoader();
         }
 
     }

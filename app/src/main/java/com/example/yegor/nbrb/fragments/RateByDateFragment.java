@@ -2,6 +2,7 @@ package com.example.yegor.nbrb.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatSpinner;
@@ -34,6 +35,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
     private AppCompatSpinner spinner;
     private AppCompatEditText editText;
+    private TextInputLayout inputLayout;
 
     private View cv, loadingView;
     private TextView errorMessage;
@@ -55,6 +57,8 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
         spinner = (AppCompatSpinner) rootView.findViewById(R.id.pick_currency);
         editText = (AppCompatEditText) rootView.findViewById(R.id.date);
+        inputLayout = (TextInputLayout) rootView.findViewById(R.id.inputLayout);
+
 
         cv = rootView.findViewById(R.id.cv);
         loadingView = rootView.findViewById(R.id.loading_view);
@@ -64,6 +68,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         rate = (TextView) rootView.findViewById(R.id.rate);
 
         rootView.findViewById(R.id.pick_date).setOnClickListener((view) -> {
+                    inputLayout.setError(null);
                     Calendar now = Calendar.getInstance();
                     DatePickerDialog dpd = DatePickerDialog.newInstance(
                             RateByDateFragment.this,
@@ -78,7 +83,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
         rootView.findViewById(R.id.find).setOnClickListener(v -> {
             if (!editText.getText().toString().matches("\\d{4}-\\d{2}-\\d{2}"))
-                editText.setError(String.format("Should match input patterm [%s]",
+                inputLayout.setError(String.format("Should match input patterm [%s]",
                         getString(R.string.input_date_pattern)));
             else
                 restartLoader();
@@ -137,7 +142,8 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         setStatus(Status.FAILED);
     }
 
-    private void setStatus(Status status) {
+    @Override
+    protected void setStatus(Status status) {
         switch (status) {
             case LOADING:
                 cv.setVisibility(View.GONE);

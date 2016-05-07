@@ -84,6 +84,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
         adapter.setModels(new ArrayList<>(0));
     }
 
+    @Override
     protected void setStatus(Status status) {
 
         switch (status) {
