@@ -8,6 +8,7 @@ import android.support.v4.content.Loader;
 import com.example.yegor.nbrb.exceptions.NoConnectionException;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.models.ContentWrapper;
+import com.example.yegor.nbrb.utils.Utils;
 
 import org.ksoap2.transport.HttpResponseException;
 
@@ -42,6 +43,7 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
 
 
     protected void restartLoader() {
+        Utils.log("restartLoader");
         getActivity().getSupportLoaderManager()
                 .restartLoader(0, getBundleArgs(), this)
                 .forceLoad();

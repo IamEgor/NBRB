@@ -6,52 +6,62 @@
     android:orientation="vertical"
     android:paddingTop="16dp">
 
-    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
-        android:id="@+id/pick_currency"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp" />
+        android:layout_margin="4dp"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp">
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/inputLayout"
-            style="@style/ErrorStyle"
+        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+            android:id="@+id/pick_currency"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/pick_date"
-            android:layout_toStartOf="@+id/pick_date"
-            app:errorEnabled="true">
+            android:layout_weight="1" />
 
-            <EditText
-                android:id="@+id/date"
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/inputLayout"
+                style="@style/ErrorStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/pick_date"
+                android:layout_toStartOf="@+id/pick_date"
+                app:errorEnabled="true">
+
+                <EditText
+                    android:id="@+id/date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:hint="@string/input_date_pattern" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.v7.widget.AppCompatImageButton
+                android:id="@+id/pick_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:hint="@string/input_date_pattern" />
+                android:src="@drawable/ic_date_range_black_24dp" />
 
-        </android.support.design.widget.TextInputLayout>
+        </RelativeLayout>
 
-        <android.support.v7.widget.AppCompatImageButton
-            android:id="@+id/pick_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_date_range_black_24dp" />
+    </LinearLayout>
 
-    </RelativeLayout>
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/find"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_margin="8dp"
+        android:layout_margin="4dp"
         android:text="Find" />
 
 

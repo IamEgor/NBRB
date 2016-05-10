@@ -43,5 +43,5 @@ dependencies {
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.wdullaer:materialdatetimepicker:2.3.0'
     compile 'com.github.PhilJay:MPAndroidChart:v2.2.4'
-
+    compile 'com.toptoche.searchablespinner:searchablespinnerlibrary:1.2.0'
 }

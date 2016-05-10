@@ -1,10 +1,14 @@
 package com.example.yegor.nbrb.utils;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.storage.AppPrefs;
@@ -55,6 +59,24 @@ public final class Utils {
 
     public static int getSDKInt() {
         return android.os.Build.VERSION.SDK_INT;
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = activity.getCurrentFocus();
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+    public static boolean isPortrait(Activity activity){
+
+        Point size = new Point();
+        activity.getWindowManager().getDefaultDisplay().getSize(size);
+
+        return size.x < size.y;
+
     }
 
     public static void logT(String tag, Object... objects) {

@@ -4,11 +4,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.AppCompatEditText;
-import android.support.v7.widget.AppCompatSpinner;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.yegor.nbrb.R;
@@ -20,6 +19,7 @@ import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
+import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import org.ksoap2.transport.HttpResponseException;
@@ -33,8 +33,8 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     public static final String CURRENCY = "CURRENCY";
     public static final String DATE = "DATE";
 
-    private AppCompatSpinner spinner;
-    private AppCompatEditText editText;
+    private SearchableSpinner spinner;
+    private EditText editText;
     private TextInputLayout inputLayout;
 
     private View cv, loadingView;
@@ -55,10 +55,9 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
         View rootView = inflater.inflate(R.layout.fragment_rates_by_date, container, false);
 
-        spinner = (AppCompatSpinner) rootView.findViewById(R.id.pick_currency);
-        editText = (AppCompatEditText) rootView.findViewById(R.id.date);
+        spinner = (SearchableSpinner) rootView.findViewById(R.id.pick_currency);
+        editText = (EditText) rootView.findViewById(R.id.date);
         inputLayout = (TextInputLayout) rootView.findViewById(R.id.inputLayout);
-
 
         cv = rootView.findViewById(R.id.cv);
         loadingView = rootView.findViewById(R.id.loading_view);
@@ -66,6 +65,9 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
         currency = (TextView) rootView.findViewById(R.id.currency);
         rate = (TextView) rootView.findViewById(R.id.rate);
+
+        spinner.setTitle(getString(R.string.select_currency));
+        spinner.setPositiveButton("OK");
 
         rootView.findViewById(R.id.pick_date).setOnClickListener((view) -> {
                     inputLayout.setError(null);
@@ -85,20 +87,14 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
             if (!editText.getText().toString().matches("\\d{4}-\\d{2}-\\d{2}"))
                 inputLayout.setError(String.format("Should match input patterm [%s]",
                         getString(R.string.input_date_pattern)));
-            else
+            else {
                 restartLoader();
+                inputLayout.setError(null);
+                Utils.hideKeyboard(getActivity());
+            }
         });
 
-        /*
-        SpinnerAdapter dataAdapter = new SpinnerAdapter(getContext(),
-                MySQLiteClass.getInstance().getCurrenciesDescription());
-        //TODO setDropDownViewResource
-        //dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        spinner.setAdapter(dataAdapter);
-        */
         (new InstallAdapter()).execute();
-        ;
 
         return rootView;
 

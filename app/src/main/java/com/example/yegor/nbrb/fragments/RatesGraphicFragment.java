@@ -1,11 +1,11 @@
 package com.example.yegor.nbrb.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatImageButton;
-import android.support.v7.widget.AppCompatSpinner;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +26,7 @@ import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
+import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.util.Calendar;
@@ -48,7 +49,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
     private TextView errorMessage;
 
     private AppCompatButton fromDate, toDate;
-    private AppCompatSpinner spinner;
+    private SearchableSpinner spinner;
     private AppCompatImageButton fullscreen;
 
     private Calendar calendar;
@@ -73,7 +74,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
         fromDate = (AppCompatButton) rootView.findViewById(R.id.from_date);
         toDate = (AppCompatButton) rootView.findViewById(R.id.to_date);
-        spinner = (AppCompatSpinner) rootView.findViewById(R.id.pick_currency);
+        spinner = (SearchableSpinner) rootView.findViewById(R.id.pick_currency);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
 
         Calendar calendar = Calendar.getInstance();
@@ -89,10 +90,15 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         toDate.setOnClickListener(this);
         fullscreen.setOnClickListener(this);
 
+        spinner.setOnItemSelectedListener(this);
+        spinner.setTitle(getString(R.string.select_currency));
+        spinner.setPositiveButton("OK");
+
         (new InstallAdapter()).execute();
 
-        spinner.setOnItemSelectedListener(this);
         rootView.findViewById(R.id.retry_btn).setOnClickListener((v -> restartLoader()));
+
+        Utils.logT("[Lifecycle]", "onCreateView");
 
         return rootView;
     }
@@ -232,9 +238,69 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         protected void onPostExecute(SpinnerAdapter adapter) {
             spinner.setAdapter(adapter);
             spinner.setSelection(adapter.getPosition(new SpinnerModel("USD", "Доллар США", "")));
-            restartLoader();
+            //restartLoader();
         }
 
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Utils.logT("[Lifecycle]", "onAttach");
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Utils.logT("[Lifecycle]", "onActivityCreated");
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Utils.logT("[Lifecycle]", "onActivityCreated");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Utils.logT("[Lifecycle]", "onStart");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Utils.logT("[Lifecycle]", "onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Utils.logT("[Lifecycle]", "onPause");
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Utils.logT("[Lifecycle]", "onStop");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Utils.logT("[Lifecycle]", "onDestroyView");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Utils.logT("[Lifecycle]", "onDestroy");
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        Utils.logT("[Lifecycle]", "onDetach");
+    }
 }

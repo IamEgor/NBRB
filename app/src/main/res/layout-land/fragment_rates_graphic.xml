@@ -20,7 +20,7 @@
             android:id="@+id/line_chart"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/pick_currency"
+            android:layout_above="@+id/buttons"
             android:layout_below="@+id/progress" />
 
         <include layout="@layout/item_error_view" />
@@ -38,12 +38,6 @@
             android:tint="@color/colorAccent"
             android:visibility="invisible" />
 
-        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
-            android:id="@+id/pick_currency"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/buttons"
-            android:layout_margin="8dp" />
 
         <LinearLayout
             android:id="@+id/buttons"
@@ -58,6 +52,14 @@
                 android:layout_weight="1"
                 android:text="@string/from_date"
                 android:textAllCaps="false" />
+
+            <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+                android:id="@+id/pick_currency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:layout_gravity="center_vertical"
+                 />
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/to_date"

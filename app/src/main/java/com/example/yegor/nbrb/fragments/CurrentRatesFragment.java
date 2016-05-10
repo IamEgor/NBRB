@@ -2,7 +2,7 @@ package com.example.yegor.nbrb.fragments;
 
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +15,7 @@ import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.utils.SoapUtils;
+import com.example.yegor.nbrb.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +47,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
         errorView = rootView.findViewById(R.id.error_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
-        rv.setLayoutManager(new LinearLayoutManager(getContext()));
+        rv.setLayoutManager(new GridLayoutManager(getContext(), Utils.isPortrait(getActivity()) ? 2 : 3));
         rv.setAdapter(adapter);
 
         rootView.findViewById(R.id.retry_btn).setOnClickListener((view) -> restartLoader());

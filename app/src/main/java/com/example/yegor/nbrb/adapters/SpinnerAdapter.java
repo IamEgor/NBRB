@@ -1,6 +1,7 @@
 package com.example.yegor.nbrb.adapters;
 
 import android.content.Context;
+import android.support.annotation.LayoutRes;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +16,8 @@ import java.util.List;
 public class SpinnerAdapter extends ArrayAdapter<SpinnerModel> {
 
     private Context context;
-    private LayoutInflater inflater;
     private List<SpinnerModel> models;
+    private LayoutInflater inflater;
 
     public SpinnerAdapter(Context context, List<SpinnerModel> models) {
         super(context, R.layout.item_dropdown_spinner, models);
@@ -28,40 +29,28 @@ public class SpinnerAdapter extends ArrayAdapter<SpinnerModel> {
     public View getCustomView(int position, View convertView,
                               ViewGroup parent) {
 
-        LayoutInflater inflater = getLayoutInflater();
+        TextView name = (TextView) inflate(R.layout.item_dropdown_spinner, parent);
+        name.setText(models.get(position).getName());
 
-        View layout = inflater.inflate(R.layout.item_dropdown_spinner, parent, false);
-
-        SpinnerModel model = models.get(position);
-
-        TextView name = (TextView) layout.findViewById(R.id.abbr);
-        TextView abbr = (TextView) layout.findViewById(R.id.name);
-        TextView date_end = (TextView) layout.findViewById(R.id.date_end);
-
-        name.setText(model.getName());
-        abbr.setText(model.getAbbr());
-        if(!model.getDateEnd().isEmpty())
-        date_end.setText(String.format(context.getString(R.string.until_date), model.getDateEnd()));
-
-        return layout;
+        return name;
     }
 
-    // It gets a View that displays in the drop down popup the data at the specified position
     @Override
     public View getDropDownView(int position, View convertView,
                                 ViewGroup parent) {
         return getCustomView(position, convertView, parent);
     }
 
-    // It gets a View that displays the data at the specified position
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         return getCustomView(position, convertView, parent);
     }
 
-    public LayoutInflater getLayoutInflater() {
+    public View inflate(@LayoutRes int id, ViewGroup parent) {
         if (inflater == null)
             inflater = LayoutInflater.from(context);
-        return inflater;
+
+        return inflater.inflate(id, parent, false);
     }
+
 }

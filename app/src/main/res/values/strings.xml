@@ -12,6 +12,8 @@
     <string name="from_date">%s\n Set start date</string>
     <string name="to_date">%s\n Set end date</string>
     <string name="retry">Retry</string>
-    <string name="until_date">Until %s</string>
+    <string name="searchable_spinner_item_text1">%1$s - %2$s</string>
+    <string name="searchable_spinner_item_text2">%1$s - %2$s(Till %3$s)</string>
+    <string name="select_currency">Select Currency</string>
 
 </resources>
