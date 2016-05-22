@@ -3,6 +3,7 @@ package com.example.yegor.nbrb.loaders;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
+import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoConnectionException;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.models.ContentWrapper;
@@ -12,7 +13,7 @@ import java.io.IOException;
 
 public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
 
-    AbstractLoaderInterface<T> action;
+    private AbstractLoaderInterface<T> action;
 
     public AbstractLoader(Context context, AbstractLoaderInterface<T> action) {
         super(context);
@@ -37,6 +38,7 @@ public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
         try {
             data = action.action();
         } catch (IOException e) {
+            Utils.log("e instanceof ExchangeRateAssignsOnceInMonth - " + (e instanceof ExchangeRateAssignsOnceInMonth));
             return new ContentWrapper<>(e);
         }
 

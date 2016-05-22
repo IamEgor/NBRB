@@ -3,6 +3,7 @@ package com.example.yegor.nbrb.fragments;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,14 +41,18 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_current_rates, container, false);
 
-        adapter = new CurrentRatesAdapter(new ArrayList<>(0));
-
         rv = (RecyclerView) rootView.findViewById(R.id.rv);
         loadingView = rootView.findViewById(R.id.loading_view);
         errorView = rootView.findViewById(R.id.error_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
-        rv.setLayoutManager(new GridLayoutManager(getContext(), Utils.isPortrait(getActivity()) ? 2 : 3));
+        adapter = new CurrentRatesAdapter(new ArrayList<>(0));
+
+        if(Utils.isPortrait(getActivity()))
+            rv.setLayoutManager(new LinearLayoutManager(getContext()));
+        else
+            rv.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
         rv.setAdapter(adapter);
 
         rootView.findViewById(R.id.retry_btn).setOnClickListener((view) -> restartLoader());

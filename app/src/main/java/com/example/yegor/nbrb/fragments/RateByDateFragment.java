@@ -12,13 +12,17 @@ import android.widget.TextView;
 
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.adapters.SpinnerAdapter;
+import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
+import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.loaders.AdapterDataAsync;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
+import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
+import com.example.yegor.nbrb.views.Validator;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
@@ -30,8 +34,11 @@ import java.util.GregorianCalendar;
 public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDateModel> implements
         DatePickerDialog.OnDateSetListener {
 
-    public static final String CURRENCY = "CURRENCY";
-    public static final String DATE = "DATE";
+    private static final int LOADER_1 = 1;
+    private static final int LOADER_2 = 2;
+
+    private static final String CURRENCY = "CURRENCY";
+    private static final String DATE = "DATE";
 
     private SearchableSpinner spinner;
     private EditText editText;
@@ -42,7 +49,11 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
     private TextView currency, rate;
 
+    private Calendar calendar;
+    private Validator validator;
+
     public RateByDateFragment() {
+        calendar = Calendar.getInstance();
     }
 
     public static RateByDateFragment newInstance() {
@@ -69,29 +80,42 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         spinner.setTitle(getString(R.string.select_currency));
         spinner.setPositiveButton("OK");
 
+        validator = new Validator(editText);
+        editText.setText(Utils.format(calendar.getTimeInMillis()));
+
         rootView.findViewById(R.id.pick_date).setOnClickListener((view) -> {
-                    inputLayout.setError(null);
-                    Calendar now = Calendar.getInstance();
+
+                    if (validator.getResult() == Validator.VALID)
+                        Utils.setCalendar(calendar, editText.getText().toString());
+
                     DatePickerDialog dpd = DatePickerDialog.newInstance(
                             RateByDateFragment.this,
-                            now.get(Calendar.YEAR),
-                            now.get(Calendar.MONTH),
-                            now.get(Calendar.DAY_OF_MONTH)
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH)
                     );
                     dpd.setThemeDark(true);
                     dpd.show(getActivity().getFragmentManager(), "Datepickerdialog");
+
                 }
         );
 
         rootView.findViewById(R.id.find).setOnClickListener(v -> {
-            if (!editText.getText().toString().matches("\\d{4}-\\d{2}-\\d{2}"))
-                inputLayout.setError(String.format("Should match input patterm [%s]",
-                        getString(R.string.input_date_pattern)));
-            else {
-                restartLoader();
-                inputLayout.setError(null);
-                Utils.hideKeyboard(getActivity());
+
+            int result = validator.getResult();
+
+            switch (result) {
+                case Validator.VALID:
+                    restartLoader(LOADER_1);
+                    inputLayout.setError(null);
+                    Utils.hideKeyboard(getActivity());
+                    break;
+                case Validator.INVALID_FORMAT:
+                case Validator.TOO_EARLY_YET:
+                case Validator.TOO_OLD_DATE:
+                    inputLayout.setError(Validator.getMessage(result));
             }
+
         });
 
         (new InstallAdapter()).execute();
@@ -102,6 +126,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
     @Override
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+        inputLayout.setError(null);
         editText.setText(Utils.format(new GregorianCalendar(year, monthOfYear, dayOfMonth)));
     }
 
@@ -117,9 +142,36 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
     @Override
     public Loader<ContentWrapper<DailyExRatesOnDateModel>> onCreateLoader(int id, Bundle args) {
+
+        String currency = args.getString(CURRENCY);
+        String date = args.getString(DATE);
+
+        assert currency != null;
+        assert date != null;
+
+        if (!MySQLiteClass.getInstance().isDateValid(currency, date))
+            return new AbstractLoader<>(getContext(), () -> {
+                throw new NoDataFoundException();
+            });
+
+        AbstractLoader<DailyExRatesOnDateModel> loader = null;
         setStatus(Status.LOADING);
-        return new AbstractLoader<>(getContext(),
-                () -> SoapUtils.getCurrencyByDate(args.getString(CURRENCY), args.getString(DATE)));
+
+        switch (id) {
+            case LOADER_1:
+                loader = new AbstractLoader<>(getContext(),
+                        () -> SoapUtils.getCurrencyDaily(currency, date));
+                break;
+
+            case LOADER_2:
+                loader = new AbstractLoader<>(getContext(),
+                        () -> SoapUtils.getCurrencyMonthly(currency, date));
+
+                break;
+        }
+
+        return loader;
+
     }
 
     @Override
@@ -133,8 +185,12 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     protected void onFailure(Exception e) {
         if (e instanceof HttpResponseException)
             errorMessage.setText("Wrong data input");
-        else
+        else if (e instanceof ExchangeRateAssignsOnceInMonth) {
+            restartLoader(LOADER_2);
+            return;
+        } else
             errorMessage.setText(e.getMessage());
+
         setStatus(Status.FAILED);
     }
 
@@ -156,6 +212,10 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
                 loadingView.setVisibility(View.GONE);
                 errorMessage.setVisibility(View.VISIBLE);
                 break;
+            case NONE:
+                cv.setVisibility(View.GONE);
+                loadingView.setVisibility(View.GONE);
+                errorMessage.setVisibility(View.GONE);
         }
     }
 
@@ -163,6 +223,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         @Override
         protected void onPostExecute(SpinnerAdapter adapter) {
             spinner.setAdapter(adapter);
+            restartLoader(LOADER_1);
         }
     }
 

@@ -4,6 +4,7 @@ package com.example.yegor.nbrb.utils;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
@@ -16,26 +17,22 @@ import org.ksoap2.transport.HttpTransportSE;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public final class SoapUtils {
 
     private static final String TAG = SoapUtils.class.getName();
-    private static final SimpleDateFormat format =
-            new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());//"2002-09-24" 2016-04-21T00:00:00+03:00
 
     private static final String NAMESPACE = "http://www.nbrb.by/";
     private static final String URL = "http://www.nbrb.by/Services/ExRates.asmx?wsdl";
 
 
-    private static final String METHOD_NAME = "ExRatesDaily";
-    private static final String SOAP_ACTION = "http://www.nbrb.by/ExRatesDaily";
+    private static final String METHOD_NAME = "ExRatesDaily2";
+    private static final String SOAP_ACTION = "http://www.nbrb.by/ExRatesDaily2";
     private static final String PROPERTY = "onDate";
 
 
@@ -49,6 +46,11 @@ public final class SoapUtils {
     private static final String METHOD_NAME3 = "CurrenciesRef";
     private static final String SOAP_ACTION3 = "http://www.nbrb.by/CurrenciesRef";
     private static final String PROPERTY3 = "Periodicity";
+
+
+    private static final String METHOD_NAME4 = "ExRatesMonthly2";
+    private static final String SOAP_ACTION4 = "http://www.nbrb.by/ExRatesMonthly2";
+    private static final String PROPERTY4 = "onDate";
 
     public static List<CurrencyModel> getCurrenciesList() throws IOException {
 
@@ -69,7 +71,7 @@ public final class SoapUtils {
 
     }
 
-    public static DailyExRatesOnDateModel getCurrencyByDate(@NonNull String currency, @NonNull String time)
+    public static DailyExRatesOnDateModel getCurrencyDaily(@NonNull String currency, @NonNull String time)
             throws IOException {
 
         Map<String, String> map = new HashMap<>();
@@ -84,7 +86,27 @@ public final class SoapUtils {
                 return new DailyExRatesOnDateModel(dailyExRatesOnDate);
         }
 
+        throw new ExchangeRateAssignsOnceInMonth();
+    }
+
+    public static DailyExRatesOnDateModel getCurrencyMonthly(@NonNull String currency, @NonNull String time)
+            throws IOException {
+
+
+        Map<String, String> map = new HashMap<>();
+        map.put(PROPERTY4, time);
+
+        SoapObject response = getResponse(new RequestProps(METHOD_NAME4, SOAP_ACTION4, map));
+        SoapObject dailyExRatesOnDate;
+
+        for (int k = 0; k < response.getPropertyCount(); k++) {
+            dailyExRatesOnDate = (SoapObject) response.getProperty(k);
+            if (currency.equals(dailyExRatesOnDate.getProperty(DailyExRatesOnDateModel.ABBREV).toString()))
+                return new DailyExRatesOnDateModel(dailyExRatesOnDate);
+        }
+
         return null;
+
     }
 
     public static List<DailyExRatesOnDateModel> getCurrenciesNow() throws IOException {
@@ -92,7 +114,7 @@ public final class SoapUtils {
         List<DailyExRatesOnDateModel> list = new ArrayList<>(16);
 
         Map<String, String> map = new HashMap<>();
-        map.put(PROPERTY, format.format((Calendar.getInstance().getTimeInMillis())));
+        map.put(PROPERTY, Utils.format((Calendar.getInstance().getTimeInMillis())));
 
         SoapObject response = getResponse(new RequestProps(METHOD_NAME, SOAP_ACTION, map));
         SoapObject dailyExRatesOnDate;
@@ -152,14 +174,14 @@ public final class SoapUtils {
 
             SoapObject response = (SoapObject) envelope.getResponse();
 
-            System.out.println("[SoapUtils]  envelope.getResponse() - " +  envelope.getResponse());
-            Log.w("SoapUtils", "  envelope.getResponse() - " +  envelope.getResponse());
+            System.out.println("[SoapUtils]  envelope.getResponse() - " + envelope.getResponse());
+            Log.w("SoapUtils", "  envelope.getResponse() - " + envelope.getResponse());
 
-            if(response == null)
+            if (response == null)
                 throw new NoDataFoundException();
 
             //if (!response.hasProperty("diffgram"))
-              //  throw new NoDataFoundException();
+            //  throw new NoDataFoundException();
             response = (SoapObject) response.getProperty(1);//anyType
             response = (SoapObject) response.getProperty(0);//newDataSet
 

@@ -31,4 +31,12 @@ public class ContentWrapper<T> {
     public void setException(Exception exception) {
         this.exception = exception;
     }
+
+    @Override
+    public String toString() {
+        return "ContentWrapper{" +
+                "content=" + content +
+                ", exception=" + exception +
+                '}';
+    }
 }

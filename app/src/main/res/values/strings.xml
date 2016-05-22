@@ -8,6 +8,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="input_date_pattern">yyyy-MM-dd</string>
+    <string name="input_date_pattern_numbers">\\d{4}-\\d{2}-\\d{2}</string>
 
     <string name="from_date">%s\n Set start date</string>
     <string name="to_date">%s\n Set end date</string>
@@ -15,5 +16,7 @@
     <string name="searchable_spinner_item_text1">%1$s - %2$s</string>
     <string name="searchable_spinner_item_text2">%1$s - %2$s(Till %3$s)</string>
     <string name="select_currency">Select Currency</string>
+    <string name="input_date_too_early">Exchange rate hasn\'t been installed</string>
+    <string name="input_date_too_old">Too old date</string>
 
 </resources>

@@ -1,6 +1,10 @@
 package com.example.yegor.nbrb.models;
 
+import com.example.yegor.nbrb.utils.Utils;
+
 import org.ksoap2.serialization.SoapObject;
+
+import java.text.ParseException;
 
 public class CurrencyModel {
 
@@ -25,12 +29,12 @@ public class CurrencyModel {
     private String abbr;
     private String name;
     private String nameEng;
-    private String dateStart;
-    private String dateEnd;
+    private long dateStart;
+    private long dateEnd;
     private int parentId;
 
     public CurrencyModel(int id, String quotName, String quotNameEng, int scale, String code,
-                         String abbr, String name, String nameEng, String dateStart, String dateEnd,
+                         String abbr, String name, String nameEng, long dateStart, long dateEnd,
                          int parentId) {
         this.id = id;
         this.quotName = quotName;
@@ -54,11 +58,10 @@ public class CurrencyModel {
         abbr = soapObject.getProperty(ABBR).toString();
         name = soapObject.getProperty(NAME).toString();
         nameEng = soapObject.getProperty(NAME_ENG).toString();
-        dateStart = soapObject.getProperty(DATE_START).toString();
-        dateEnd = soapObject.getPropertySafelyAsString(DATE_END, null);
+        dateStart = prop2long(soapObject.getProperty(DATE_START).toString());
+        dateEnd = prop2long(soapObject.getPropertySafelyAsString(DATE_END, null));
         parentId = Integer.parseInt(soapObject.getProperty(PARENT_ID).toString());
     }
-
 
     public int getId() {
         return id;
@@ -92,16 +95,29 @@ public class CurrencyModel {
         return nameEng;
     }
 
-    public String getDateStart() {
+    public long getDateStart() {
         return dateStart;
     }
 
-    public String getDateEnd() {
+    public long getDateEnd() {
         return dateEnd;
     }
 
     public int getParentId() {
         return parentId;
+    }
+
+    private long prop2long(String s) {
+
+        if (s.length() == 0)
+            return -1;
+
+        try {
+            return Utils.date2long(s.substring(0, 10));
+        } catch (ParseException e) {
+            Utils.logT(CurrencyModel.class.getSimpleName(), s + " " + e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override
@@ -131,8 +147,8 @@ public class CurrencyModel {
         private String abbr;
         private String name;
         private String nameEng;
-        private String dateStart;
-        private String dateEnd;
+        private long dateStart;
+        private long dateEnd;
         private int parentId;
 
         public Builder setId(int id) {
@@ -175,12 +191,12 @@ public class CurrencyModel {
             return this;
         }
 
-        public Builder setDateStart(String dateStart) {
+        public Builder setDateStart(long dateStart) {
             this.dateStart = dateStart;
             return this;
         }
 
-        public Builder setDateEnd(String dateEnd) {
+        public Builder setDateEnd(long dateEnd) {
             this.dateEnd = dateEnd;
             return this;
         }

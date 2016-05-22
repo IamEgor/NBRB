@@ -6,11 +6,10 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 
 import com.example.yegor.nbrb.exceptions.NoConnectionException;
-import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.utils.Utils;
 
-import org.ksoap2.transport.HttpResponseException;
+import java.io.IOException;
 
 public abstract class AbstractRatesFragment<T> extends Fragment implements
         LoaderManager.LoaderCallbacks<ContentWrapper<T>> {
@@ -21,15 +20,15 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
     @Override
     public void onLoadFinished(Loader<ContentWrapper<T>> loader, ContentWrapper<T> data) {
 
+        Utils.log(data);
+
         if (data.getException() == null && data.getContent() != null) {
             onDataReceived(data.getContent());
         } else if (data.getException() != null) {
 
             Exception e = data.getException();
 
-            if (e instanceof NoConnectionException ||
-                    e instanceof NoDataFoundException ||
-                    e instanceof HttpResponseException)
+            if (e instanceof NoConnectionException || e instanceof IOException)
                 onFailure(e);
 
         } else
@@ -41,11 +40,13 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
     public void onLoaderReset(Loader<ContentWrapper<T>> loader) {
     }
 
-
     protected void restartLoader() {
-        Utils.log("restartLoader");
+        restartLoader(0);
+    }
+
+    protected void restartLoader(int loaderId) {
         getActivity().getSupportLoaderManager()
-                .restartLoader(0, getBundleArgs(), this)
+                .restartLoader(loaderId, getBundleArgs(), this)
                 .forceLoad();
     }
 
@@ -58,7 +59,7 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
     protected abstract void setStatus(Status stutus);
 
     protected enum Status {
-        LOADING, OK, FAILED
+        LOADING, OK, FAILED, NONE
     }
 
 }

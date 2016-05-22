@@ -1,11 +1,11 @@
 package com.example.yegor.nbrb.utils;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.StringRes;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -21,15 +21,20 @@ import java.util.Locale;
 
 public final class Utils {
 
-    private static final SimpleDateFormat format =
-            new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
+    public static final long START_DATE = 856137600 * 1000L;//17.02.1997
     public static final long WEEK_LENGTH = 7 * 24 * 60 * 60 * 1000L;
 
+    private static final boolean DEBUG_MODE = true;
+    private static final String TAG = "[APP_LOGS]";
+
+    private static final SimpleDateFormat format;
+
+    static {
+        format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        format.setLenient(false);
+    }
+
     public static boolean need2Update() {
-        Log.w("[Utils]", "AppPrefs.getLastUpdate() - " + AppPrefs.getLastUpdate() +
-                ", TimeInMillis -  " + Calendar.getInstance().getTimeInMillis() +
-                " difference - " + (AppPrefs.getLastUpdate() + WEEK_LENGTH - Calendar.getInstance().getTimeInMillis()));
         return (AppPrefs.getLastUpdate() + WEEK_LENGTH - Calendar.getInstance().getTimeInMillis()) < 0;
     }
 
@@ -39,6 +44,10 @@ public final class Utils {
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
 
         return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    public static String getString(@StringRes int id) {
+        return App.getContext().getString(id);
     }
 
     public static String format(GregorianCalendar time) {
@@ -51,6 +60,39 @@ public final class Utils {
 
     public static long date2long(String date) throws ParseException {
         return format.parse(date).getTime();
+    }
+
+    public static long date2longUnSafe(String date) {
+        try {
+            return format.parse(date).getTime();
+        } catch (ParseException e) {
+            return -1;
+        }
+    }
+
+    public static long getEdgeTime() {//23:59:59 of next day
+
+        Calendar calendar2 = Calendar.getInstance();
+
+        Calendar calendar1 = new GregorianCalendar(
+                calendar2.get(Calendar.YEAR),
+                calendar2.get(Calendar.MONTH),
+                calendar2.get(Calendar.DAY_OF_MONTH));
+
+        calendar1.roll(Calendar.DATE, 1);
+        calendar1.add(Calendar.MILLISECOND, -1);
+
+        return calendar1.getTimeInMillis();
+
+    }
+
+    public static Calendar setCalendar(Calendar calendar, String string) {
+        try {
+            calendar.setTimeInMillis(date2long(string));
+            return calendar;
+        } catch (ParseException e) {
+            throw new RuntimeException();
+        }
     }
 
     public static boolean isLollipop() {
@@ -70,7 +112,7 @@ public final class Utils {
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    public static boolean isPortrait(Activity activity){
+    public static boolean isPortrait(Activity activity) {
 
         Point size = new Point();
         activity.getWindowManager().getDefaultDisplay().getSize(size);
@@ -80,6 +122,9 @@ public final class Utils {
     }
 
     public static void logT(String tag, Object... objects) {
+        if (!DEBUG_MODE)
+            return;
+
         String message = "";
         for (Object o : objects)
             message += o.toString() + " | ";
@@ -87,9 +132,10 @@ public final class Utils {
         Log.w(tag, message);
     }
 
-    public static final String TAG = "[APP_LOGS]";
-
     public static void log(Object... objects) {
+        if (!DEBUG_MODE)
+            return;
+
         String message = "";
         for (Object o : objects)
             message += o.toString() + " | ";

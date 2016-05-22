@@ -23,7 +23,7 @@
             android:layout_above="@+id/pick_currency"
             android:layout_below="@+id/progress" />
 
-        <include layout="@layout/item_error_view" />
+        <include layout="@layout/include_error_view" />
 
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/fullscreen"

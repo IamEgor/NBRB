@@ -4,7 +4,7 @@ import org.ksoap2.serialization.SoapObject;
 
 public class DailyExRatesOnDateModel {
 
-    public static final String QUOT_NAME = "Cur_QuotName";
+    public static final String NAME = "Cur_Name";
     public static final String SCALE = "Cur_Scale";
     public static final String RATE = "Cur_OfficialRate";
     public static final String CODE = "Cur_Code";
@@ -25,7 +25,7 @@ public class DailyExRatesOnDateModel {
     }
 
     public DailyExRatesOnDateModel(SoapObject soapObject) {
-        quotName = soapObject.getProperty(QUOT_NAME).toString();
+        quotName = soapObject.getProperty(NAME).toString();
         scale = Integer.parseInt(soapObject.getProperty(SCALE).toString());
         rate = Float.parseFloat(soapObject.getProperty(RATE).toString());
         code = Integer.parseInt(soapObject.getProperty(CODE).toString());

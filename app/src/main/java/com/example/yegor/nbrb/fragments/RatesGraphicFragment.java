@@ -1,6 +1,5 @@
 package com.example.yegor.nbrb.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.Loader;
@@ -98,8 +97,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
 
         rootView.findViewById(R.id.retry_btn).setOnClickListener((v -> restartLoader()));
 
-        Utils.logT("[Lifecycle]", "onCreateView");
-
         return rootView;
     }
 
@@ -158,6 +155,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         setStatus(Status.LOADING);
 
         return new AbstractLoader<>(getContext(), () -> {
+            // TODO: при изменинии curId валюты отбражать график или нет?
             String curId = MySQLiteClass.getInstance().getIdByAbbr(args.getString(ABBR));
             return SoapUtils.getRatesDyn(curId, args.getString(FROM_DATE), args.getString(TO_DATE));
         });
@@ -167,9 +165,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
     protected Bundle getBundleArgs() {
 
         Bundle bundle = new Bundle();
-
-        Utils.log(spinner);
-        Utils.log(spinner.getSelectedItem());
 
         bundle.putString(ABBR, ((SpinnerModel) spinner.getSelectedItem()).getAbbr());
         bundle.putString(FROM_DATE, Utils.format((Long) fromDate.getTag()));
@@ -194,9 +189,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
     protected void setStatus(Status status) {
         switch (status) {
             case LOADING:
-                //mChart.setVisibility(View.VISIBLE);
                 loadingView.setVisibility(View.VISIBLE);
-                //errorView.setVisibility(View.GONE);
                 break;
             case OK:
                 mChart.setVisibility(View.VISIBLE);
@@ -237,70 +230,9 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         @Override
         protected void onPostExecute(SpinnerAdapter adapter) {
             spinner.setAdapter(adapter);
-            spinner.setSelection(adapter.getPosition(new SpinnerModel("USD", "Доллар США", "")));
-            //restartLoader();
+            spinner.setSelection(adapter.getPosition(new SpinnerModel("USD", "Доллар США", -1)));
         }
 
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Utils.logT("[Lifecycle]", "onAttach");
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Utils.logT("[Lifecycle]", "onActivityCreated");
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Utils.logT("[Lifecycle]", "onActivityCreated");
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Utils.logT("[Lifecycle]", "onStart");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Utils.logT("[Lifecycle]", "onResume");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Utils.logT("[Lifecycle]", "onPause");
-    }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Utils.logT("[Lifecycle]", "onStop");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Utils.logT("[Lifecycle]", "onDestroyView");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Utils.logT("[Lifecycle]", "onDestroy");
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        Utils.logT("[Lifecycle]", "onDetach");
-    }
 }

@@ -10,8 +10,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
+import com.example.yegor.nbrb.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MySQLiteClass {
@@ -66,78 +68,35 @@ public class MySQLiteClass {
 
     public void addCurrencies(List<CurrencyModel> currencies) {
 
-        //open(true);
+        Collections.sort(currencies, (lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
 
         for (CurrencyModel currency : currencies)
             addCurrency(currency);
 
-        //close();
-
-    }
-
-    public List<CurrencyModel> getAllCurrencies() {
-
-        List<CurrencyModel> currencies = new ArrayList<>();
-
-        String selectQuery = "SELECT  * FROM " + CURRENCY_TABLE;
-
-        //open(false);
-
-        Cursor cursor = thisDataBase.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-
-                CurrencyModel contact = new CurrencyModel.Builder()
-                        .setId(Integer.parseInt(cursor.getString(0)))
-                        .setQuotName(cursor.getString(1))
-                        .setQuotNameEng(cursor.getString(2))
-                        .setScale(Integer.parseInt(cursor.getString(3)))
-                        .setCode(cursor.getString(4))
-                        .setAbbr(cursor.getString(5))
-                        .setName(cursor.getString(6))
-                        .setNameEng(cursor.getString(7))
-                        .setDateStart(cursor.getString(8))
-                        .setDateEnd(cursor.getString(9))
-                        .setParentId(Integer.parseInt(cursor.getString(10)))
-                        .create();
-
-                currencies.add(contact);
-
-            } while (cursor.moveToNext());
-
-        }
-
-        cursor.close();
-        //close();
-
-        return currencies;
     }
 
     public List<SpinnerModel> getCurrenciesDescription() {
 
         List<SpinnerModel> list = new ArrayList<>(64);
 
-        //open(false);
-
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
                 new String[]{CurrencyModel.ABBR, CurrencyModel.NAME, CurrencyModel.DATE_END},
-                null,//CurrencyModel.DATE_END + " = \"\" OR  " + CurrencyModel.DATE_END + " IS NULL",
-                null, null, null, null);
+                null, null,
+                CurrencyModel.PARENT_ID, null,
+                CurrencyModel.NAME + " , " + CurrencyModel.DATE_START);
 
         if (cursor.moveToFirst()) {
             do {
                 list.add(
                         new SpinnerModel(cursor.getString(0),
                                 cursor.getString(1),
-                                cursor.getString(2)));
+                                cursor.getLong(2)));
 
             } while (cursor.moveToNext());
         }
 
         cursor.close();
-        //close();
 
         return list;
 
@@ -145,12 +104,10 @@ public class MySQLiteClass {
 
     public String getIdByAbbr(String abbr) {
 
-        //open(false);
-
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
                 new String[]{CurrencyModel.ID},
-                CurrencyModel.ABBR + " =?",
+                CurrencyModel.ABBR + " =? ",
                 new String[]{abbr},
                 null, null, null);
 
@@ -159,9 +116,47 @@ public class MySQLiteClass {
         String id = cursor.getString(0);
 
         cursor.close();
-        //close();
 
         return id;
+    }
+
+    //дата < чем дата окончания и > чем дата начала
+    public boolean isDateValid(String abbr, String dateString) {
+
+        Cursor cursor = thisDataBase.query(
+                CURRENCY_TABLE,
+                new String[]{CurrencyModel.DATE_START, CurrencyModel.DATE_END},
+                CurrencyModel.ABBR + " =? ",
+                new String[]{abbr},
+                null, null,
+                CurrencyModel.DATE_START);
+
+        long[][] dates = new long[cursor.getCount()][2];
+
+        if (cursor.moveToFirst()) {
+            int i = 0;
+            do {
+                dates[i][0] = cursor.getLong(0);
+                dates[i++][1] = cursor.getLong(1);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        long specifiedDate = Utils.date2longUnSafe(dateString);
+
+
+        if (dates.length == 1 && dates[0][dates.length] == -1)
+            return true;
+        else if (specifiedDate >= dates[0][0] && dates[dates.length - 1][1] == -1)
+            return true;
+        else if (specifiedDate >= dates[0][0] && specifiedDate <= dates[dates.length - 1][1])
+            return true;
+        else
+            return false;
+
+        //TODO что это?
+        //return dateL <- dateEnd;
     }
 
     private static MySQLiteClass instance;
@@ -187,8 +182,8 @@ public class MySQLiteClass {
                         CurrencyModel.ABBR + " TEXT NOT NULL, " +
                         CurrencyModel.NAME + " TEXT NOT NULL, " +
                         CurrencyModel.NAME_ENG + " TEXT NOT NULL, " +
-                        CurrencyModel.DATE_START + " TEXT NOT NULL, " +
-                        CurrencyModel.DATE_END + " TEXT NOT NULL, " +
+                        CurrencyModel.DATE_START + " INTEGER, " +
+                        CurrencyModel.DATE_END + " INTEGER, " +
                         CurrencyModel.PARENT_ID + " INTEGER);";
 
         public DBHelp(Context context) {

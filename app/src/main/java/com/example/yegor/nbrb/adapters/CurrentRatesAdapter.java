@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapter.ViewHolder> {
 
-    List<DailyExRatesOnDateModel> models;
+    private List<DailyExRatesOnDateModel> models;
 
     public CurrentRatesAdapter(List<DailyExRatesOnDateModel> models) {
         this.models = models;
@@ -31,9 +31,13 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.setAbbr(models.get(position).getAbbreviation());
-        holder.setRate(models.get(position).getRate());
-        //TODO * Scale
+
+        DailyExRatesOnDateModel model = models.get(position);
+
+        holder.setScale(String.valueOf(model.getScale()));
+        holder.setAbbr(model.getAbbreviation());
+        holder.setRate(model.getRate());
+        holder.setName(model.getQuotName());
     }
 
     @Override
@@ -46,15 +50,21 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
         public static final int LAYOUT_ID = R.layout.item_current_rates;
 
         private CardView cv;
-        private TextView abbr, rate;
+        private TextView scale, abbr, rate, name;
 
         public ViewHolder(ViewGroup parent) {
             super(LayoutInflater.from(parent.getContext()).inflate(LAYOUT_ID, parent, false));
 
             cv = (CardView) itemView.findViewById(R.id.cv);
+            scale = (TextView) itemView.findViewById(R.id.scale);
             abbr = (TextView) itemView.findViewById(R.id.abbr);
             rate = (TextView) itemView.findViewById(R.id.rate);
+            name = (TextView) itemView.findViewById(R.id.name);
 
+        }
+
+        public void setScale(String scale) {
+            this.scale.setText(scale);
         }
 
         public void setAbbr(String abbr) {
@@ -63,6 +73,10 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
 
         public void setRate(float rate) {
             this.rate.setText(String.valueOf(rate));
+        }
+
+        public void setName(String name) {
+            this.name.setText(name);
         }
 
     }
