@@ -53,4 +53,13 @@ public class SpinnerAdapter extends ArrayAdapter<SpinnerModel> {
         return inflater.inflate(id, parent, false);
     }
 
+    public int getPosition(String abbr) {
+
+        for (int i = 0; i < models.size(); i++)
+            if (models.get(i).getAbbr().equals(abbr))
+                return i;
+
+        throw new RuntimeException();
+    }
+
 }

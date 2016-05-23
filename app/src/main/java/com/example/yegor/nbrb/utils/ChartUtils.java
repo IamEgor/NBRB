@@ -5,9 +5,11 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 
 import com.example.yegor.nbrb.App;
-import com.example.yegor.nbrb.views.MyMarkerView;
 import com.example.yegor.nbrb.R;
+import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
+import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.views.MyMarkerView;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -15,18 +17,25 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class ChartUtils {
 
-    public static void setUpChart(LineChart mChart, List<ExRatesDynModel> content) {
+    public static LineData getChartContent(String abbr, String fromDate, String toDate)
+            throws IOException {
+
+        CurrencyModel currency = MySQLiteClass.getInstance().getCurrencyModelByAbbr(abbr, fromDate);
+        List<ExRatesDynModel> content = SoapUtils.getRatesDyn(currency.getIdStr(), fromDate, toDate);
 
         float[] floats = new float[content.size()];
         String[] strings = new String[content.size()];
 
+        int scale = currency.getScale();
+
         for (int i = 0; i < content.size(); i++) {
-            floats[i] = content.get(i).getRate();
+            floats[i] = content.get(i).getRate() / scale;
             strings[i] = content.get(i).getDate();
         }
 
@@ -66,10 +75,14 @@ public final class ChartUtils {
         dataSets.add(set1); // add the datasets
 
         // create a data object with the datasets
-        LineData lineData = new LineData(strings, dataSets);
+        return new LineData(strings, dataSets);
+
+    }
+
+    public static void setUpChart(LineChart mChart, LineData content) {
 
         // set data
-        mChart.setData(lineData);
+        mChart.setData(content);
         mChart.invalidate();
 
         mChart.setDescription(null);
@@ -77,12 +90,10 @@ public final class ChartUtils {
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.TOP);
         mChart.getAxisRight().setEnabled(false);
 
-
-        MyMarkerView mv = new MyMarkerView(App.getContext(), R.layout.custom_marker_view, strings);
+        MyMarkerView mv = new MyMarkerView(App.getContext(), R.layout.custom_marker_view, content.getXVals());
         mChart.setMarkerView(mv);
 
     }
-
 
     private static void setUpChartTest(LineChart mChart, List<ExRatesDynModel> content) {
 

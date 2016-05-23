@@ -47,7 +47,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     private View cv, loadingView;
     private TextView errorMessage;
 
-    private TextView currency, rate;
+    private TextView abbr, name, scale, rate;
 
     private Calendar calendar;
     private Validator validator;
@@ -74,8 +74,10 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         loadingView = rootView.findViewById(R.id.loading_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
-        currency = (TextView) rootView.findViewById(R.id.currency);
         rate = (TextView) rootView.findViewById(R.id.rate);
+        scale = (TextView) rootView.findViewById(R.id.scale);
+        name = (TextView) rootView.findViewById(R.id.name);
+        abbr = (TextView) rootView.findViewById(R.id.abbr);
 
         spinner.setTitle(getString(R.string.select_currency));
         spinner.setPositiveButton("OK");
@@ -176,19 +178,23 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
     @Override
     protected void onDataReceived(DailyExRatesOnDateModel model) {
-        currency.setText(model.getAbbreviation());
+
+        name.setText(model.getQuotName());
+        abbr.setText(model.getAbbreviation());
         rate.setText(String.valueOf(model.getRate()));
+        scale.setText(String.valueOf(model.getScale()));
+
         setStatus(Status.OK);
     }
 
     @Override
     protected void onFailure(Exception e) {
-        if (e instanceof HttpResponseException)
-            errorMessage.setText("Wrong data input");
-        else if (e instanceof ExchangeRateAssignsOnceInMonth) {
+        if (e instanceof ExchangeRateAssignsOnceInMonth) {
             restartLoader(LOADER_2);
             return;
-        } else
+        } else if (e instanceof HttpResponseException)
+            errorMessage.setText("Wrong data input");
+        else
             errorMessage.setText(e.getMessage());
 
         setStatus(Status.FAILED);

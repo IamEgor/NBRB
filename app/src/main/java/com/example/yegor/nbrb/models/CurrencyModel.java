@@ -13,7 +13,6 @@ public class CurrencyModel {
     public static final String QUOT_NAME_ENG = "Cur_QuotName_Eng";
     public static final String SCALE = "Cur_Scale";
     public static final String CODE = "Cur_Code";
-
     public static final String ABBR = "Cur_Abbreviation";
     public static final String NAME = "Cur_Name";
     public static final String NAME_ENG = "Cur_Name_Eng";
@@ -65,6 +64,10 @@ public class CurrencyModel {
 
     public int getId() {
         return id;
+    }
+
+    public String getIdStr() {
+        return String.valueOf(id);
     }
 
     public String getQuotName() {

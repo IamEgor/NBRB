@@ -1,8 +1,13 @@
 package com.example.yegor.nbrb.fragments;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatImageButton;
 import android.view.LayoutInflater;
@@ -13,28 +18,32 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
+import com.example.yegor.nbrb.activities.MainActivity;
 import com.example.yegor.nbrb.adapters.SpinnerAdapter;
+import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.loaders.AdapterDataAsync;
 import com.example.yegor.nbrb.models.ContentWrapper;
-import com.example.yegor.nbrb.models.ExRatesDynModel;
+import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.ChartUtils;
-import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.LineData;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.util.Calendar;
-import java.util.List;
 
-public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynModel>> implements
+public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implements
         View.OnClickListener,
         AdapterView.OnItemSelectedListener,
         DatePickerDialog.OnDateSetListener {
+
+    public static final String ACTION = App.getContext().getPackageName();
 
     private static final String IS_LEFT_BUTTON = "IS_LEFT_BUTTON";
 
@@ -52,13 +61,28 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
     private AppCompatImageButton fullscreen;
 
     private Calendar calendar;
+    private SpinnerAdapter spinnerAdapter;
 
-    public RatesGraphicFragment() {
-        calendar = Calendar.getInstance();
-    }
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String abbr = intent.getStringExtra(CurrencyModel.ABBR);
+            spinner.setSelection(spinnerAdapter.getPosition(abbr));
+            ((MainActivity) getActivity()).setCurrentItem(2, true);
+
+            Toast.makeText(App.getContext(), "onReceive", Toast.LENGTH_SHORT).show();
+
+            //restartLoader();
+        }
+    };
 
     public static RatesGraphicFragment newInstance() {
         return new RatesGraphicFragment();
+    }
+
+    public RatesGraphicFragment() {
+        calendar = Calendar.getInstance();
     }
 
     @Nullable
@@ -98,6 +122,18 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
         rootView.findViewById(R.id.retry_btn).setOnClickListener((v -> restartLoader()));
 
         return rootView;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(receiver, new IntentFilter(ACTION));
+    }
+
+    @Override
+    public void onDetach() {
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(receiver);
+        super.onDetach();
     }
 
     @Override
@@ -150,21 +186,14 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
     }
 
     @Override
-    public Loader<ContentWrapper<List<ExRatesDynModel>>> onCreateLoader(int id, Bundle args) {
-
-        setStatus(Status.LOADING);
-
-        return new AbstractLoader<>(getContext(), () -> {
-            // TODO: при изменинии curId валюты отбражать график или нет?
-            String curId = MySQLiteClass.getInstance().getIdByAbbr(args.getString(ABBR));
-            return SoapUtils.getRatesDyn(curId, args.getString(FROM_DATE), args.getString(TO_DATE));
-        });
-    }
-
-    @Override
     protected Bundle getBundleArgs() {
 
         Bundle bundle = new Bundle();
+        //TODO
+        //не тот Id
+        Utils.log("(spinner == null) = " + (spinner == null));
+        Utils.log("((SpinnerModel) spinner.getSelectedItem()) = " + ((SpinnerModel) spinner.getSelectedItem()));
+        Utils.log(" ((SpinnerModel) spinner.getSelectedItem()).getAbbr()) = " + (((SpinnerModel) spinner.getSelectedItem()).getAbbr()));
 
         bundle.putString(ABBR, ((SpinnerModel) spinner.getSelectedItem()).getAbbr());
         bundle.putString(FROM_DATE, Utils.format((Long) fromDate.getTag()));
@@ -174,7 +203,33 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
     }
 
     @Override
-    protected void onDataReceived(List<ExRatesDynModel> models) {
+    public Loader<ContentWrapper<LineData>> onCreateLoader(int id, Bundle args) {
+
+        String abbr = args.getString(ABBR);
+        String fromDate = args.getString(FROM_DATE);
+        String toDate = args.getString(TO_DATE);
+
+        if (!MySQLiteClass.getInstance().isDateValid(abbr, fromDate))
+            return new AbstractLoader<>(getContext(), () -> {
+                throw new NoDataFoundException();
+            });
+
+        if (!MySQLiteClass.getInstance().isDateValid(abbr, toDate))
+            return new AbstractLoader<>(getContext(), () -> {
+                throw new NoDataFoundException();
+            });
+
+        setStatus(Status.LOADING);
+
+        return new AbstractLoader<>(getContext(), () -> {
+            // TODO: при изменинии curId валюты отбражать график или нет?
+            return ChartUtils.getChartContent(
+                    abbr, fromDate, toDate);
+        });
+    }
+
+    @Override
+    protected void onDataReceived(LineData models) {
         ChartUtils.setUpChart(mChart, models);
         setStatus(Status.OK);
     }
@@ -229,8 +284,9 @@ public class RatesGraphicFragment extends AbstractRatesFragment<List<ExRatesDynM
 
         @Override
         protected void onPostExecute(SpinnerAdapter adapter) {
-            spinner.setAdapter(adapter);
-            spinner.setSelection(adapter.getPosition(new SpinnerModel("USD", "Доллар США", -1)));
+            spinnerAdapter = adapter;
+            spinner.setAdapter(spinnerAdapter);
+            spinner.setSelection(spinnerAdapter.getPosition(new SpinnerModel("USD", "Доллар США", -1)));
         }
 
     }

@@ -84,7 +84,7 @@ public class MySQLiteClass {
                 new String[]{CurrencyModel.ABBR, CurrencyModel.NAME, CurrencyModel.DATE_END},
                 null, null,
                 CurrencyModel.PARENT_ID, null,
-                CurrencyModel.NAME + " , " + CurrencyModel.DATE_START);
+                CurrencyModel.NAME);
 
         if (cursor.moveToFirst()) {
             do {
@@ -102,22 +102,58 @@ public class MySQLiteClass {
 
     }
 
-    public String getIdByAbbr(String abbr) {
+/*
+    public SpinnerModel getSpinnerModelByAbbr(String abbr) {
 
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
-                new String[]{CurrencyModel.ID},
+                new String[]{CurrencyModel.NAME, CurrencyModel.DATE_END},
                 CurrencyModel.ABBR + " =? ",
                 new String[]{abbr},
                 null, null, null);
 
         cursor.moveToFirst();
 
-        String id = cursor.getString(0);
+        SpinnerModel model = new SpinnerModel(abbr, cursor.getString(0), cursor.getLong(1));
 
         cursor.close();
 
-        return id;
+        return model;
+    }
+*/
+    public CurrencyModel getCurrencyModelByAbbr(String abbr, String time) {
+
+        Cursor cursor = thisDataBase.query(
+                CURRENCY_TABLE,
+                new String[]{
+                        CurrencyModel.ID, CurrencyModel.QUOT_NAME, CurrencyModel.QUOT_NAME_ENG,
+                        CurrencyModel.SCALE, CurrencyModel.CODE, CurrencyModel.ABBR,
+                        CurrencyModel.NAME, CurrencyModel.NAME_ENG, CurrencyModel.DATE_START,
+                        CurrencyModel.DATE_END, CurrencyModel.PARENT_ID},
+                CurrencyModel.ABBR + " =? AND (" + CurrencyModel.DATE_END + " >? OR " + CurrencyModel.DATE_END + " = '-1')",
+                new String[]{abbr, time},
+                null, null, null);
+
+        cursor.moveToFirst();
+
+        CurrencyModel model = new CurrencyModel.Builder()
+                .setId(cursor.getInt(0))
+                .setQuotName(cursor.getString(1))
+                .setQuotNameEng(cursor.getString(2))
+                .setScale(cursor.getInt(3))
+                .setCode(cursor.getString(4))
+                .setAbbr(cursor.getString(5))
+                .setName(cursor.getString(6))
+                .setNameEng(cursor.getString(7))
+                .setDateStart(cursor.getLong(8))
+                .setDateEnd(cursor.getLong(9))
+                .setParentId(cursor.getInt(10))
+                .create();
+
+
+        cursor.close();
+
+        return model;
     }
 
     //дата < чем дата окончания и > чем дата начала

@@ -144,7 +144,6 @@ public final class SoapUtils {
 
         for (int k = 0; k < response.getPropertyCount(); k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
-            //TODO Utils.date2Long() вместо substring
             list.add(new ExRatesDynModel(dailyExRatesOnDate));
         }
 

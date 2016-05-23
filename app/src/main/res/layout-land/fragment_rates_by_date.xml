@@ -69,41 +69,9 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:layout_margin="8dp">
+        android:layout_margin="16dp">
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/cv"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="8dp">
-
-                <TextView
-                    android:id="@+id/currency"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:text="USD"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/rate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:text="953.5"
-                    android:textSize="18sp" />
-
-            </RelativeLayout>
-
-        </android.support.v7.widget.CardView>
+        <include layout="@layout/item_current_rates" />
 
         <com.wang.avi.AVLoadingIndicatorView
             android:id="@+id/loading_view"

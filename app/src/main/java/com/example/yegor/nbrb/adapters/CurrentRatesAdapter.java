@@ -1,12 +1,19 @@
 package com.example.yegor.nbrb.adapters;
 
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
+import com.example.yegor.nbrb.fragments.RatesGraphicFragment;
+import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 
 import java.util.List;
@@ -45,7 +52,8 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
         return models.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+
+    static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public static final int LAYOUT_ID = R.layout.item_current_rates;
 
@@ -61,6 +69,18 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
             rate = (TextView) itemView.findViewById(R.id.rate);
             name = (TextView) itemView.findViewById(R.id.name);
 
+            cv.setOnClickListener(this);
+
+        }
+
+        @Override
+        public void onClick(View v) {
+
+            Intent intent = new Intent(RatesGraphicFragment.ACTION);
+            intent.putExtra(CurrencyModel.ABBR, abbr.getText().toString());
+
+            LocalBroadcastManager.getInstance(App.getContext()).sendBroadcast(intent);
+            Toast.makeText(App.getContext(), "onClick", Toast.LENGTH_SHORT).show();
         }
 
         public void setScale(String scale) {

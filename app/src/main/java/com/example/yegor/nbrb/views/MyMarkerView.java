@@ -10,6 +10,8 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.utils.Utils;
 
+import java.util.List;
+
 /**
  * Custom implementation of the MarkerView.
  *
@@ -24,6 +26,14 @@ public class MyMarkerView extends MarkerView {
         super(context, layoutResource);
 
         this.labels = labels;
+        tvContent = (TextView) findViewById(R.id.tvContent);
+    }
+
+
+    public MyMarkerView(Context context, int layoutResource, List<String> labels) {
+        super(context, layoutResource);
+
+        this.labels = labels.toArray(new String[labels.size()]);
         tvContent = (TextView) findViewById(R.id.tvContent);
     }
 
