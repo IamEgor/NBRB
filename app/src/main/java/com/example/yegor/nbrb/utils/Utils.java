@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class Utils {
 
@@ -27,9 +28,11 @@ public final class Utils {
     private static final boolean DEBUG_MODE = true;
     private static final String TAG = "[APP_LOGS]";
 
+    private static final AtomicInteger sNextGeneratedId;
     private static final SimpleDateFormat format;
 
     static {
+        sNextGeneratedId = new AtomicInteger(1);
         format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         format.setLenient(false);
     }
@@ -119,6 +122,31 @@ public final class Utils {
 
         return size.x < size.y;
 
+    }
+
+    public static Calendar getCalendar(String date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(date2longUnSafe(date));
+        return calendar;
+    }
+
+    public static int getColor(int color) {
+        if (getSDKInt() >= 23)
+            return App.getContext().getColor(color);
+        else
+            return App.getContext().getResources().getColor(color);
+    }
+
+    public static int generateViewId() {
+        for (; ; ) {
+            final int result = sNextGeneratedId.get();
+            // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
+            int newValue = result + 1;
+            if (newValue > 0x00FFFFFF) newValue = 1; // Roll over to 1, not 0.
+            if (sNextGeneratedId.compareAndSet(result, newValue)) {
+                return result;
+            }
+        }
     }
 
     public static void logT(String tag, Object... objects) {

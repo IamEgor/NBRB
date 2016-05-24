@@ -18,5 +18,8 @@
     <string name="select_currency">Select Currency</string>
     <string name="input_date_too_early">Exchange rate hasn\'t been installed</string>
     <string name="input_date_too_old">Too old date</string>
+    <string name="but_done">Done</string>
+    <string name="title_tab_start_date">Start Date</string>
+    <string name="ttile_tab_end_date">End Date</string>
 
 </resources>

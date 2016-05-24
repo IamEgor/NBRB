@@ -1,6 +1,5 @@
 package com.example.yegor.nbrb.utils;
 
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 
@@ -48,14 +47,13 @@ public final class ChartUtils {
 
         LineDataSet set1 = new LineDataSet(yVals, null);
         set1.setDrawValues(false);
-        set1.setFillAlpha(110);
-        set1.setFillColor(Color.RED);
+        set1.setFillAlpha(192);
 
         // set the line to be drawn like this "- - - - - -"
         set1.enableDashedLine(10f, 5f, 0f);
         set1.enableDashedHighlightLine(10f, 5f, 0f);
-        set1.setColor(Color.BLACK);
-        set1.setCircleColor(Color.BLACK);
+        set1.setColor(Utils.getColor(R.color.colorAccent));
+        set1.setCircleColor(Utils.getColor(R.color.colorAccent));
         set1.setLineWidth(1f);
         set1.setCircleRadius(3f);
         set1.setDrawCircleHole(false);
@@ -64,11 +62,10 @@ public final class ChartUtils {
         set1.disableDashedLine();
 
         if (Utils.getSDKInt() >= 18) {
-            // fill drawable only supported on api level 18 and above
-            Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.fade_red);
+            Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.fade_primary);
             set1.setFillDrawable(drawable);
         } else {
-            set1.setFillColor(Color.BLACK);
+            set1.setFillColor(Utils.getColor(R.color.colorPrimary));
         }
 
         ArrayList<ILineDataSet> dataSets = new ArrayList<>();
@@ -95,6 +92,24 @@ public final class ChartUtils {
 
     }
 
+    public static void setDisabledColor(LineChart chart){
+
+        if (chart.getData() == null)
+            return;
+
+        List<ILineDataSet> sets = chart.getData().getDataSets();
+
+        for (ILineDataSet iSet : sets) {
+
+            LineDataSet set = (LineDataSet) iSet;
+            set.setFillAlpha(128);
+            set.setFillColor(Utils.getColor(R.color.dark_grey));
+            set.setColor(Utils.getColor(R.color.midi_grey));
+            set.setCircleColor(Utils.getColor(R.color.midi_grey));
+        }
+        chart.invalidate();
+    }
+    /*
     private static void setUpChartTest(LineChart mChart, List<ExRatesDynModel> content) {
 
         float max = 0f, min = content.get(0).getRate();
@@ -155,7 +170,7 @@ public final class ChartUtils {
 
         if (Utils.getSDKInt() >= 18) {
             // fill drawable only supported on api level 18 and above
-            Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.fade_red);
+            Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.fade_primary);
             set1.setFillDrawable(drawable);
         } else {
             set1.setFillColor(Color.BLACK);
@@ -180,5 +195,5 @@ public final class ChartUtils {
         MyMarkerView mv = new MyMarkerView(App.getContext(), R.layout.custom_marker_view, strings);
         mChart.setMarkerView(mv);
     }
-
+    */
 }

@@ -8,8 +8,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatImageButton;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,17 +31,23 @@ import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.utils.Utils;
+import com.example.yegor.nbrb.views.DateRangePickerFragment;
+import com.example.yegor.nbrb.views.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implements
         View.OnClickListener,
         AdapterView.OnItemSelectedListener,
-        DatePickerDialog.OnDateSetListener {
+        DatePickerDialog.OnDateSetListener,
+        ToggleNavigation.OnChoose,
+        DateRangePickerFragment.OnDateRangeSelectedListener {
 
     public static final String ACTION = App.getContext().getPackageName();
 
@@ -56,12 +62,15 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     private View errorView;
     private TextView errorMessage;
 
-    private AppCompatButton fromDate, toDate;
+    //private AppCompatButton fromDate, toDate;
     private SearchableSpinner spinner;
     private AppCompatImageButton fullscreen;
+    private ToggleNavigation toggleNavigation;
 
     private Calendar calendar;
     private SpinnerAdapter spinnerAdapter;
+
+    private String fromDateStr, toDateStr;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -71,9 +80,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
             spinner.setSelection(spinnerAdapter.getPosition(abbr));
             ((MainActivity) getActivity()).setCurrentItem(2, true);
 
-            Toast.makeText(App.getContext(), "onReceive", Toast.LENGTH_SHORT).show();
-
-            //restartLoader();
         }
     };
 
@@ -83,6 +89,9 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     public RatesGraphicFragment() {
         calendar = Calendar.getInstance();
+        toDateStr = Utils.format(calendar.getTimeInMillis());
+        calendar.add(Calendar.MONTH, -1);
+        fromDateStr = Utils.format(calendar.getTimeInMillis());
     }
 
     @Nullable
@@ -95,11 +104,22 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         loadingView = (ProgressBar) rootView.findViewById(R.id.progress);
         errorView = rootView.findViewById(R.id.error_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
-        fromDate = (AppCompatButton) rootView.findViewById(R.id.from_date);
-        toDate = (AppCompatButton) rootView.findViewById(R.id.to_date);
+        //fromDate = (AppCompatButton) rootView.findViewById(R.id.from_date);
+        //toDate = (AppCompatButton) rootView.findViewById(R.id.to_date);
         spinner = (SearchableSpinner) rootView.findViewById(R.id.pick_currency);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
+        toggleNavigation = (ToggleNavigation) rootView.findViewById(R.id.toggle);
 
+        toggleNavigation.setParams(new ArrayList<ToggleNavigation.ButtonParam>() {{
+            add(new ToggleNavigation.ButtonParam("Неделя", false));
+            add(new ToggleNavigation.ButtonParam("Месяц", true));
+            //add(new ToggleNavigation.ButtonParam("Полгода", false));
+            add(new ToggleNavigation.ButtonParam("Год", false));
+            add(new ToggleNavigation.ButtonParam("Период", false));
+        }});
+        toggleNavigation.setOnChoose(this);
+
+        /*
         Calendar calendar = Calendar.getInstance();
         toDate.setTag(calendar.getTimeInMillis());
         toDate.setText(String.format(getString(R.string.from_date),
@@ -111,6 +131,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
         fromDate.setOnClickListener(this);
         toDate.setOnClickListener(this);
+        */
         fullscreen.setOnClickListener(this);
 
         spinner.setOnItemSelectedListener(this);
@@ -173,6 +194,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         calendar.set(Calendar.MONTH, monthOfYear);
         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
+        /*
         if (view.getArguments().getBoolean(IS_LEFT_BUTTON)) {
             fromDate.setText(String.format(getString(R.string.from_date), Utils.format(calendar.getTimeInMillis())));
             fromDate.setTag(calendar.getTimeInMillis());
@@ -180,24 +202,74 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
             toDate.setText(String.format(getString(R.string.to_date), Utils.format(calendar.getTimeInMillis())));
             toDate.setTag(calendar.getTimeInMillis());
         }
+        */
 
         restartLoader();
 
     }
 
     @Override
+    public void choose(int position) {
+        //TODO только при измении позиции
+        switch (position) {
+            case 0:
+                calendar = Calendar.getInstance();
+                toDateStr = Utils.format(calendar.getTimeInMillis());
+                calendar.add(Calendar.WEEK_OF_YEAR, -1);
+                fromDateStr = Utils.format(calendar.getTimeInMillis());
+                break;
+            case 1:
+                calendar = Calendar.getInstance();
+                toDateStr = Utils.format(calendar.getTimeInMillis());
+                calendar.add(Calendar.MONTH, -1);
+                fromDateStr = Utils.format(calendar.getTimeInMillis());
+                break;
+            case 2:
+                calendar = Calendar.getInstance();
+                toDateStr = Utils.format(calendar.getTimeInMillis());
+                calendar.add(Calendar.YEAR, -1);
+                fromDateStr = Utils.format(calendar.getTimeInMillis());
+                break;
+            case 3:
+
+                DateRangePickerFragment.PickerDate[] dates = new DateRangePickerFragment.PickerDate[2];
+
+                Calendar calendar = Utils.getCalendar(fromDateStr);
+                dates[0] = new DateRangePickerFragment.PickerDate(calendar);
+                calendar = Utils.getCalendar(toDateStr);
+                dates[1] = new DateRangePickerFragment.PickerDate(calendar);
+
+                DateRangePickerFragment dateRangePickerFragment = DateRangePickerFragment
+                        .newInstance(this, false, dates);
+                dateRangePickerFragment.show(getFragmentManager(), "datePicker");
+
+                return;
+        }
+
+        restartLoader();
+
+    }
+
+    @Override
+    public void onDateRangeSelected(int startDay, int startMonth, int startYear, int endDay, int endMonth, int endYear) {
+        GregorianCalendar calendar = new GregorianCalendar(startYear, startMonth, startDay);
+        fromDateStr = Utils.format(calendar.getTimeInMillis());
+        calendar = new GregorianCalendar(endYear, endMonth, endDay);
+        toDateStr = Utils.format(calendar.getTimeInMillis());
+        restartLoader();
+        Log.d("range : ", "from: " + startDay + "-" + startMonth + "-" + startYear + " to : " + endDay + "-" + endMonth + "-" + endYear);
+    }
+
+    @Override
     protected Bundle getBundleArgs() {
 
         Bundle bundle = new Bundle();
-        //TODO
-        //не тот Id
-        Utils.log("(spinner == null) = " + (spinner == null));
-        Utils.log("((SpinnerModel) spinner.getSelectedItem()) = " + ((SpinnerModel) spinner.getSelectedItem()));
-        Utils.log(" ((SpinnerModel) spinner.getSelectedItem()).getAbbr()) = " + (((SpinnerModel) spinner.getSelectedItem()).getAbbr()));
 
+        bundle.putString(FROM_DATE, fromDateStr);
+        bundle.putString(TO_DATE, toDateStr);
         bundle.putString(ABBR, ((SpinnerModel) spinner.getSelectedItem()).getAbbr());
-        bundle.putString(FROM_DATE, Utils.format((Long) fromDate.getTag()));
-        bundle.putString(TO_DATE, Utils.format((Long) toDate.getTag()));
+        //bundle.putString(FROM_DATE, Utils.format((Long) fromDate.getTag()));
+        //bundle.putString(TO_DATE, Utils.format((Long) toDate.getTag()));
 
         return bundle;
     }
@@ -244,6 +316,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     protected void setStatus(Status status) {
         switch (status) {
             case LOADING:
+                ChartUtils.setDisabledColor(mChart);
                 loadingView.setVisibility(View.VISIBLE);
                 break;
             case OK:

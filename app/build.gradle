@@ -43,4 +43,5 @@ dependencies {
     compile 'com.wdullaer:materialdatetimepicker:2.3.0'
     compile 'com.github.PhilJay:MPAndroidChart:v2.2.4'
     compile 'com.toptoche.searchablespinner:searchablespinnerlibrary:1.2.0'
+    compile 'com.borax12.materialdaterangepicker:library:1.6'
 }
