@@ -43,40 +43,15 @@
             android:id="@+id/pick_currency"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/buttons"
+            android:layout_above="@+id/toggle"
             android:layout_margin="8dp" />
-
-        <LinearLayout
-            android:id="@+id/buttons"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_above="@+id/toggle">
-
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/from_date"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/from_date"
-                android:textAllCaps="false" />
-
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/to_date"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/to_date"
-                android:textAllCaps="false" />
-
-        </LinearLayout>
 
         <com.example.yegor.nbrb.views.ToggleNavigation
             android:id="@+id/toggle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
+            android:layout_alignParentBottom="true"
+            android:layout_margin="4dp" />
 
     </RelativeLayout>
 

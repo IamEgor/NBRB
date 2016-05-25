@@ -3,6 +3,7 @@ package com.example.yegor.nbrb.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
+import com.appeaser.sublimepickerlibrary.helpers.SublimeOptions;
+import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.adapters.SpinnerAdapter;
 import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
@@ -22,17 +26,16 @@ import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
+import com.example.yegor.nbrb.views.SublimePickerFragment;
 import com.example.yegor.nbrb.views.Validator;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import org.ksoap2.transport.HttpResponseException;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDateModel> implements
-        DatePickerDialog.OnDateSetListener {
+        SublimePickerFragment.Callback {
 
     private static final int LOADER_1 = 1;
     private static final int LOADER_2 = 2;
@@ -90,14 +93,23 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
                     if (validator.getResult() == Validator.VALID)
                         Utils.setCalendar(calendar, editText.getText().toString());
 
-                    DatePickerDialog dpd = DatePickerDialog.newInstance(
-                            RateByDateFragment.this,
-                            calendar.get(Calendar.YEAR),
-                            calendar.get(Calendar.MONTH),
-                            calendar.get(Calendar.DAY_OF_MONTH)
-                    );
-                    dpd.setThemeDark(true);
-                    dpd.show(getActivity().getFragmentManager(), "Datepickerdialog");
+                    SublimePickerFragment pickerFrag = new SublimePickerFragment();
+                    pickerFrag.setCallback(RateByDateFragment.this);
+
+                    SublimeOptions options = new SublimeOptions();
+                    int displayOptions = 0;
+
+                    displayOptions |= SublimeOptions.ACTIVATE_DATE_PICKER;
+                    options.setPickerToShow(SublimeOptions.Picker.DATE_PICKER);
+                    options.setDisplayOptions(displayOptions);
+                    options.setDateParams(calendar);
+
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable("SUBLIME_OPTIONS", options);
+                    pickerFrag.setArguments(bundle);
+
+                    pickerFrag.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
+                    pickerFrag.show(getFragmentManager(), "SUBLIME_PICKER");
 
                 }
         );
@@ -127,9 +139,14 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     }
 
     @Override
-    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+    public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
         inputLayout.setError(null);
-        editText.setText(Utils.format(new GregorianCalendar(year, monthOfYear, dayOfMonth)));
+        editText.setText(Utils.format(selectedDate.getFirstDate().getTimeInMillis()));
+    }
+
+    @Override
+    public void onCancelled() {
+
     }
 
     @Override

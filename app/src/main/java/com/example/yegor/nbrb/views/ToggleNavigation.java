@@ -21,13 +21,15 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
     private static int ACTIVE_COLOR = App.getContext().getResources().getColor(R.color.colorPrimary);
     private static int IN_ACTIVE_COLOR = App.getContext().getResources().getColor(R.color.light_grey);
 
-    private List<ButtonParam> params;
-    private List<Integer> ids;
-
     private Context context;
     private OnChoose onChoose;
 
+    private List<ButtonParam> params;
+    private List<Integer> ids;
+
     private int activeId;
+    private int previousSelectedId;
+    private int canRepeatId;
 
     public ToggleNavigation(Context context, List<ButtonParam> labels) {
         super(context);
@@ -56,6 +58,10 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         return activeId;
     }
 
+    public int getPreviousSelectedId() {
+        return previousSelectedId;
+    }
+
     public void setParams(List<ButtonParam> params) {
         this.params = params;
         init(context, params);
@@ -66,7 +72,14 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
     }
 
     public void setActive(int activeId) {
+
+        previousSelectedId = this.activeId;
+        this.setActiveStateless(activeId);
+    }
+
+    public void setActiveStateless(int activeId) {
         this.activeId = activeId;
+
         for (ButtonParam param : params) {
             int id = param.getId();
             param.setActive(id == activeId);
@@ -74,19 +87,28 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         }
     }
 
+    public void setPreviousActive() {
+        setActiveStateless(previousSelectedId);
+    }
+
     @Override
     public void onClick(View v) {
+
+        if (activeId == v.getId() && canRepeatId != v.getId())
+            return;
+
         setActive(v.getId());
+
         if (onChoose == null)
-            throw new  UnsupportedOperationException("You must implement callback operation");
+            throw new UnsupportedOperationException("You must implement callback operation");
 
         onChoose.choose(getPositionById(v.getId()));
     }
 
     private int getPositionById(int id) {
-        for (int i = 0; i < params.size(); i++){
+        for (int i = 0; i < params.size(); i++) {
             if (params.get(i).getId() == id)
-                return  i;
+                return i;
         }
         throw new RuntimeException("Smth got wrong");
     }
@@ -112,6 +134,13 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
             button.setOnClickListener(this);
 
             this.addView(button);
+
+            if (param.isActive())
+                activeId = param.getId();
+
+            if (param.isCanRepeat())
+                canRepeatId = param.getId();
+
         }
     }
 
@@ -119,11 +148,13 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
 
         private String label;
         private boolean active;
+        private boolean canRepeat;
         private int id;
 
-        public ButtonParam(String label, boolean active) {
+        public ButtonParam(String label, boolean active, boolean canRepeat) {
             this.label = label;
             this.active = active;
+            this.canRepeat = canRepeat;
             id = Utils.generateViewId();
         }
 
@@ -135,6 +166,10 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
             return active;
         }
 
+        public boolean isCanRepeat() {
+            return canRepeat;
+        }
+
         public int getId() {
             return id;
         }
@@ -142,7 +177,6 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         public void setActive(boolean active) {
             this.active = active;
         }
-
     }
 
     public interface OnChoose {

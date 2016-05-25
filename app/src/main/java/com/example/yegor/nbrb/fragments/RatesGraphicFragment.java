@@ -2,6 +2,7 @@ package com.example.yegor.nbrb.fragments;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -9,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.AppCompatImageButton;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.borax12.materialdaterangepicker.date.DatePickerDialog;
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.activities.MainActivity;
@@ -31,12 +32,10 @@ import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.utils.Utils;
-import com.example.yegor.nbrb.views.DateRangePickerFragment;
 import com.example.yegor.nbrb.views.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -45,13 +44,11 @@ import java.util.GregorianCalendar;
 public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implements
         View.OnClickListener,
         AdapterView.OnItemSelectedListener,
-        DatePickerDialog.OnDateSetListener,
         ToggleNavigation.OnChoose,
-        DateRangePickerFragment.OnDateRangeSelectedListener {
+        DatePickerDialog.OnDateSetListener,
+        DialogInterface.OnCancelListener{
 
     public static final String ACTION = App.getContext().getPackageName();
-
-    private static final String IS_LEFT_BUTTON = "IS_LEFT_BUTTON";
 
     public static final String ABBR = "ABBR";
     public static final String FROM_DATE = "FROM_DATE";
@@ -62,7 +59,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     private View errorView;
     private TextView errorMessage;
 
-    //private AppCompatButton fromDate, toDate;
     private SearchableSpinner spinner;
     private AppCompatImageButton fullscreen;
     private ToggleNavigation toggleNavigation;
@@ -104,34 +100,18 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         loadingView = (ProgressBar) rootView.findViewById(R.id.progress);
         errorView = rootView.findViewById(R.id.error_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
-        //fromDate = (AppCompatButton) rootView.findViewById(R.id.from_date);
-        //toDate = (AppCompatButton) rootView.findViewById(R.id.to_date);
         spinner = (SearchableSpinner) rootView.findViewById(R.id.pick_currency);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
         toggleNavigation = (ToggleNavigation) rootView.findViewById(R.id.toggle);
 
         toggleNavigation.setParams(new ArrayList<ToggleNavigation.ButtonParam>() {{
-            add(new ToggleNavigation.ButtonParam("Неделя", false));
-            add(new ToggleNavigation.ButtonParam("Месяц", true));
-            //add(new ToggleNavigation.ButtonParam("Полгода", false));
-            add(new ToggleNavigation.ButtonParam("Год", false));
-            add(new ToggleNavigation.ButtonParam("Период", false));
+            add(new ToggleNavigation.ButtonParam("Неделя", false, false));
+            add(new ToggleNavigation.ButtonParam("Месяц", true, false));
+            add(new ToggleNavigation.ButtonParam("Год", false, false));
+            add(new ToggleNavigation.ButtonParam("Период", false, true));
         }});
         toggleNavigation.setOnChoose(this);
 
-        /*
-        Calendar calendar = Calendar.getInstance();
-        toDate.setTag(calendar.getTimeInMillis());
-        toDate.setText(String.format(getString(R.string.from_date),
-                Utils.format(calendar.getTimeInMillis())));
-        calendar.roll(Calendar.MONTH, false);
-        fromDate.setTag(calendar.getTimeInMillis());
-        fromDate.setText(String.format(getString(R.string.from_date),
-                Utils.format(calendar.getTimeInMillis())));
-
-        fromDate.setOnClickListener(this);
-        toDate.setOnClickListener(this);
-        */
         fullscreen.setOnClickListener(this);
 
         spinner.setOnItemSelectedListener(this);
@@ -161,12 +141,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     public void onClick(View v) {
 
         switch (v.getId()) {
-            case R.id.from_date:
-                showDialog(v);
-                break;
-            case R.id.to_date:
-                showDialog(v);
-                break;
             case R.id.fullscreen:
                 Toast.makeText(getContext(), "Not yet", Toast.LENGTH_SHORT).show();
                 break;
@@ -184,27 +158,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
-    }
-
-    @Override
-    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-
-        calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.MONTH, monthOfYear);
-        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-        /*
-        if (view.getArguments().getBoolean(IS_LEFT_BUTTON)) {
-            fromDate.setText(String.format(getString(R.string.from_date), Utils.format(calendar.getTimeInMillis())));
-            fromDate.setTag(calendar.getTimeInMillis());
-        } else {
-            toDate.setText(String.format(getString(R.string.to_date), Utils.format(calendar.getTimeInMillis())));
-            toDate.setTag(calendar.getTimeInMillis());
-        }
-        */
-
-        restartLoader();
 
     }
 
@@ -231,17 +184,21 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
                 fromDateStr = Utils.format(calendar.getTimeInMillis());
                 break;
             case 3:
+                Calendar start = Utils.getCalendar(fromDateStr);
+                Calendar end = Utils.getCalendar(toDateStr);
 
-                DateRangePickerFragment.PickerDate[] dates = new DateRangePickerFragment.PickerDate[2];
+                DatePickerDialog dpd = DatePickerDialog.newInstance(
+                        this,
+                        start.get(Calendar.YEAR),
+                        start.get(Calendar.MONTH),
+                        start.get(Calendar.DAY_OF_MONTH),
+                        end.get(Calendar.YEAR),
+                        end.get(Calendar.MONTH),
+                        end.get(Calendar.DAY_OF_MONTH)
+                );
+                dpd.setOnCancelListener(this);
 
-                Calendar calendar = Utils.getCalendar(fromDateStr);
-                dates[0] = new DateRangePickerFragment.PickerDate(calendar);
-                calendar = Utils.getCalendar(toDateStr);
-                dates[1] = new DateRangePickerFragment.PickerDate(calendar);
-
-                DateRangePickerFragment dateRangePickerFragment = DateRangePickerFragment
-                        .newInstance(this, false, dates);
-                dateRangePickerFragment.show(getFragmentManager(), "datePicker");
+                dpd.show(getActivity().getFragmentManager(), "Datepickerdialog");
 
                 return;
         }
@@ -251,13 +208,20 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     }
 
     @Override
-    public void onDateRangeSelected(int startDay, int startMonth, int startYear, int endDay, int endMonth, int endYear) {
-        GregorianCalendar calendar = new GregorianCalendar(startYear, startMonth, startDay);
+    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth,
+                          int yearEnd, int monthOfYearEnd, int dayOfMonthEnd) {
+
+        GregorianCalendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth);
         fromDateStr = Utils.format(calendar.getTimeInMillis());
-        calendar = new GregorianCalendar(endYear, endMonth, endDay);
+        calendar = new GregorianCalendar(yearEnd, monthOfYearEnd, dayOfMonthEnd);
         toDateStr = Utils.format(calendar.getTimeInMillis());
+
         restartLoader();
-        Log.d("range : ", "from: " + startDay + "-" + startMonth + "-" + startYear + " to : " + endDay + "-" + endMonth + "-" + endYear);
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        toggleNavigation.setPreviousActive();
     }
 
     @Override
@@ -268,8 +232,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         bundle.putString(FROM_DATE, fromDateStr);
         bundle.putString(TO_DATE, toDateStr);
         bundle.putString(ABBR, ((SpinnerModel) spinner.getSelectedItem()).getAbbr());
-        //bundle.putString(FROM_DATE, Utils.format((Long) fromDate.getTag()));
-        //bundle.putString(TO_DATE, Utils.format((Long) toDate.getTag()));
 
         return bundle;
     }
@@ -330,27 +292,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
                 errorView.setVisibility(View.VISIBLE);
                 break;
         }
-    }
-
-    private void showDialog(View view) {
-
-        long time = (long) view.getTag();
-
-        calendar.setTimeInMillis(time);
-
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(IS_LEFT_BUTTON, view.getId() == R.id.from_date);
-
-        DatePickerDialog pickerDialog = DatePickerDialog.newInstance(
-                RatesGraphicFragment.this,
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        );
-
-        pickerDialog.setThemeDark(true);
-        pickerDialog.setArguments(bundle);
-        pickerDialog.show(getActivity().getFragmentManager(), "Datepickerdialog");
     }
 
     private class InstallAdapter extends AdapterDataAsync {
