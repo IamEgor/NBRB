@@ -46,7 +46,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         AdapterView.OnItemSelectedListener,
         ToggleNavigation.OnChoose,
         DatePickerDialog.OnDateSetListener,
-        DialogInterface.OnCancelListener{
+        DialogInterface.OnCancelListener {
 
     public static final String ACTION = App.getContext().getPackageName();
 
@@ -123,6 +123,19 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         rootView.findViewById(R.id.retry_btn).setOnClickListener((v -> restartLoader()));
 
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        DatePickerDialog dpd = (DatePickerDialog) getActivity()
+                .getFragmentManager()
+                .findFragmentByTag("Datepickerdialog");
+
+        if (dpd != null)
+            dpd.setOnDateSetListener(this);
+
     }
 
     @Override

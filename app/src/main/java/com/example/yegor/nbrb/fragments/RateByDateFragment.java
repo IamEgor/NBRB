@@ -26,7 +26,7 @@ import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
-import com.example.yegor.nbrb.views.SublimePickerFragment;
+import com.example.yegor.nbrb.views.SublimePickerDialog;
 import com.example.yegor.nbrb.views.Validator;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
@@ -35,7 +35,7 @@ import org.ksoap2.transport.HttpResponseException;
 import java.util.Calendar;
 
 public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDateModel> implements
-        SublimePickerFragment.Callback {
+        SublimePickerDialog.Callback {
 
     private static final int LOADER_1 = 1;
     private static final int LOADER_2 = 2;
@@ -93,8 +93,8 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
                     if (validator.getResult() == Validator.VALID)
                         Utils.setCalendar(calendar, editText.getText().toString());
 
-                    SublimePickerFragment pickerFrag = new SublimePickerFragment();
-                    pickerFrag.setCallback(RateByDateFragment.this);
+                    SublimePickerDialog pickerFrag = new SublimePickerDialog();
+                    pickerFrag.setCallback(this);
 
                     SublimeOptions options = new SublimeOptions();
                     int displayOptions = 0;
@@ -135,6 +135,18 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         (new InstallAdapter()).execute();
 
         return rootView;
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        SublimePickerDialog dpd = (SublimePickerDialog) getFragmentManager()
+                .findFragmentByTag("SUBLIME_PICKER");
+
+        if (dpd != null)
+            dpd.setCallback(this);
 
     }
 

@@ -18,7 +18,7 @@ import java.text.DateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 
-public class SublimePickerFragment extends DialogFragment {
+public class SublimePickerDialog extends DialogFragment {
     // Date & Time formatter used for formatting
     // text on the switcher button
     DateFormat mDateFormatter, mTimeFormatter;
@@ -58,7 +58,7 @@ public class SublimePickerFragment extends DialogFragment {
         // to supply custom formatters.
     };
 
-    public SublimePickerFragment() {
+    public SublimePickerDialog() {
         // Initialize formatters
         mDateFormatter = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault());
         mTimeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.getDefault());
