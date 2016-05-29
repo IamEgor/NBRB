@@ -29,10 +29,22 @@ public class SpinnerAdapter extends ArrayAdapter<SpinnerModel> {
     public View getCustomView(int position, View convertView,
                               ViewGroup parent) {
 
-        TextView name = (TextView) inflate(R.layout.item_dropdown_spinner, parent);
-        name.setText(models.get(position).getName());
+        SpinnerModel model = models.get(position);
+        View rowView = convertView;
+        ViewHolder holder;
 
-        return name;
+        if (rowView == null) {
+            rowView = inflate(R.layout.item_dropdown_spinner, parent);
+            holder = new ViewHolder(rowView);
+            rowView.setTag(holder);
+        } else {
+            holder = (ViewHolder) rowView.getTag();
+        }
+
+        holder.setName(model.getName());
+        holder.setEndDate(model.getDateEndStr());
+
+        return rowView;
     }
 
     @Override
@@ -60,6 +72,29 @@ public class SpinnerAdapter extends ArrayAdapter<SpinnerModel> {
                 return i;
 
         throw new RuntimeException();
+    }
+
+    static class ViewHolder {
+
+        private TextView name;
+        private TextView endDate;
+
+        public ViewHolder() {
+        }
+
+        public ViewHolder(View rowView) {
+            name = (TextView) rowView.findViewById(R.id.name);
+            endDate = (TextView) rowView.findViewById(R.id.end_date);
+        }
+
+        public void setName(String name) {
+            this.name.setText(name);
+        }
+
+        public void setEndDate(String endDate) {
+            this.endDate.setText(endDate.isEmpty() ? endDate : String.format("Till %s", endDate));
+        }
+
     }
 
 }

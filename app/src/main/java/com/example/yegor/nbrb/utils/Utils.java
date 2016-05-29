@@ -82,7 +82,7 @@ public final class Utils {
                 calendar2.get(Calendar.MONTH),
                 calendar2.get(Calendar.DAY_OF_MONTH));
 
-        calendar1.roll(Calendar.DATE, 1);
+        calendar1.roll(Calendar.DATE, 2);
         calendar1.add(Calendar.MILLISECOND, -1);
 
         return calendar1.getTimeInMillis();

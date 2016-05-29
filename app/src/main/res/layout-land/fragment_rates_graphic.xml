@@ -3,6 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <include
+        layout="@layout/include_error_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -23,8 +29,6 @@
             android:layout_above="@+id/buttons"
             android:layout_below="@+id/progress" />
 
-        <include layout="@layout/include_error_view" />
-
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/fullscreen"
             android:layout_width="wrap_content"
@@ -38,23 +42,11 @@
             android:tint="@color/colorAccent"
             android:visibility="invisible" />
 
-
         <LinearLayout
             android:id="@+id/buttons"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_alignParentBottom="true">
-
-            <!--
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/from_date"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/from_date"
-                android:textAllCaps="false" />
-                -->
 
             <com.toptoche.searchablespinnerlibrary.SearchableSpinner
                 android:id="@+id/pick_currency"
@@ -68,17 +60,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="2" />
-
-            <!--
-            <android.support.v7.widget.AppCompatButton
-                android:id="@+id/to_date"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/to_date"
-                android:textAllCaps="false" />
-                -->
 
         </LinearLayout>
 

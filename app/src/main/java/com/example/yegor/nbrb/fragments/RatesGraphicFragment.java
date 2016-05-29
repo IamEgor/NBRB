@@ -131,7 +131,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
         DatePickerDialog dpd = (DatePickerDialog) getActivity()
                 .getFragmentManager()
-                .findFragmentByTag("Datepickerdialog");
+                .findFragmentByTag(getString(R.string.range_picker_dialog));
 
         if (dpd != null)
             dpd.setOnDateSetListener(this);
@@ -176,7 +176,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     @Override
     public void choose(int position) {
-        //TODO только при измении позиции
         switch (position) {
             case 0:
                 calendar = Calendar.getInstance();
@@ -211,7 +210,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
                 );
                 dpd.setOnCancelListener(this);
 
-                dpd.show(getActivity().getFragmentManager(), "Datepickerdialog");
+                dpd.show(getActivity().getFragmentManager(), getString(R.string.range_picker_dialog));
 
                 return;
         }

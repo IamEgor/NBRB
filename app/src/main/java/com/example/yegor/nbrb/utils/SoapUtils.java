@@ -32,25 +32,22 @@ public final class SoapUtils {
 
 
     private static final String METHOD_NAME = "ExRatesDaily2";
-    private static final String SOAP_ACTION = "http://www.nbrb.by/ExRatesDaily2";
+    private static final String SOAP_ACTION = NAMESPACE + METHOD_NAME; //"http://www.nbrb.by/ExRatesDaily2";
     private static final String PROPERTY = "onDate";
 
-
     private static final String METHOD_NAME2 = "ExRatesDyn";
-    private static final String SOAP_ACTION2 = "http://www.nbrb.by/ExRatesDyn";
+    private static final String SOAP_ACTION2 = NAMESPACE + METHOD_NAME2;//"http://www.nbrb.by/ExRatesDyn";
     private static final String PROPERTY_CUR_ID = "curId";
     private static final String PROPERTY_FROM_DATE = "fromDate";
     private static final String PROPERTY_TO_DATE = "toDate";
 
-
     private static final String METHOD_NAME3 = "CurrenciesRef";
-    private static final String SOAP_ACTION3 = "http://www.nbrb.by/CurrenciesRef";
+    private static final String SOAP_ACTION3 = NAMESPACE + METHOD_NAME3;//"http://www.nbrb.by/CurrenciesRef";
     private static final String PROPERTY3 = "Periodicity";
 
-
     private static final String METHOD_NAME4 = "ExRatesMonthly2";
-    private static final String SOAP_ACTION4 = "http://www.nbrb.by/ExRatesMonthly2";
-    private static final String PROPERTY4 = "onDate";
+    private static final String SOAP_ACTION4 = NAMESPACE + METHOD_NAME4;//"http://www.nbrb.by/ExRatesMonthly2";
+    private static final String PROPERTY4 = PROPERTY;
 
     public static List<CurrencyModel> getCurrenciesList() throws IOException {
 
@@ -91,7 +88,6 @@ public final class SoapUtils {
 
     public static DailyExRatesOnDateModel getCurrencyMonthly(@NonNull String currency, @NonNull String time)
             throws IOException {
-
 
         Map<String, String> map = new HashMap<>();
         map.put(PROPERTY4, time);

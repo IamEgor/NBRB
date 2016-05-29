@@ -109,7 +109,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
                     pickerFrag.setArguments(bundle);
 
                     pickerFrag.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
-                    pickerFrag.show(getFragmentManager(), "SUBLIME_PICKER");
+                    pickerFrag.show(getFragmentManager(), getString(R.string.date_picker_dialog));
 
                 }
         );
@@ -143,7 +143,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         super.onResume();
 
         SublimePickerDialog dpd = (SublimePickerDialog) getFragmentManager()
-                .findFragmentByTag("SUBLIME_PICKER");
+                .findFragmentByTag(getString(R.string.date_picker_dialog));
 
         if (dpd != null)
             dpd.setCallback(this);
@@ -221,8 +221,10 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         if (e instanceof ExchangeRateAssignsOnceInMonth) {
             restartLoader(LOADER_2);
             return;
-        } else if (e instanceof HttpResponseException)
+        } else if (e instanceof HttpResponseException) {
             errorMessage.setText("Wrong data input");
+        } else if (e instanceof NoDataFoundException)
+            errorMessage.setText(getString(R.string.no_rate_exception));
         else
             errorMessage.setText(e.getMessage());
 

@@ -28,6 +28,10 @@ public class SpinnerModel {
         return dateEnd;
     }
 
+    public String getDateEndStr() {
+        return dateEnd == -1 ? "" : Utils.format(dateEnd);
+    }
+
     @Override
     public String toString() {
 

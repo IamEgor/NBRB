@@ -56,7 +56,6 @@
 
     </LinearLayout>
 
-
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/find"
         android:layout_width="200dp"
@@ -64,7 +63,6 @@
         android:layout_gravity="center_horizontal"
         android:layout_margin="4dp"
         android:text="Find" />
-
 
     <FrameLayout
         android:layout_width="match_parent"

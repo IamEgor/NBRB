@@ -13,6 +13,7 @@ import java.io.IOException;
 
 public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
 
+    private ContentWrapper<T> data;
     private AbstractLoaderInterface<T> action;
 
     public AbstractLoader(Context context, AbstractLoaderInterface<T> action) {
@@ -46,6 +47,62 @@ public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
             return new ContentWrapper<>(data);
         else
             return new ContentWrapper<>(new NoDataFoundException());
+
+    }
+
+    @Override
+    public void deliverResult(ContentWrapper<T> data) {
+
+        if (isReset()) {
+            releaseResources(data);
+            return;
+        }
+
+        ContentWrapper<T> oldData = this.data;
+        this.data = data;
+
+        if (isStarted())
+            super.deliverResult(data);
+
+        if (oldData != null && oldData != data)
+            releaseResources(oldData);
+
+    }
+
+    @Override
+    protected void onStartLoading() {
+
+        if (data != null) {
+            deliverResult(data);
+        }
+
+    }
+
+    @Override
+    protected void onStopLoading() {
+        cancelLoad();
+    }
+
+    @Override
+    protected void onReset() {
+
+        onStopLoading();
+
+        if (data != null) {
+            releaseResources(data);
+            data = null;
+        }
+
+    }
+
+    @Override
+    public void onCanceled(ContentWrapper<T> data) {
+        super.onCanceled(data);
+
+        releaseResources(data);
+    }
+
+    private void releaseResources(ContentWrapper<T> data) {
 
     }
 
