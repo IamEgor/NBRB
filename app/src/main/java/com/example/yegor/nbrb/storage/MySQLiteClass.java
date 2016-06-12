@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
-import com.example.yegor.nbrb.utils.Utils;
+import com.example.yegor.nbrb.utils.DateUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -179,7 +179,7 @@ public class MySQLiteClass {
 
         cursor.close();
 
-        long specifiedDate = Utils.date2longUnSafe(dateString);
+        long specifiedDate = DateUtils.date2longSafe(dateString);
 
 
         if (dates.length == 1 && dates[0][dates.length] == -1)

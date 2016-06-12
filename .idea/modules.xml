@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/NBRB.iml" filepath="$PROJECT_DIR$/NBRB.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/materialdaterangepicker/materialdaterangepicker.iml" filepath="$PROJECT_DIR$/materialdaterangepicker/materialdaterangepicker.iml" />
     </modules>
   </component>
 </project>

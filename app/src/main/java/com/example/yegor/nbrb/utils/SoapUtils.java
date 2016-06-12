@@ -110,7 +110,7 @@ public final class SoapUtils {
         List<DailyExRatesOnDateModel> list = new ArrayList<>(16);
 
         Map<String, String> map = new HashMap<>();
-        map.put(PROPERTY, Utils.format((Calendar.getInstance().getTimeInMillis())));
+        map.put(PROPERTY, DateUtils.format((Calendar.getInstance().getTimeInMillis())));
 
         SoapObject response = getResponse(new RequestProps(METHOD_NAME, SOAP_ACTION, map));
         SoapObject dailyExRatesOnDate;

@@ -2,7 +2,7 @@ package com.example.yegor.nbrb.models;
 
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
-import com.example.yegor.nbrb.utils.Utils;
+import com.example.yegor.nbrb.utils.DateUtils;
 
 public class SpinnerModel {
 
@@ -29,7 +29,7 @@ public class SpinnerModel {
     }
 
     public String getDateEndStr() {
-        return dateEnd == -1 ? "" : Utils.format(dateEnd);
+        return dateEnd == -1 ? "" : DateUtils.format(dateEnd);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class SpinnerModel {
         if (dateEnd == -1)
             return String.format(App.getContext().getString(R.string.searchable_spinner_item_text1), abbr, name);
         else
-            return String.format(App.getContext().getString(R.string.searchable_spinner_item_text2), abbr, name, Utils.format(dateEnd));
+            return String.format(App.getContext().getString(R.string.searchable_spinner_item_text2), abbr, name, DateUtils.format(dateEnd));
 
     }
 

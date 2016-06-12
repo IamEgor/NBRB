@@ -45,13 +45,14 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
     }
 
     protected void restartLoader(int loaderId) {
+        /*
         Bundle bundle  =getBundleArgs();
         for (String key : bundle.keySet()) {
             Object value = bundle.get(key);
             Utils.logT("[restartLoader]", String.format("%s %s (%s)", key,
                     value.toString(), value.getClass().getName()));
         }
-
+        */
         getActivity().getSupportLoaderManager()
                 .restartLoader(loaderId, getBundleArgs(), this)
                 .forceLoad();

@@ -22,12 +22,23 @@
             android:indeterminate="true"
             android:visibility="invisible" />
 
+        <!--
+        <include
+            android:id="@+id/tests"
+            layout="@layout/tests"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/progress" />
+            -->
+
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/line_chart"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/pick_currency"
-            android:layout_below="@+id/progress" />
+            android:layout_below="@+id/progress"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp" />
 
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/fullscreen"

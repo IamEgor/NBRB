@@ -4,6 +4,7 @@ import android.support.annotation.IntDef;
 import android.widget.EditText;
 
 import com.example.yegor.nbrb.R;
+import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.Utils;
 
 import java.lang.annotation.Retention;
@@ -54,11 +55,11 @@ public class Validator {
             if (!s.matches(Utils.getString(R.string.input_date_pattern_numbers)))
                 return INVALID_FORMAT;
 
-            long date2long = Utils.date2long(s);
+            long date2long = DateUtils.date2long(s);
 
-            if (date2long > Utils.getEdgeTime()) {
+            if (date2long > DateUtils.getEdgeTime()) {
                 return TOO_EARLY_YET;
-            } else if (date2long < Utils.START_DATE)
+            } else if (date2long < DateUtils.START_DATE)
                 return TOO_OLD_DATE;
             else
                 return VALID;

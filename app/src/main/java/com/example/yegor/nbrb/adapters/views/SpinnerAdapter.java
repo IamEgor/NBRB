@@ -1,4 +1,4 @@
-package com.example.yegor.nbrb.adapters;
+package com.example.yegor.nbrb.adapters.views;
 
 import android.content.Context;
 import android.support.annotation.LayoutRes;

@@ -18,11 +18,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.borax12.materialdaterangepicker.date.DatePickerDialog;
+import com.example.yegor.materialdaterangepicker.date.DatePickerDialog;
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.activities.MainActivity;
-import com.example.yegor.nbrb.adapters.SpinnerAdapter;
+import com.example.yegor.nbrb.adapters.views.ChartAdapter;
+import com.example.yegor.nbrb.adapters.views.SpinnerAdapter;
+import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.loaders.AdapterDataAsync;
@@ -31,28 +33,37 @@ import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.ChartUtils;
+import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.Utils;
 import com.example.yegor.nbrb.views.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
+import com.toptoche.searchablespinnerlibrary.SearchableListDialog;
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
+
 
 public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implements
         View.OnClickListener,
         AdapterView.OnItemSelectedListener,
         ToggleNavigation.OnChoose,
         DatePickerDialog.OnDateSetListener,
-        DialogInterface.OnCancelListener {
+        DatePickerDialog.OnTabChanged,
+        DialogInterface.OnCancelListener,
+        ChartAdapter.OnChartSelect {
 
     public static final String ACTION = App.getContext().getPackageName();
 
     public static final String ABBR = "ABBR";
     public static final String FROM_DATE = "FROM_DATE";
     public static final String TO_DATE = "TO_DATE";
+
+    private static final int LOADER_1 = 1;
+    private static final int LOADER_2 = 2;
 
     private LineChart mChart;
     private ProgressBar loadingView;
@@ -62,20 +73,22 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     private SearchableSpinner spinner;
     private AppCompatImageButton fullscreen;
     private ToggleNavigation toggleNavigation;
+    private TextView selectedRate, selectedDate;
+
+    private SpinnerAdapter spinnerAdapter;
+    private ChartAdapter chartAdapter;
+
+    private DatePickerDialog dpd;
 
     private Calendar calendar;
-    private SpinnerAdapter spinnerAdapter;
-
     private String fromDateStr, toDateStr;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             String abbr = intent.getStringExtra(CurrencyModel.ABBR);
             spinner.setSelection(spinnerAdapter.getPosition(abbr));
             ((MainActivity) getActivity()).setCurrentItem(2, true);
-
         }
     };
 
@@ -85,9 +98,9 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     public RatesGraphicFragment() {
         calendar = Calendar.getInstance();
-        toDateStr = Utils.format(calendar.getTimeInMillis());
+        toDateStr = DateUtils.format(calendar.getTimeInMillis());
         calendar.add(Calendar.MONTH, -1);
-        fromDateStr = Utils.format(calendar.getTimeInMillis());
+        fromDateStr = DateUtils.format(calendar.getTimeInMillis());
     }
 
     @Nullable
@@ -103,6 +116,8 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         spinner = (SearchableSpinner) rootView.findViewById(R.id.pick_currency);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
         toggleNavigation = (ToggleNavigation) rootView.findViewById(R.id.toggle);
+        selectedRate = (TextView) rootView.findViewById(R.id.rate);
+        selectedDate = (TextView) rootView.findViewById(R.id.date);
 
         toggleNavigation.setParams(new ArrayList<ToggleNavigation.ButtonParam>() {{
             add(new ToggleNavigation.ButtonParam("Неделя", false, false));
@@ -120,7 +135,17 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
         (new InstallAdapter()).execute();
 
-        rootView.findViewById(R.id.retry_btn).setOnClickListener((v -> restartLoader()));
+        rootView.findViewById(R.id.retry_btn).setOnClickListener(this);
+        //rootView.findViewById(R.id.scale).setOnClickListener(this);
+        //rootView.findViewById(R.id.abbr).setOnClickListener(this);
+
+        dpd = DatePickerDialog.newInstance(this, 0, 0, 0);
+
+        dpd.setOnCancelListener(this);
+        dpd.setOnTabChanged(this);
+
+        chartAdapter = new ChartAdapter(mChart, this);
+        mChart.setOnChartValueSelectedListener(chartAdapter);
 
         return rootView;
     }
@@ -158,7 +183,18 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
                 Toast.makeText(getContext(), "Not yet", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.retry_btn:
-                restartLoader();
+                restartLoader(LOADER_1);
+                break;
+            case R.id.scale:
+            case R.id.abbr:
+                List<String> strings = new ArrayList<String>() {{
+                    add("sdsf");
+                    add("fdbe");
+                    add("trbhw");
+                    add("rthh");
+                }};
+                SearchableListDialog dialog = SearchableListDialog.newInstance(strings);
+                dialog.show(getActivity().getFragmentManager(), "fwewfwefwef");
                 break;
         }
 
@@ -166,7 +202,8 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        restartLoader();
+
+        restartLoader(LOADER_1);
     }
 
     @Override
@@ -177,46 +214,39 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     @Override
     public void choose(int position) {
         switch (position) {
-            case 0:
+            case 0://за неделю
                 calendar = Calendar.getInstance();
-                toDateStr = Utils.format(calendar.getTimeInMillis());
+                toDateStr = DateUtils.format(calendar.getTimeInMillis());
                 calendar.add(Calendar.WEEK_OF_YEAR, -1);
-                fromDateStr = Utils.format(calendar.getTimeInMillis());
+                calendar.add(Calendar.DATE, 1);
+                fromDateStr = DateUtils.format(calendar.getTimeInMillis());
+                dpd.setMinDate(DateUtils.getCalendar(DateUtils.START_DATE));
+                dpd.setMaxDate(DateUtils.getDateTomorrow());
                 break;
-            case 1:
+            case 1://за месяц
                 calendar = Calendar.getInstance();
-                toDateStr = Utils.format(calendar.getTimeInMillis());
+                toDateStr = DateUtils.format(calendar.getTimeInMillis());
                 calendar.add(Calendar.MONTH, -1);
-                fromDateStr = Utils.format(calendar.getTimeInMillis());
+                calendar.add(Calendar.DATE, 1);
+                fromDateStr = DateUtils.format(calendar.getTimeInMillis());
+                dpd.setMinDate(DateUtils.getCalendar(DateUtils.START_DATE));
+                dpd.setMaxDate(DateUtils.getDateTomorrow());
                 break;
-            case 2:
+            case 2://за год
                 calendar = Calendar.getInstance();
-                toDateStr = Utils.format(calendar.getTimeInMillis());
-                calendar.add(Calendar.YEAR, -1);
-                fromDateStr = Utils.format(calendar.getTimeInMillis());
+                toDateStr = DateUtils.format(calendar.getTimeInMillis());
+                calendar.add(Calendar.DATE, -364);//даже если високосный
+                fromDateStr = DateUtils.format(calendar.getTimeInMillis());
+                dpd.setMinDate(DateUtils.getCalendar(DateUtils.START_DATE));
+                dpd.setMaxDate(DateUtils.getDateTomorrow());
                 break;
-            case 3:
-                Calendar start = Utils.getCalendar(fromDateStr);
-                Calendar end = Utils.getCalendar(toDateStr);
-
-                DatePickerDialog dpd = DatePickerDialog.newInstance(
-                        this,
-                        start.get(Calendar.YEAR),
-                        start.get(Calendar.MONTH),
-                        start.get(Calendar.DAY_OF_MONTH),
-                        end.get(Calendar.YEAR),
-                        end.get(Calendar.MONTH),
-                        end.get(Calendar.DAY_OF_MONTH)
-                );
-                dpd.setOnCancelListener(this);
-
-                dpd.show(getActivity().getFragmentManager(), getString(R.string.range_picker_dialog));
-
+            case 3://за период
+                dpd.show(getActivity().getFragmentManager(), getString(R.string.range_picker_dialog),
+                        DateUtils.getCalendar(fromDateStr), DateUtils.getCalendar(toDateStr));
                 return;
         }
 
-        restartLoader();
-
+        restartLoader(LOADER_1);
     }
 
     @Override
@@ -224,16 +254,42 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
                           int yearEnd, int monthOfYearEnd, int dayOfMonthEnd) {
 
         GregorianCalendar calendar = new GregorianCalendar(year, monthOfYear, dayOfMonth);
-        fromDateStr = Utils.format(calendar.getTimeInMillis());
+        fromDateStr = DateUtils.format(calendar.getTimeInMillis());
         calendar = new GregorianCalendar(yearEnd, monthOfYearEnd, dayOfMonthEnd);
-        toDateStr = Utils.format(calendar.getTimeInMillis());
+        toDateStr = DateUtils.format(calendar.getTimeInMillis());
 
-        restartLoader();
+        restartLoader(LOADER_1);
     }
 
     @Override
     public void onCancel(DialogInterface dialog) {
         toggleNavigation.setPreviousActive();
+        dpd.setMinDate(DateUtils.getCalendar(DateUtils.START_DATE));
+        dpd.setMaxDate(DateUtils.getDateTomorrow());
+    }
+
+    @Override
+    public void onTabChanged(DatePickerDialog dialog, Calendar calendarStart, Calendar calendarEnd,
+                             boolean isStartPage) {
+
+        if (isStartPage) {
+            calendar.setTimeInMillis(calendarEnd.getTimeInMillis());
+            calendar.add(Calendar.DATE, -1);
+            dialog.setMaxDate(calendar);
+            dialog.setMinDate(DateUtils.getCalendar(DateUtils.START_DATE));
+        } else {
+            calendar.setTimeInMillis(calendarStart.getTimeInMillis());
+            calendar.add(Calendar.DATE, 1);
+            dialog.setMinDate(calendar);
+            dialog.setMaxDate(DateUtils.getDateTomorrow());
+        }
+
+    }
+
+    @Override
+    public void onChartValueSelected(String rate, String date) {
+        selectedRate.setText(rate);
+        selectedDate.setText(date);
     }
 
     @Override
@@ -265,24 +321,45 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
                 throw new NoDataFoundException();
             });
 
+        AbstractLoader<LineData> loader = null;
         setStatus(Status.LOADING);
 
-        return new AbstractLoader<>(getContext(), () -> {
-            // TODO: при изменинии curId валюты отбражать график или нет?
-            return ChartUtils.getChartContent(
-                    abbr, fromDate, toDate);
-        });
+        switch (id) {
+            case LOADER_1:
+                loader = new AbstractLoader<>(getContext(),
+                        () ->  ChartUtils.getChartContent1(abbr, fromDate, toDate));
+                break;
+
+            case LOADER_2:
+                loader = new AbstractLoader<>(getContext(),
+                        () ->  ChartUtils.getChartContent2(abbr, fromDate, toDate));
+                break;
+        }
+
+        return loader;
     }
 
     @Override
     protected void onDataReceived(LineData models) {
+        Utils.logT("onDataReceived", "expectedLength " + ChartUtils.expectedLength(fromDateStr, toDateStr));
+        Utils.logT("onDataReceived", "models.getXValCount().size() " + models.getYValCount());
+
+        Utils.logT("onDataReceived", "DataSets " + models.getDataSets().toString());
+        Utils.logT("onDataReceived", "XVals " + models.getXVals().toString());
+
+        chartAdapter.setDates(models.getXVals());
         ChartUtils.setUpChart(mChart, models);
         setStatus(Status.OK);
     }
 
     @Override
     protected void onFailure(Exception e) {
-        errorMessage.setText(e.getMessage());
+        if (e instanceof ExchangeRateAssignsOnceInMonth) {
+            restartLoader(LOADER_2);
+            return;
+        } else
+            errorMessage.setText(e.getMessage());
+
         setStatus(Status.FAILED);
     }
 

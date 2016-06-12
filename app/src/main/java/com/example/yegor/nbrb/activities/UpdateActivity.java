@@ -15,8 +15,8 @@ import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.storage.AppPrefs;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.SoapUtils;
-import com.example.yegor.nbrb.utils.Utils;
 
 import org.ksoap2.transport.HttpResponseException;
 
@@ -28,7 +28,7 @@ public class UpdateActivity extends AppCompatActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (!Utils.need2Update()) {
+        if (!DateUtils.need2Update()) {
             startActivity(new Intent(this, MainActivity.class));
             finish();
         }

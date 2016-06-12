@@ -1,5 +1,6 @@
 package com.example.yegor.nbrb.models;
 
+import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.Utils;
 
 import org.ksoap2.serialization.SoapObject;
@@ -116,7 +117,7 @@ public class CurrencyModel {
             return -1;
 
         try {
-            return Utils.date2long(s.substring(0, 10));
+            return DateUtils.date2long(s.substring(0, 10));
         } catch (ParseException e) {
             Utils.logT(CurrencyModel.class.getSimpleName(), s + " " + e.getMessage());
             throw new RuntimeException(e.getMessage());

@@ -15,7 +15,7 @@ import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
 import com.appeaser.sublimepickerlibrary.helpers.SublimeOptions;
 import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
 import com.example.yegor.nbrb.R;
-import com.example.yegor.nbrb.adapters.SpinnerAdapter;
+import com.example.yegor.nbrb.adapters.views.SpinnerAdapter;
 import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
@@ -24,6 +24,7 @@ import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
 import com.example.yegor.nbrb.views.SublimePickerDialog;
@@ -33,6 +34,8 @@ import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 import org.ksoap2.transport.HttpResponseException;
 
 import java.util.Calendar;
+
+import br.com.jansenfelipe.androidmask.MaskEditTextChangedListener;
 
 public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDateModel> implements
         SublimePickerDialog.Callback {
@@ -82,16 +85,21 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         name = (TextView) rootView.findViewById(R.id.name);
         abbr = (TextView) rootView.findViewById(R.id.abbr);
 
+        MaskEditTextChangedListener mask = new MaskEditTextChangedListener("####-##-##", editText);
+        editText.addTextChangedListener(mask);
+
         spinner.setTitle(getString(R.string.select_currency));
         spinner.setPositiveButton("OK");
 
         validator = new Validator(editText);
-        editText.setText(Utils.format(calendar.getTimeInMillis()));
+        editText.setText(DateUtils.format(calendar.getTimeInMillis()));
 
         rootView.findViewById(R.id.pick_date).setOnClickListener((view) -> {
 
-                    if (validator.getResult() == Validator.VALID)
-                        Utils.setCalendar(calendar, editText.getText().toString());
+                    if (validator.getResult() == Validator.VALID) {
+                        calendar.setTimeInMillis(DateUtils.date2longSafe(editText.getText().toString()));
+                    }
+                    //Utils.setCalendar(calendar, editText.getText().toString());
 
                     SublimePickerDialog pickerFrag = new SublimePickerDialog();
                     pickerFrag.setCallback(this);
@@ -153,7 +161,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     @Override
     public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
         inputLayout.setError(null);
-        editText.setText(Utils.format(selectedDate.getFirstDate().getTimeInMillis()));
+        editText.setText(DateUtils.format(selectedDate.getFirstDate().getTimeInMillis()));
     }
 
     @Override
@@ -197,7 +205,6 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
             case LOADER_2:
                 loader = new AbstractLoader<>(getContext(),
                         () -> SoapUtils.getCurrencyMonthly(currency, date));
-
                 break;
         }
 
@@ -222,7 +229,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
             restartLoader(LOADER_2);
             return;
         } else if (e instanceof HttpResponseException) {
-            errorMessage.setText("Wrong data input");
+            errorMessage.setText(R.string.fragment_by_date_wrong_input);
         } else if (e instanceof NoDataFoundException)
             errorMessage.setText(getString(R.string.no_rate_exception));
         else
