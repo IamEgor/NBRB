@@ -15,21 +15,25 @@ public class DateUtils {
     public static final long ONE_DAY = 24 * 60 * 60 * 1000L;
     public static final long WEEK_LENGTH = 7 * ONE_DAY;
 
-    private static final SimpleDateFormat format;
+    private static final SimpleDateFormat defaultFormat;
     private static final Calendar calendar;
-    private static final DateFormatSymbols myDateFormatSymbols;
+
+    private static final SimpleDateFormat formatWeekdayAndDate;
 
     static {
-        format = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        format.setLenient(false);
+        defaultFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        defaultFormat.setLenient(false);
         calendar = Calendar.getInstance();
-        myDateFormatSymbols = new DateFormatSymbols() {
-            @Override
-            public String[] getMonths() {
-                return new String[]{"января", "февраля", "марта", "апреля", "мая", "июня",
-                        "июля", "августа", "сентября", "октября", "ноября", "декабря"};
-            }
-        };
+
+        formatWeekdayAndDate = new SimpleDateFormat("EEE, dd MMMM",
+                new DateFormatSymbols() {
+                    @Override
+                    public String[] getMonths() {
+                        return new String[]{"января", "февраля", "марта", "апреля", "мая", "июня",
+                                "июля", "августа", "сентября", "октября", "ноября", "декабря"};
+                    }
+                });
+
     }
 
     public static boolean need2Update() {
@@ -45,16 +49,20 @@ public class DateUtils {
     }
 
     public static String format(long time) {
-        return format.format(time);
+        return defaultFormat.format(time);
+    }
+
+    public static String formatWeekdayAndDate(Calendar calendar) {
+        return formatWeekdayAndDate.format(calendar.getTimeInMillis());
     }
 
     public static long date2long(String date) throws ParseException {
-        return format.parse(date).getTime();
+        return defaultFormat.parse(date).getTime();
     }
 
     public static long date2longSafe(String date) {
         try {
-            return format.parse(date).getTime();
+            return defaultFormat.parse(date).getTime();
         } catch (ParseException e) {
             return -1;
         }

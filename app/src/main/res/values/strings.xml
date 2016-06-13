@@ -26,5 +26,7 @@
     <string name="date_picker_dialog">DATE_PICKER_DIALOG</string>
     <string name="range_picker_dialog">RANGE_PICKER_DIALOG</string>
     <string name="fragment_by_date_wrong_input">Wrong data input</string>
+    <string name="date_end">Till %s</string>
+    <string name="action_search">Search</string>
 
 </resources>

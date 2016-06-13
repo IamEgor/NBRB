@@ -14,6 +14,9 @@ import java.io.IOException;
 public abstract class AbstractRatesFragment<T> extends Fragment implements
         LoaderManager.LoaderCallbacks<ContentWrapper<T>> {
 
+    protected static final int LOADER_1 = 1;
+    protected static final int LOADER_2 = 2;
+
     public AbstractRatesFragment() {
     }
 
@@ -41,7 +44,7 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
     }
 
     protected void restartLoader() {
-        restartLoader(0);
+        restartLoader(LOADER_1);
     }
 
     protected void restartLoader(int loaderId) {

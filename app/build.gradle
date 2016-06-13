@@ -48,4 +48,6 @@ dependencies {
     compile 'com.appeaser.sublimepickerlibrary:sublimepickerlibrary:2.1.1'
     compile 'com.github.maarqin:androidmask:2.0.0'
     compile project(path: ':materialdaterangepicker')
+    compile 'com.prolificinteractive:material-calendarview:1.4.0'
+    compile 'com.dmitrymalkovich.android:progress-fab:1.6'
 }

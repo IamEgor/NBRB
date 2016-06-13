@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.TextUtils;
 
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.models.CurrencyModel;
@@ -77,11 +78,11 @@ public class MySQLiteClass {
 
     public List<SpinnerModel> getCurrenciesDescription() {
 
-        List<SpinnerModel> list = new ArrayList<>(64);
+        List<SpinnerModel> list = new ArrayList<>();
 
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
-                new String[]{CurrencyModel.ABBR, CurrencyModel.NAME, CurrencyModel.DATE_END},
+                new String[]{CurrencyModel.ABBR, CurrencyModel.NAME, CurrencyModel.SCALE, CurrencyModel.DATE_END},
                 null, null,
                 CurrencyModel.PARENT_ID, null,
                 CurrencyModel.NAME);
@@ -91,7 +92,8 @@ public class MySQLiteClass {
                 list.add(
                         new SpinnerModel(cursor.getString(0),
                                 cursor.getString(1),
-                                cursor.getLong(2)));
+                                cursor.getInt(2),
+                                cursor.getLong(3)));
 
             } while (cursor.moveToNext());
         }
@@ -102,25 +104,30 @@ public class MySQLiteClass {
 
     }
 
-/*
-    public SpinnerModel getSpinnerModelByAbbr(String abbr) {
+    public Cursor getCurrenciesDescriptionCursor() {
 
-        Cursor cursor = thisDataBase.query(
+        return thisDataBase.query(
                 CURRENCY_TABLE,
-                new String[]{CurrencyModel.NAME, CurrencyModel.DATE_END},
-                CurrencyModel.ABBR + " =? ",
-                new String[]{abbr},
-                null, null, null);
-
-        cursor.moveToFirst();
-
-        SpinnerModel model = new SpinnerModel(abbr, cursor.getString(0), cursor.getLong(1));
-
-        cursor.close();
-
-        return model;
+                new String[]{CurrencyModel.ID + " as _id", CurrencyModel.ABBR, CurrencyModel.NAME, CurrencyModel.DATE_END},
+                null, null,
+                CurrencyModel.PARENT_ID, null,
+                CurrencyModel.NAME);
     }
-*/
+
+    public Cursor getCurrenciesDescriptionCursor(String string) {
+
+        if (TextUtils.isEmpty(string))
+            return null;
+
+        return thisDataBase.query(
+                CURRENCY_TABLE,
+                new String[]{CurrencyModel.ID + " as _id", CurrencyModel.ABBR, CurrencyModel.NAME, CurrencyModel.DATE_END},
+                CurrencyModel.ABBR + " like('%?%') OR " + CurrencyModel.NAME + " like('%?%')",
+                new String[]{string},
+                CurrencyModel.PARENT_ID, null,
+                CurrencyModel.NAME);
+    }
+
     public CurrencyModel getCurrencyModelByAbbr(String abbr, String time) {
 
         Cursor cursor = thisDataBase.query(

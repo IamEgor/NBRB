@@ -62,9 +62,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     public static final String FROM_DATE = "FROM_DATE";
     public static final String TO_DATE = "TO_DATE";
 
-    private static final int LOADER_1 = 1;
-    private static final int LOADER_2 = 2;
-
     private LineChart mChart;
     private ProgressBar loadingView;
     private View errorView;
@@ -327,12 +324,12 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         switch (id) {
             case LOADER_1:
                 loader = new AbstractLoader<>(getContext(),
-                        () ->  ChartUtils.getChartContent1(abbr, fromDate, toDate));
+                        () -> ChartUtils.getChartContent1(abbr, fromDate, toDate));
                 break;
 
             case LOADER_2:
                 loader = new AbstractLoader<>(getContext(),
-                        () ->  ChartUtils.getChartContent2(abbr, fromDate, toDate));
+                        () -> ChartUtils.getChartContent2(abbr, fromDate, toDate));
                 break;
         }
 
@@ -389,7 +386,8 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         protected void onPostExecute(SpinnerAdapter adapter) {
             spinnerAdapter = adapter;
             spinner.setAdapter(spinnerAdapter);
-            spinner.setSelection(spinnerAdapter.getPosition(new SpinnerModel("USD", "Доллар США", -1)));
+            spinner.setSelection(0);
+            //spinner.setSelection(spinnerAdapter.getPosition(new SpinnerModel("USD", "Доллар США", -1)));
         }
 
     }

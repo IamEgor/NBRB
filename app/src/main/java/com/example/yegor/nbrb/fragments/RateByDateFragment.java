@@ -1,25 +1,31 @@
 package com.example.yegor.nbrb.fragments;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.DialogFragment;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.appeaser.sublimepickerlibrary.datepicker.SelectedDate;
-import com.appeaser.sublimepickerlibrary.helpers.SublimeOptions;
-import com.appeaser.sublimepickerlibrary.recurrencepicker.SublimeRecurrencePicker;
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.example.yegor.nbrb.R;
-import com.example.yegor.nbrb.adapters.views.SpinnerAdapter;
+import com.example.yegor.nbrb.activities.ChooseCurrencyActivity;
+import com.example.yegor.nbrb.adapters.views.YearSelectorAdapter;
 import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
-import com.example.yegor.nbrb.loaders.AdapterDataAsync;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
@@ -27,36 +33,36 @@ import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
-import com.example.yegor.nbrb.views.SublimePickerDialog;
-import com.example.yegor.nbrb.views.Validator;
-import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 
 import org.ksoap2.transport.HttpResponseException;
 
 import java.util.Calendar;
-
-import br.com.jansenfelipe.androidmask.MaskEditTextChangedListener;
+import java.util.List;
 
 public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDateModel> implements
-        SublimePickerDialog.Callback {
+        OnDateSelectedListener {
 
-    private static final int LOADER_1 = 1;
-    private static final int LOADER_2 = 2;
-
+    private static final int REQUEST_CODE = 1;
     private static final String CURRENCY = "CURRENCY";
     private static final String DATE = "DATE";
 
-    private SearchableSpinner spinner;
-    private EditText editText;
-    private TextInputLayout inputLayout;
+    private View loadingView;
 
-    private View cv, loadingView;
-    private TextView errorMessage;
+    private TextView rate, abbr, scale;
+    private RelativeLayout rateContainer;
+    private ProgressBar progress;
 
-    private TextView abbr, name, scale, rate;
+    private CoordinatorLayout coordinatorLayout;
+    private MaterialCalendarView calendarView;
+    private ListView yearsList;
+    private TextView dateText, yearsText;
 
+    private YearSelectorAdapter adapter;
     private Calendar calendar;
-    private Validator validator;
+    private SpinnerModel spinnerModel;
 
     public RateByDateFragment() {
         calendar = Calendar.getInstance();
@@ -72,109 +78,102 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
         View rootView = inflater.inflate(R.layout.fragment_rates_by_date, container, false);
 
-        spinner = (SearchableSpinner) rootView.findViewById(R.id.pick_currency);
-        editText = (EditText) rootView.findViewById(R.id.date);
-        inputLayout = (TextInputLayout) rootView.findViewById(R.id.inputLayout);
-
-        cv = rootView.findViewById(R.id.cv);
+        coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.main_content);
         loadingView = rootView.findViewById(R.id.loading_view);
-        errorMessage = (TextView) rootView.findViewById(R.id.error_message);
-
+        rateContainer = (RelativeLayout) rootView.findViewById(R.id.container13);
+        progress = (ProgressBar) rootView.findViewById(R.id.progress);
         rate = (TextView) rootView.findViewById(R.id.rate);
-        scale = (TextView) rootView.findViewById(R.id.scale);
-        name = (TextView) rootView.findViewById(R.id.name);
         abbr = (TextView) rootView.findViewById(R.id.abbr);
+        scale = (TextView) rootView.findViewById(R.id.scale);
+        calendarView = (MaterialCalendarView) rootView.findViewById(R.id.calendar_view);
+        yearsList = (ListView) rootView.findViewById(R.id.year_list);
+        dateText = (TextView) rootView.findViewById(R.id.date_text);
+        yearsText = (TextView) rootView.findViewById(R.id.year_text);
 
-        MaskEditTextChangedListener mask = new MaskEditTextChangedListener("####-##-##", editText);
-        editText.addTextChangedListener(mask);
 
-        spinner.setTitle(getString(R.string.select_currency));
-        spinner.setPositiveButton("OK");
+        progress.getIndeterminateDrawable()
+                .setColorFilter(Utils.getColor(R.color.colorPrimaryLight), PorterDuff.Mode.MULTIPLY);
+        calendarView.setDateSelected(Calendar.getInstance(), true);
+        calendarView.state().edit().setMaximumDate(DateUtils.getDateTomorrow()).commit();
 
-        validator = new Validator(editText);
-        editText.setText(DateUtils.format(calendar.getTimeInMillis()));
 
-        rootView.findViewById(R.id.pick_date).setOnClickListener((view) -> {
+        List<String> list = Stream
+                .range(1997, Calendar.getInstance().get(Calendar.YEAR) + 1)
+                .map(String::valueOf)
+                .collect(Collectors.<String>toList());
 
-                    if (validator.getResult() == Validator.VALID) {
-                        calendar.setTimeInMillis(DateUtils.date2longSafe(editText.getText().toString()));
-                    }
-                    //Utils.setCalendar(calendar, editText.getText().toString());
+        adapter = new YearSelectorAdapter(getActivity(), list);
+        yearsList.setAdapter(adapter);
+        int position = adapter.getPosition(String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
+        yearsList.setSelection(position);
+        yearsList.setSelection(position);
 
-                    SublimePickerDialog pickerFrag = new SublimePickerDialog();
-                    pickerFrag.setCallback(this);
 
-                    SublimeOptions options = new SublimeOptions();
-                    int displayOptions = 0;
-
-                    displayOptions |= SublimeOptions.ACTIVATE_DATE_PICKER;
-                    options.setPickerToShow(SublimeOptions.Picker.DATE_PICKER);
-                    options.setDisplayOptions(displayOptions);
-                    options.setDateParams(calendar);
-
-                    Bundle bundle = new Bundle();
-                    bundle.putParcelable("SUBLIME_OPTIONS", options);
-                    pickerFrag.setArguments(bundle);
-
-                    pickerFrag.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
-                    pickerFrag.show(getFragmentManager(), getString(R.string.date_picker_dialog));
-
-                }
-        );
-
-        rootView.findViewById(R.id.find).setOnClickListener(v -> {
-
-            int result = validator.getResult();
-
-            switch (result) {
-                case Validator.VALID:
-                    restartLoader(LOADER_1);
-                    inputLayout.setError(null);
-                    Utils.hideKeyboard(getActivity());
-                    break;
-                case Validator.INVALID_FORMAT:
-                case Validator.TOO_EARLY_YET:
-                case Validator.TOO_OLD_DATE:
-                    inputLayout.setError(Validator.getMessage(result));
-            }
-
+        dateText.setOnClickListener((view) -> showCalendar(true));
+        yearsText.setOnClickListener((view) -> showCalendar(false));
+        rateContainer.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
+            startActivityForResult(intent, REQUEST_CODE);
+        });
+        yearsList.setOnItemClickListener((parent, view, pos, arg3) -> {
+            adapter.setSelection(pos);
+            calendar.set(Calendar.YEAR, Integer.parseInt(adapter.getText(pos)));
+            yearsText.setText(adapter.getText(pos));
+            calendarView.setCurrentDate(calendar);
+            //TODO исправить
+            calendarView.goToPrevious();
+            calendarView.goToPrevious();
         });
 
-        (new InstallAdapter()).execute();
+
+        calendarView.setOnDateChangedListener(this);
 
         return rootView;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+
+            spinnerModel = data.getParcelableExtra(ChooseCurrencyFragment.EXTRA);
+            abbr.setText(spinnerModel.getAbbr());
+            scale.setText(String.valueOf(spinnerModel.getScale()));
+
+            if (spinnerModel.getDateEnd() != -1)
+                calendarView.state()
+                        .edit()
+                        .setMaximumDate(DateUtils.getCalendar(spinnerModel.getDateEnd()))
+                        .commit();
+
+            restartLoader(LOADER_1);
+
+        }
 
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        SublimePickerDialog dpd = (SublimePickerDialog) getFragmentManager()
-                .findFragmentByTag(getString(R.string.date_picker_dialog));
-
-        if (dpd != null)
-            dpd.setCallback(this);
-
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser)
+            restartLoader(LOADER_1);
+        Utils.logT("setUserVisibleHint", "RateByDateFragment.setUserVisibleHint() " + isVisibleToUser);
     }
 
     @Override
-    public void onDateTimeRecurrenceSet(SelectedDate selectedDate, int hourOfDay, int minute, SublimeRecurrencePicker.RecurrenceOption recurrenceOption, String recurrenceRule) {
-        inputLayout.setError(null);
-        editText.setText(DateUtils.format(selectedDate.getFirstDate().getTimeInMillis()));
-    }
-
-    @Override
-    public void onCancelled() {
-
+    public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+        calendar = date.getCalendar();
+        dateText.setText(DateUtils.formatWeekdayAndDate(date.getCalendar()));
+        yearsText.setText(String.valueOf(date.getYear()));
     }
 
     @Override
     protected Bundle getBundleArgs() {
 
         Bundle bundle = new Bundle();
-        bundle.putString(CURRENCY, ((SpinnerModel) spinner.getSelectedItem()).getAbbr());
-        bundle.putString(DATE, editText.getText().toString());
+        bundle.putString(CURRENCY, abbr.getText().toString());
+        bundle.putString(DATE, DateUtils.format(calendar));
 
         return bundle;
     }
@@ -215,7 +214,8 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     @Override
     protected void onDataReceived(DailyExRatesOnDateModel model) {
 
-        name.setText(model.getQuotName());
+        rate.setPaintFlags(rate.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+
         abbr.setText(model.getAbbreviation());
         rate.setText(String.valueOf(model.getRate()));
         scale.setText(String.valueOf(model.getScale()));
@@ -225,15 +225,28 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
     @Override
     protected void onFailure(Exception e) {
+        Snackbar snackbar;
         if (e instanceof ExchangeRateAssignsOnceInMonth) {
             restartLoader(LOADER_2);
             return;
         } else if (e instanceof HttpResponseException) {
-            errorMessage.setText(R.string.fragment_by_date_wrong_input);
-        } else if (e instanceof NoDataFoundException)
-            errorMessage.setText(getString(R.string.no_rate_exception));
-        else
-            errorMessage.setText(e.getMessage());
+            snackbar = Snackbar
+                    .make(coordinatorLayout,
+                            R.string.fragment_by_date_wrong_input,
+                            Snackbar.LENGTH_LONG);
+        } else if (e instanceof NoDataFoundException) {
+            snackbar = Snackbar
+                    .make(coordinatorLayout,
+                            R.string.no_rate_exception,
+                            Snackbar.LENGTH_LONG);
+        } else
+            snackbar = Snackbar
+                    .make(coordinatorLayout,
+                            e.getMessage(),
+                            Snackbar.LENGTH_LONG)
+                    .setAction("Retry", view -> restartLoader(LOADER_1));
+
+        snackbar.show();
 
         setStatus(Status.FAILED);
     }
@@ -242,33 +255,25 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     protected void setStatus(Status status) {
         switch (status) {
             case LOADING:
-                cv.setVisibility(View.GONE);
                 loadingView.setVisibility(View.VISIBLE);
-                errorMessage.setVisibility(View.GONE);
+                rate.setPaintFlags(rate.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 break;
-            case OK:
-                cv.setVisibility(View.VISIBLE);
+            default:
                 loadingView.setVisibility(View.GONE);
-                errorMessage.setVisibility(View.GONE);
-                break;
-            case FAILED:
-                cv.setVisibility(View.GONE);
-                loadingView.setVisibility(View.GONE);
-                errorMessage.setVisibility(View.VISIBLE);
-                break;
-            case NONE:
-                cv.setVisibility(View.GONE);
-                loadingView.setVisibility(View.GONE);
-                errorMessage.setVisibility(View.GONE);
         }
+
     }
 
-    private class InstallAdapter extends AdapterDataAsync {
-        @Override
-        protected void onPostExecute(SpinnerAdapter adapter) {
-            spinner.setAdapter(adapter);
-            restartLoader(LOADER_1);
+    void showCalendar(boolean isCalendar) {
+
+        if (isCalendar) {
+            calendarView.setVisibility(View.VISIBLE);
+            yearsList.setVisibility(View.INVISIBLE);
+        } else {
+            calendarView.setVisibility(View.INVISIBLE);
+            yearsList.setVisibility(View.VISIBLE);
         }
+
     }
 
 }

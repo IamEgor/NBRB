@@ -8,9 +8,9 @@ import com.example.yegor.nbrb.fragments.CurrentRatesFragment;
 import com.example.yegor.nbrb.fragments.RateByDateFragment;
 import com.example.yegor.nbrb.fragments.RatesGraphicFragment;
 
-public class SectionsPagerAdapter extends FragmentPagerAdapter {
+public class MainPagerAdapter extends FragmentPagerAdapter {
 
-    public SectionsPagerAdapter(FragmentManager fm) {
+    public MainPagerAdapter(FragmentManager fm) {
         super(fm);
     }
 

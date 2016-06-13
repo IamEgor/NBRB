@@ -40,6 +40,8 @@ public class Test {
 
         System.out.println(f(fromDate, toDate, list));
 
+        Calendar calendar = Calendar.getInstance();
+        System.out.println("Calendar.YEAR = " + calendar.get(Calendar.YEAR));
 
     }
 

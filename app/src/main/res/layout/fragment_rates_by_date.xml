@@ -1,91 +1,198 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingTop="16dp">
+    android:orientation="vertical">
 
-    <com.toptoche.searchablespinnerlibrary.SearchableSpinner
-        android:id="@+id/pick_currency"
+    <View
+        android:id="@+id/shadow"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp" />
+        android:layout_height="@dimen/shadow_height"
+        android:background="@drawable/toolbar_dropshadow"
+        app:layout_behavior="com.example.yegor.nbrb.views.TabPagerShadowBehavior" />
 
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:id="@+id/container1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp">
+        android:layout_below="@+id/shadow">
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/inputLayout"
-            style="@style/ErrorStyle"
+        <RelativeLayout
+            android:id="@+id/container11"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/pick_date"
-            android:layout_toStartOf="@+id/pick_date"
-            app:errorEnabled="true">
+            android:background="@color/colorPrimaryDark"
+            android:padding="16dp">
 
-            <EditText
-                android:id="@+id/date"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="BLR"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/scale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:hint="@string/input_date_pattern"
-                android:inputType="number"
-                android:maxLength="10" />
+                android:text="1 000"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
 
-        </android.support.design.widget.TextInputLayout>
+        </RelativeLayout>
 
-        <android.support.v7.widget.AppCompatImageButton
-            android:id="@+id/pick_date"
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:id="@+id/container12"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_date_range_black_24dp" />
+            android:layout_below="@+id/container11"
+            android:background="@color/colorPrimary">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginStart="16dp"
+                android:background="@android:color/white" />
+
+        </FrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/container13"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/container12"
+            android:background="@color/colorPrimary"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/abbr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="USD"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/rate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:text="19 065"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+        <com.dmitrymalkovich.android.ProgressFloatingActionButton
+            android:id="@+id/loading_view"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_centerInParent="true"
+            android:clickable="true">
+
+            <android.support.design.widget.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_cloud_download_black_24dp"
+                android:tint="@android:color/white" />
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="@style/Widget.AppCompat.ProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </com.dmitrymalkovich.android.ProgressFloatingActionButton>
 
     </RelativeLayout>
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/find"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="8dp"
-        android:text="Find" />
-
     <FrameLayout
+        android:id="@+id/container2"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:layout_margin="8dp">
-
-        <include
-            layout="@layout/item_current_rates"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center" />
-
-        <com.wang.avi.AVLoadingIndicatorView
-            android:id="@+id/loading_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            android:visibility="gone"
-            app:indicator="BallClipRotatePulse"
-            app:indicator_color="@color/colorAccent" />
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/container1"
+        android:layout_marginTop="2dp"
+        android:background="@color/colorAccent">
 
         <TextView
-            android:id="@+id/error_message"
+            android:id="@+id/date_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="No connection"
-            android:visibility="gone" />
+            android:paddingBottom="5dp"
+            android:paddingEnd="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="5dp"
+            android:text="19 сентября"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@android:color/white" />
 
     </FrameLayout>
 
-</LinearLayout>
+    <FrameLayout
+        android:id="@+id/container3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/container2"
+        android:background="@color/colorAccent">
+
+        <TextView
+            android:id="@+id/year_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:paddingEnd="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="5dp"
+            android:text="2016"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@android:color/white" />
+
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/container4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/container3"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="2dp">
+
+        <com.prolificinteractive.materialcalendarview.MaterialCalendarView
+            android:id="@+id/calendar_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:visibility="visible"
+            app:mcv_dateTextAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Large"
+            app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+        <ListView
+            android:id="@+id/year_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:choiceMode="singleChoice"
+            android:visibility="invisible">
+
+        </ListView>
+
+    </RelativeLayout>
+
+</RelativeLayout>
