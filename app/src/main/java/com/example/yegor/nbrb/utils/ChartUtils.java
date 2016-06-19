@@ -10,7 +10,6 @@ import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
-import com.example.yegor.nbrb.views.MyMarkerView;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -162,8 +161,8 @@ public final class ChartUtils {
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.TOP);
         mChart.getAxisRight().setEnabled(false);
 
-        MyMarkerView mv = new MyMarkerView(App.getContext(), R.layout.custom_marker_view, content.getXVals());
-        mChart.setMarkerView(mv);
+        //MyMarkerView mv = new MyMarkerView(App.getContext(), R.layout.custom_marker_view, content.getXVals());
+        //mChart.setMarkerView(mv);
 
     }
 

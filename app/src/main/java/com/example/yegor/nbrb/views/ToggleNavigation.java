@@ -102,7 +102,7 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         if (onChoose == null)
             throw new UnsupportedOperationException("You must implement callback operation");
 
-        onChoose.choose(getPositionById(v.getId()));
+        onChoose.onToggleChoose(getPositionById(v.getId()));
     }
 
     private int getPositionById(int id) {
@@ -180,7 +180,7 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
     }
 
     public interface OnChoose {
-        void choose(int position);
+        void onToggleChoose(int position);
     }
 
 }

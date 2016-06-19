@@ -114,6 +114,8 @@ public class ChooseCurrencyAdapter extends RecyclerView.Adapter<ChooseCurrencyAd
             if (model.getDateEnd() != -1)
                 dateEnd.setText(String.format(Utils.getString(R.string.date_end),
                         DateUtils.format(model.getDateEnd())));
+            else
+                dateEnd.setText("");
 
             itemView.setOnClickListener(v -> listener.onItemClick(model));
         }

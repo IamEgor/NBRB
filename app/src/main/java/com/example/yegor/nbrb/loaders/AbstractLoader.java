@@ -54,8 +54,8 @@ public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
     public void deliverResult(ContentWrapper<T> data) {
 
         if (isReset()) {
-            releaseResources(data);
-            return;
+            if (data != null)
+                releaseResources(data);
         }
 
         ContentWrapper<T> oldData = this.data;
@@ -64,7 +64,7 @@ public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
         if (isStarted())
             super.deliverResult(data);
 
-        if (oldData != null && oldData != data)
+        if (oldData != null)//&& oldData != data)
             releaseResources(oldData);
 
     }
@@ -72,15 +72,23 @@ public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
     @Override
     protected void onStartLoading() {
 
-        if (data != null) {
+        if (data != null)
             deliverResult(data);
-        }
+        else
+            forceLoad();
 
     }
 
     @Override
     protected void onStopLoading() {
         cancelLoad();
+    }
+
+    @Override
+    public void onCanceled(ContentWrapper<T> data) {
+        super.onCanceled(data);
+
+        releaseResources(data);
     }
 
     @Override
@@ -95,15 +103,7 @@ public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
 
     }
 
-    @Override
-    public void onCanceled(ContentWrapper<T> data) {
-        super.onCanceled(data);
-
-        releaseResources(data);
-    }
-
     private void releaseResources(ContentWrapper<T> data) {
-
     }
 
 }

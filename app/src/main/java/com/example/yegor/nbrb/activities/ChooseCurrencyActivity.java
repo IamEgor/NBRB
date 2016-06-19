@@ -2,6 +2,7 @@ package com.example.yegor.nbrb.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.fragments.ChooseCurrencyFragment;
@@ -19,6 +20,17 @@ public class ChooseCurrencyActivity extends AppCompatActivity {
                     .commit();
         }
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (android.R.id.home == item.getItemId()) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

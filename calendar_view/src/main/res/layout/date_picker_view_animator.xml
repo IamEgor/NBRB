@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.example.yegor.calendarview.datepicker.PickerViewAnimator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/animator"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:inAnimation="@anim/sp_date_picker_fade_in"
+    android:measureAllChildren="true"
+    android:outAnimation="@anim/sp_date_picker_fade_out">
+
+    <com.example.yegor.calendarview.datepicker.DayPickerView
+        android:id="@+id/date_picker_day_picker"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content"
+        android:tag="@string/sublime_date_picker_tag" />
+
+    <com.example.yegor.calendarview.datepicker.YearPickerView
+        android:id="@+id/date_picker_year_picker"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollIndicators="bottom" />
+
+</com.example.yegor.calendarview.datepicker.PickerViewAnimator>

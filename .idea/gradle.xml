@@ -9,14 +9,16 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/materialdaterangepicker" />
+            <option value="$PROJECT_DIR$/calendar_view" />
+            <option value="$PROJECT_DIR$/material_date_range_picker" />
           </set>
         </option>
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/materialdaterangepicker" />
+            <option value="$PROJECT_DIR$/calendar_view" />
+            <option value="$PROJECT_DIR$/material_date_range_picker" />
           </set>
         </option>
       </GradleProjectSettings>

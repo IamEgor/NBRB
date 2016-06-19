@@ -11,34 +11,21 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/shadow_height">
+        android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/progress"
-            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="8dp"
-            android:indeterminate="true"
-            android:visibility="invisible" />
-
-        <!--
         <include
-            android:id="@+id/tests"
-            layout="@layout/tests"
+            android:id="@+id/pick_currency"
+            layout="@layout/item_pick_currency"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/progress" />
-            -->
+            android:layout_height="wrap_content" />
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/line_chart"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/pick_currency"
-            android:layout_below="@+id/progress"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp" />
+            android:layout_above="@+id/toggle"
+            android:layout_below="@+id/pick_currency"
+            android:layout_margin="4dp" />
 
         <android.support.v7.widget.AppCompatImageButton
             android:id="@+id/fullscreen"
@@ -46,26 +33,21 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/progress"
-            android:layout_margin="2dp"
+            android:layout_below="@+id/pick_currency"
+            android:layout_margin="4dp"
             android:background="@null"
             android:src="@drawable/ic_fullscreen_black_24dp"
             android:tint="@color/colorAccent"
-            android:visibility="invisible" />
-
-        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
-            android:id="@+id/pick_currency"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/toggle"
-            android:layout_margin="8dp" />
+            android:visibility="visible" />
 
         <com.example.yegor.nbrb.views.ToggleNavigation
             android:id="@+id/toggle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_margin="4dp" />
+            android:layout_marginBottom="4dp"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp" />
 
     </RelativeLayout>
 

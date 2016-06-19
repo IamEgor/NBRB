@@ -1,5 +1,6 @@
 package com.example.yegor.nbrb.fragments;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,23 +14,19 @@ import android.support.v7.widget.AppCompatImageButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.yegor.materialdaterangepicker.date.DatePickerDialog;
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
+import com.example.yegor.nbrb.activities.ChooseCurrencyActivity;
 import com.example.yegor.nbrb.activities.MainActivity;
 import com.example.yegor.nbrb.adapters.views.ChartAdapter;
-import com.example.yegor.nbrb.adapters.views.SpinnerAdapter;
 import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
-import com.example.yegor.nbrb.loaders.AdapterDataAsync;
 import com.example.yegor.nbrb.models.ContentWrapper;
-import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.ChartUtils;
@@ -38,18 +35,13 @@ import com.example.yegor.nbrb.utils.Utils;
 import com.example.yegor.nbrb.views.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
-import com.toptoche.searchablespinnerlibrary.SearchableListDialog;
-import com.toptoche.searchablespinnerlibrary.SearchableSpinner;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.List;
 
 
 public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implements
-        View.OnClickListener,
-        AdapterView.OnItemSelectedListener,
         ToggleNavigation.OnChoose,
         DatePickerDialog.OnDateSetListener,
         DatePickerDialog.OnTabChanged,
@@ -57,35 +49,33 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         ChartAdapter.OnChartSelect {
 
     public static final String ACTION = App.getContext().getPackageName();
-
     public static final String ABBR = "ABBR";
     public static final String FROM_DATE = "FROM_DATE";
     public static final String TO_DATE = "TO_DATE";
 
+    private static final int REQUEST_CODE = 1;
+
+    private TextView scale, date, abbr, rate;
     private LineChart mChart;
-    private ProgressBar loadingView;
+    private AppCompatImageButton fullscreen;
+    private ToggleNavigation toggleNavigation;
+
+    private View loadingView;
     private View errorView;
     private TextView errorMessage;
 
-    private SearchableSpinner spinner;
-    private AppCompatImageButton fullscreen;
-    private ToggleNavigation toggleNavigation;
-    private TextView selectedRate, selectedDate;
-
-    private SpinnerAdapter spinnerAdapter;
-    private ChartAdapter chartAdapter;
-
     private DatePickerDialog dpd;
-
+    private ChartAdapter chartAdapter;
     private Calendar calendar;
     private String fromDateStr, toDateStr;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String abbr = intent.getStringExtra(CurrencyModel.ABBR);
-            spinner.setSelection(spinnerAdapter.getPosition(abbr));
+            //String abbr = intent.getStringExtra(CurrencyModel.ABBR);
+            //spinner.setSelection(spinnerAdapter.getPosition(abbr));
             ((MainActivity) getActivity()).setCurrentItem(2, true);
+            Toast.makeText(getActivity(), "onReceive()", Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -98,23 +88,38 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         toDateStr = DateUtils.format(calendar.getTimeInMillis());
         calendar.add(Calendar.MONTH, -1);
         fromDateStr = DateUtils.format(calendar.getTimeInMillis());
+        dpd = DatePickerDialog.newInstance(this, 0, 0, 0);
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_rates_graphic, container, false);
 
+        scale = (TextView) rootView.findViewById(R.id.scale);
+        date = (TextView) rootView.findViewById(R.id.date);
+        abbr = (TextView) rootView.findViewById(R.id.abbr);
+        rate = (TextView) rootView.findViewById(R.id.rate);
         mChart = (LineChart) rootView.findViewById(R.id.line_chart);
-        loadingView = (ProgressBar) rootView.findViewById(R.id.progress);
-        errorView = rootView.findViewById(R.id.error_view);
-        errorMessage = (TextView) rootView.findViewById(R.id.error_message);
-        spinner = (SearchableSpinner) rootView.findViewById(R.id.pick_currency);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
         toggleNavigation = (ToggleNavigation) rootView.findViewById(R.id.toggle);
-        selectedRate = (TextView) rootView.findViewById(R.id.rate);
-        selectedDate = (TextView) rootView.findViewById(R.id.date);
+        loadingView = rootView.findViewById(R.id.loading_view);
+        errorView = rootView.findViewById(R.id.error_view);
+        errorMessage = (TextView) rootView.findViewById(R.id.error_message);
+
+        rootView.findViewById(R.id.retry_btn).setOnClickListener(v -> restartLoader());
+        rootView.findViewById(R.id.container3).setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
+            startActivityForResult(intent, REQUEST_CODE);
+        });
+
+        return rootView;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 
         toggleNavigation.setParams(new ArrayList<ToggleNavigation.ButtonParam>() {{
             add(new ToggleNavigation.ButtonParam("Неделя", false, false));
@@ -124,19 +129,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         }});
         toggleNavigation.setOnChoose(this);
 
-        fullscreen.setOnClickListener(this);
-
-        spinner.setOnItemSelectedListener(this);
-        spinner.setTitle(getString(R.string.select_currency));
-        spinner.setPositiveButton("OK");
-
-        (new InstallAdapter()).execute();
-
-        rootView.findViewById(R.id.retry_btn).setOnClickListener(this);
-        //rootView.findViewById(R.id.scale).setOnClickListener(this);
-        //rootView.findViewById(R.id.abbr).setOnClickListener(this);
-
-        dpd = DatePickerDialog.newInstance(this, 0, 0, 0);
+        fullscreen.setOnClickListener(v -> Toast.makeText(getContext(), "Not yet", Toast.LENGTH_SHORT).show());
 
         dpd.setOnCancelListener(this);
         dpd.setOnTabChanged(this);
@@ -144,7 +137,27 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         chartAdapter = new ChartAdapter(mChart, this);
         mChart.setOnChartValueSelectedListener(chartAdapter);
 
-        return rootView;
+        restartLoader(LOADER_1);
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+
+            SpinnerModel spinnerModel = data.getParcelableExtra(ChooseCurrencyFragment.EXTRA);
+            abbr.setText(spinnerModel.getAbbr());
+            scale.setText(String.valueOf(spinnerModel.getScale()));
+
+            if (spinnerModel.getDateEnd() != -1) {
+                Toast.makeText(getActivity(), "Обработать случай с dateEnd", Toast.LENGTH_SHORT).show();
+            }
+
+            restartLoader(LOADER_1);
+        }
+
     }
 
     @Override
@@ -173,43 +186,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     }
 
     @Override
-    public void onClick(View v) {
-
-        switch (v.getId()) {
-            case R.id.fullscreen:
-                Toast.makeText(getContext(), "Not yet", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.retry_btn:
-                restartLoader(LOADER_1);
-                break;
-            case R.id.scale:
-            case R.id.abbr:
-                List<String> strings = new ArrayList<String>() {{
-                    add("sdsf");
-                    add("fdbe");
-                    add("trbhw");
-                    add("rthh");
-                }};
-                SearchableListDialog dialog = SearchableListDialog.newInstance(strings);
-                dialog.show(getActivity().getFragmentManager(), "fwewfwefwef");
-                break;
-        }
-
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-        restartLoader(LOADER_1);
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
-
-    @Override
-    public void choose(int position) {
+    public void onToggleChoose(int position) {
         switch (position) {
             case 0://за неделю
                 calendar = Calendar.getInstance();
@@ -285,8 +262,12 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     @Override
     public void onChartValueSelected(String rate, String date) {
-        selectedRate.setText(rate);
-        selectedDate.setText(date);
+
+        if (this.date.getVisibility() != View.VISIBLE)
+            this.date.setVisibility(View.VISIBLE);
+
+        this.rate.setText(rate);
+        this.date.setText(date);
     }
 
     @Override
@@ -296,7 +277,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
         bundle.putString(FROM_DATE, fromDateStr);
         bundle.putString(TO_DATE, toDateStr);
-        bundle.putString(ABBR, ((SpinnerModel) spinner.getSelectedItem()).getAbbr());
+        bundle.putString(ABBR, abbr.getText().toString());
 
         return bundle;
     }
@@ -365,11 +346,14 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         switch (status) {
             case LOADING:
                 ChartUtils.setDisabledColor(mChart);
+                date.setVisibility(View.INVISIBLE);
                 loadingView.setVisibility(View.VISIBLE);
+                errorView.setVisibility(View.GONE);
+                rate.setText(R.string.rate_not_selected);
                 break;
             case OK:
-                mChart.setVisibility(View.VISIBLE);
                 loadingView.setVisibility(View.INVISIBLE);
+                mChart.setVisibility(View.VISIBLE);
                 errorView.setVisibility(View.GONE);
                 break;
             case FAILED:
@@ -380,16 +364,5 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         }
     }
 
-    private class InstallAdapter extends AdapterDataAsync {
-
-        @Override
-        protected void onPostExecute(SpinnerAdapter adapter) {
-            spinnerAdapter = adapter;
-            spinner.setAdapter(spinnerAdapter);
-            spinner.setSelection(0);
-            //spinner.setSelection(spinnerAdapter.getPosition(new SpinnerModel("USD", "Доллар США", -1)));
-        }
-
-    }
 
 }

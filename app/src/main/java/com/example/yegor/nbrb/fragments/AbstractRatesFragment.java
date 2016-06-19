@@ -5,11 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 
-import com.example.yegor.nbrb.exceptions.NoConnectionException;
 import com.example.yegor.nbrb.models.ContentWrapper;
-import com.example.yegor.nbrb.utils.Utils;
-
-import java.io.IOException;
 
 public abstract class AbstractRatesFragment<T> extends Fragment implements
         LoaderManager.LoaderCallbacks<ContentWrapper<T>> {
@@ -23,18 +19,11 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
     @Override
     public void onLoadFinished(Loader<ContentWrapper<T>> loader, ContentWrapper<T> data) {
 
-        Utils.log(data);
-
-        if (data.getException() == null && data.getContent() != null) {
+        if (data.getException() == null && data.getContent() != null)
             onDataReceived(data.getContent());
-        } else if (data.getException() != null) {
-
-            Exception e = data.getException();
-
-            if (e instanceof NoConnectionException || e instanceof IOException)
-                onFailure(e);
-
-        } else
+        else if (data.getException() != null)
+            onFailure(data.getException());
+        else
             throw new RuntimeException("Unknown exception " + data.getException().getMessage());
 
     }

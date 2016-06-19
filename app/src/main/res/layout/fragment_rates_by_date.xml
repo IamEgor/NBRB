@@ -2,8 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <View
         android:id="@+id/shadow"
@@ -12,187 +11,18 @@
         android:background="@drawable/toolbar_dropshadow"
         app:layout_behavior="com.example.yegor.nbrb.views.TabPagerShadowBehavior" />
 
-    <RelativeLayout
-        android:id="@+id/container1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/shadow">
-
-        <RelativeLayout
-            android:id="@+id/container11"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="BLR"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@android:color/white"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/scale"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:text="1 000"
-                android:textColor="@android:color/white"
-                android:textStyle="bold" />
-
-        </RelativeLayout>
-
-        <FrameLayout
-            android:id="@+id/container12"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/container11"
-            android:background="@color/colorPrimary">
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginStart="16dp"
-                android:background="@android:color/white" />
-
-        </FrameLayout>
-
-        <RelativeLayout
-            android:id="@+id/container13"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/container12"
-            android:background="@color/colorPrimary"
-            android:padding="16dp">
-
-            <TextView
-                android:id="@+id/abbr"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="USD"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="@android:color/white"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/rate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:text="19 065"
-                android:textColor="@android:color/white"
-                android:textStyle="bold" />
-
-        </RelativeLayout>
-
-        <com.dmitrymalkovich.android.ProgressFloatingActionButton
-            android:id="@+id/loading_view"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_centerInParent="true"
-            android:clickable="true">
-
-            <android.support.design.widget.FloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_cloud_download_black_24dp"
-                android:tint="@android:color/white" />
-
-            <ProgressBar
-                android:id="@+id/progress"
-                style="@style/Widget.AppCompat.ProgressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </com.dmitrymalkovich.android.ProgressFloatingActionButton>
-
-    </RelativeLayout>
-
-    <FrameLayout
-        android:id="@+id/container2"
+    <include
+        android:id="@+id/pick_currency"
+        layout="@layout/item_pick_currency"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/container1"
-        android:layout_marginTop="2dp"
-        android:background="@color/colorAccent">
-
-        <TextView
-            android:id="@+id/date_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="5dp"
-            android:paddingEnd="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingStart="16dp"
-            android:paddingTop="5dp"
-            android:text="19 сентября"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@android:color/white" />
-
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/container3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/container2"
-        android:background="@color/colorAccent">
-
-        <TextView
-            android:id="@+id/year_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="5dp"
-            android:paddingEnd="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingStart="16dp"
-            android:paddingTop="5dp"
-            android:text="2016"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@android:color/white" />
-
-    </FrameLayout>
+        android:layout_height="wrap_content" />
 
     <RelativeLayout
-        android:id="@+id/container4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
-        android:layout_below="@+id/container3"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="2dp">
-
-        <com.prolificinteractive.materialcalendarview.MaterialCalendarView
-            android:id="@+id/calendar_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:visibility="visible"
-            app:mcv_dateTextAppearance="@style/TextAppearance.AppCompat.Medium"
-            app:mcv_headerTextAppearance="@style/TextAppearance.AppCompat.Large"
-            app:mcv_weekDayTextAppearance="@style/TextAppearance.AppCompat.Medium" />
-
-        <ListView
-            android:id="@+id/year_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:choiceMode="singleChoice"
-            android:visibility="invisible">
-
-        </ListView>
-
-    </RelativeLayout>
+        android:layout_below="@+id/pick_currency"
+        android:gravity="center_horizontal" />
 
 </RelativeLayout>

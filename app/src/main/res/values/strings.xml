@@ -28,5 +28,6 @@
     <string name="fragment_by_date_wrong_input">Wrong data input</string>
     <string name="date_end">Till %s</string>
     <string name="action_search">Search</string>
+    <string name="rate_not_selected">____.__</string>
 
 </resources>
