@@ -118,7 +118,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
                 Toast.makeText(getActivity(), "добавить date start в spinner model", Toast.LENGTH_SHORT).show();
             }
 
-            restartLoader(LOADER_1);
+            restartLoader();
         }
 
     }
