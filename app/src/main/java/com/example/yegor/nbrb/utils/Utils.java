@@ -13,15 +13,10 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.example.yegor.nbrb.App;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public final class Utils {
 
     private static final boolean DEBUG_MODE = true;
     private static final String TAG = "[APP_LOGS]";
-
-    private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
-
 
     public static String getString(@StringRes int id) {
         return App.getContext().getString(id);
@@ -75,19 +70,6 @@ public final class Utils {
             view = new View(activity);
 
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    public static int generateViewId() {
-
-        for (; ; ) {
-            final int result = sNextGeneratedId.get();
-            // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
-            int newValue = result + 1;
-            if (newValue > 0x00FFFFFF) newValue = 1; // Roll over to 1, not 0.
-            if (sNextGeneratedId.compareAndSet(result, newValue)) {
-                return result;
-            }
-        }
     }
 
     public static void logT(String tag, Object... objects) {

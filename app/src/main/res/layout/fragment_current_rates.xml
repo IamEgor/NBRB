@@ -12,6 +12,11 @@
         android:splitMotionEvents="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/shadow_height"
+        android:background="@drawable/toolbar_dropshadow" />
+
     <include layout="@layout/include_error_view" />
 
     <include layout="@layout/include_loading_view" />

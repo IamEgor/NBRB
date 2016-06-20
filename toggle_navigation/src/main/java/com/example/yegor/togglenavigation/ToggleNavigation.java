@@ -1,31 +1,33 @@
-package com.example.yegor.nbrb.views;
+package com.example.yegor.togglenavigation;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.Build;
+import android.support.annotation.ColorRes;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import com.example.yegor.nbrb.App;
-import com.example.yegor.nbrb.R;
-import com.example.yegor.nbrb.utils.Utils;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class ToggleNavigation extends LinearLayout implements View.OnClickListener {
-
-    private static int ACTIVE_COLOR = App.getContext().getResources().getColor(R.color.colorPrimary);
-    private static int IN_ACTIVE_COLOR = App.getContext().getResources().getColor(R.color.light_grey);
+    @ColorRes
+    private static int ACTIVE_COLOR = R.color.colorPrimary;
+    @ColorRes
+    private static int IN_ACTIVE_COLOR = R.color.white;
 
     private Context context;
+    private Resources resources;
     private OnChoose onChoose;
 
     private List<ButtonParam> params;
     private List<Integer> ids;
+
 
     private int activeId;
     private int previousSelectedId;
@@ -33,6 +35,7 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
 
     public ToggleNavigation(Context context, List<ButtonParam> labels) {
         super(context);
+
         this.context = context;
         this.params = labels;
         init(context, labels);
@@ -40,17 +43,21 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
 
     public ToggleNavigation(Context context, AttributeSet attrs) {
         super(context, attrs);
+
         this.context = context;
+        resources = context.getResources();
     }
 
     public ToggleNavigation(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+
         this.context = context;
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public ToggleNavigation(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
         this.context = context;
     }
 
@@ -83,12 +90,67 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         for (ButtonParam param : params) {
             int id = param.getId();
             param.setActive(id == activeId);
-            findViewById(id).setBackgroundColor(id == activeId ? ACTIVE_COLOR : IN_ACTIVE_COLOR);
+            Button button = (Button) findViewById(id);
+            button.setBackgroundColor(id == activeId ?
+                    resources.getColor(ACTIVE_COLOR) : resources.getColor(IN_ACTIVE_COLOR));
+            button.setTextColor(id == activeId ?
+                    resources.getColor(IN_ACTIVE_COLOR) : resources.getColor(ACTIVE_COLOR));
+
         }
     }
 
     public void setPreviousActive() {
         setActiveStateless(previousSelectedId);
+    }
+
+    private int getPositionById(int id) {
+
+        for (int i = 0; i < params.size(); i++) {
+            if (params.get(i).getId() == id)
+                return i;
+        }
+
+        throw new RuntimeException("No such position.");
+    }
+
+    private void init(Context context, List<ButtonParam> labels) {
+
+        LinearLayout.LayoutParams p = new LinearLayout
+                .LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+
+        p.weight = 1;
+
+        setBackgroundResource(R.drawable.border_drawable);
+        Utils.setPaddingMoreThan(this, 3);
+
+        ids = new ArrayList<>();
+
+        for (ButtonParam param : labels) {
+
+            Button button = new Button(context);
+
+            button.setLayoutParams(p);
+            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+
+            button.setText(param.getLabel());
+            button.setId(param.getId());
+            button.setBackgroundColor(param.isActive() ?
+                    resources.getColor(ACTIVE_COLOR) : resources.getColor(IN_ACTIVE_COLOR));
+            button.setTextColor(param.isActive() ?
+                    resources.getColor(IN_ACTIVE_COLOR) : resources.getColor(ACTIVE_COLOR));
+            button.setTypeface(null, Typeface.BOLD);
+
+            button.setOnClickListener(this);
+
+            this.addView(button);
+
+            if (param.isActive())
+                activeId = param.getId();
+
+            if (param.isCanRepeat())
+                canRepeatId = param.getId();
+
+        }
     }
 
     @Override
@@ -103,45 +165,6 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
             throw new UnsupportedOperationException("You must implement callback operation");
 
         onChoose.onToggleChoose(getPositionById(v.getId()));
-    }
-
-    private int getPositionById(int id) {
-        for (int i = 0; i < params.size(); i++) {
-            if (params.get(i).getId() == id)
-                return i;
-        }
-        throw new RuntimeException("Smth got wrong");
-    }
-
-    private void init(Context context, List<ButtonParam> labels) {
-
-        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        p.weight = 1;
-
-        ids = new ArrayList<>();
-
-        for (ButtonParam param : labels) {
-
-            Button button = new Button(context);
-
-            button.setLayoutParams(p);
-            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-
-            button.setText(param.getLabel());
-            button.setId(param.getId());
-            button.setBackgroundColor(param.isActive() ? ACTIVE_COLOR : IN_ACTIVE_COLOR);
-
-            button.setOnClickListener(this);
-
-            this.addView(button);
-
-            if (param.isActive())
-                activeId = param.getId();
-
-            if (param.isCanRepeat())
-                canRepeatId = param.getId();
-
-        }
     }
 
     public static class ButtonParam {

@@ -1,1 +1,1 @@
-include ':app', ':material_date_range_picker', ':calendar_view'
+include ':app', ':material_date_range_picker', ':calendar_view', ':toggle_navigation'

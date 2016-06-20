@@ -49,4 +49,5 @@ dependencies {
 
     compile project(path: ':calendar_view')
     compile project(path: ':material_date_range_picker')
+    compile project(path: ':toggle_navigation')
 }

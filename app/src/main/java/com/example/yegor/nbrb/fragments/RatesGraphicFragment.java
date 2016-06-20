@@ -32,14 +32,13 @@ import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.Utils;
-import com.example.yegor.nbrb.views.ToggleNavigation;
+import com.example.yegor.togglenavigation.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-
 
 public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implements
         ToggleNavigation.OnChoose,

@@ -21,12 +21,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/shadow_height"
-        android:background="@drawable/toolbar_dropshadow"
-        app:layout_behavior="com.example.yegor.nbrb.views.TabPagerShadowBehavior" />
-
     <android.support.v4.view.ViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
