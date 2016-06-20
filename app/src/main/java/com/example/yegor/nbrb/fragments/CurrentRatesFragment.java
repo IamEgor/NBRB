@@ -1,6 +1,7 @@
 package com.example.yegor.nbrb.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,10 +25,11 @@ import java.util.List;
 public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRatesOnDateModel>> {
 
     private RecyclerView rv;
-    private CurrentRatesAdapter adapter;
     private View loadingView;
     private View errorView;
     private TextView errorMessage;
+
+    private CurrentRatesAdapter adapter;
 
     public CurrentRatesFragment() {
     }
@@ -39,6 +41,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.fragment_current_rates, container, false);
 
         rv = (RecyclerView) rootView.findViewById(R.id.rv);
@@ -46,20 +49,24 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
         errorView = rootView.findViewById(R.id.error_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
+        rootView.findViewById(R.id.retry_btn).setOnClickListener((view) -> restartLoader(LOADER_1));
+
+        return rootView;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
         adapter = new CurrentRatesAdapter(new ArrayList<>(0));
 
-        if(Utils.isPortrait(getActivity()))
+        if (Utils.isPortrait(getActivity()))
             rv.setLayoutManager(new LinearLayoutManager(getContext()));
         else
             rv.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         rv.setAdapter(adapter);
 
-        rootView.findViewById(R.id.retry_btn).setOnClickListener((view) -> restartLoader());
-
-        getLoaderManager().initLoader(0, null, this).forceLoad();
-
-        return rootView;
+        restartLoader();
     }
 
     @Override
@@ -69,12 +76,15 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
 
     @Override
     public Loader<ContentWrapper<List<DailyExRatesOnDateModel>>> onCreateLoader(int id, Bundle args) {
+
         setStatus(Status.LOADING);
+
         return new AbstractLoader<>(getContext(), SoapUtils::getCurrenciesNow);
     }
 
     @Override
     protected void onDataReceived(List<DailyExRatesOnDateModel> models) {
+
         adapter.setModels(models);
         setStatus(Status.OK);
     }
@@ -110,7 +120,5 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
                 errorView.setVisibility(View.VISIBLE);
                 break;
         }
-
     }
-
 }

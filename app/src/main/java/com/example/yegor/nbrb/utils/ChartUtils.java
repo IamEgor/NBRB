@@ -163,7 +163,6 @@ public final class ChartUtils {
 
         //MyMarkerView mv = new MyMarkerView(App.getContext(), R.layout.custom_marker_view, content.getXVals());
         //mChart.setMarkerView(mv);
-
     }
 
     public static void setDisabledColor(LineChart chart) {

@@ -67,16 +67,29 @@
             android:textColor="@android:color/white"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/rate"
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:text="@string/rate_not_selected"
-            android:textColor="@android:color/white"
-            android:textStyle="bold" />
+            android:layout_centerVertical="true">
+
+            <TextView
+                android:id="@+id/rate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rate_not_selected"
+                android:textColor="@android:color/white"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:id="@+id/strikethrough_line"
+                android:layout_gravity="center_vertical"
+                android:background="@android:color/white" />
+
+        </FrameLayout>
 
     </RelativeLayout>
 

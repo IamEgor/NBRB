@@ -27,6 +27,7 @@ import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
+import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.ChartUtils;
@@ -71,10 +72,10 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //String abbr = intent.getStringExtra(CurrencyModel.ABBR);
-            //spinner.setSelection(spinnerAdapter.getPosition(abbr));
+            abbr.setText(intent.getStringExtra(CurrencyModel.ABBR));
+            scale.setText(intent.getStringExtra(CurrencyModel.SCALE));
             ((MainActivity) getActivity()).setCurrentItem(2, true);
-            Toast.makeText(getActivity(), "onReceive()", Toast.LENGTH_SHORT).show();
+            restartLoader(LOADER_1);
         }
     };
 
@@ -83,6 +84,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     }
 
     public RatesGraphicFragment() {
+
         calendar = Calendar.getInstance();
         toDateStr = DateUtils.format(calendar.getTimeInMillis());
         calendar.add(Calendar.MONTH, -1);

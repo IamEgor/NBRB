@@ -6,7 +6,7 @@ import android.view.View;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Utils {
+class Utils {
 
     private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
 
@@ -42,8 +42,8 @@ public class Utils {
 
     private static int getMoreOrEqualsThanPx(int real, int desiredDips, DisplayMetrics metrics) {
         desiredDips = desiredDips * (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-        Log.w("getMoreOrEqualsThanPx","real - " +real );
-        Log.w("getMoreOrEqualsThanPx","desiredDips - " +desiredDips );
+        Log.w("getMoreOrEqualsThanPx", "real - " + real);
+        Log.w("getMoreOrEqualsThanPx", "desiredDips - " + desiredDips);
         return real > desiredDips ? real : desiredDips;
     }
 

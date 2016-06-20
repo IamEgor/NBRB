@@ -11,6 +11,9 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -45,6 +48,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     private View loadingView;
 
     private TextView rate, abbr, scale;
+    private View strikethroughLine;
 
     private CoordinatorLayout coordinatorLayout;
 
@@ -70,12 +74,12 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
         mSublimePicker = new SublimePicker(getContext());
 
-
         coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.main_content);
         loadingView = rootView.findViewById(R.id.loading_view);
         rate = (TextView) rootView.findViewById(R.id.rate);
         abbr = (TextView) rootView.findViewById(R.id.abbr);
         scale = (TextView) rootView.findViewById(R.id.scale);
+        strikethroughLine = rootView.findViewById(R.id.strikethrough_line);
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -120,15 +124,14 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
             restartLoader();
         }
-
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
+
         if (isVisibleToUser)
             restartLoader(LOADER_1);
-
     }
 
     @Override
@@ -141,6 +144,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     protected Bundle getBundleArgs() {
 
         Bundle bundle = new Bundle();
+
         bundle.putString(CURRENCY, abbr.getText().toString());
         bundle.putString(DATE, DateUtils.format(calendar));
 
@@ -179,7 +183,6 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         }
 
         return loader;
-
     }
 
     @Override
@@ -230,17 +233,61 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         switch (status) {
             case LOADING:
                 loadingView.setVisibility(View.VISIBLE);
-                rate.setPaintFlags(rate.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                paintStripe(true);
                 break;
             case OK:
                 loadingView.setVisibility(View.GONE);
-                rate.setPaintFlags(rate.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                paintStripe(false);
                 break;
             case FAILED:
                 loadingView.setVisibility(View.GONE);
                 rate.setPaintFlags(rate.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
-
     }
 
+    private void paintStripe(boolean paint) {
+
+        if (getString(R.string.rate_not_selected).equals(rate.getText().toString()))
+            return;
+
+        if (paint) {
+            ResizeWidthAnimation anim = new ResizeWidthAnimation(strikethroughLine, rate.getWidth());
+            anim.setDuration(300);
+            rate.startAnimation(anim);
+        } else {
+            ResizeWidthAnimation anim = new ResizeWidthAnimation(strikethroughLine, 0);
+            anim.setDuration(5);
+            rate.startAnimation(anim);
+        }
+    }
+
+    class ResizeWidthAnimation extends Animation {
+
+        private int mWidth;
+        private int mStartWidth;
+        private View mView;
+
+        public ResizeWidthAnimation(View view, int width) {
+
+            mView = view;
+            mWidth = width;
+            mStartWidth = view.getWidth();
+
+            setInterpolator(new AccelerateDecelerateInterpolator());
+        }
+
+        @Override
+        protected void applyTransformation(float interpolatedTime, Transformation t) {
+            int newWidth = mStartWidth + (int) ((mWidth - mStartWidth) * interpolatedTime);
+
+            mView.getLayoutParams().width = newWidth;
+            mView.requestLayout();
+        }
+
+        @Override
+        public boolean willChangeBounds() {
+            return true;
+        }
+
+    }
 }

@@ -7,11 +7,15 @@ import android.support.v4.content.Loader;
 
 import com.example.yegor.nbrb.models.ContentWrapper;
 
+import java.util.Set;
+
 public abstract class AbstractRatesFragment<T> extends Fragment implements
         LoaderManager.LoaderCallbacks<ContentWrapper<T>> {
 
     protected static final int LOADER_1 = 1;
     protected static final int LOADER_2 = 2;
+
+    protected Bundle prevArgs;
 
     public AbstractRatesFragment() {
     }
@@ -37,17 +41,44 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
     }
 
     protected void restartLoader(int loaderId) {
-        /*
-        Bundle bundle  =getBundleArgs();
-        for (String key : bundle.keySet()) {
-            Object value = bundle.get(key);
-            Utils.logT("[restartLoader]", String.format("%s %s (%s)", key,
-                    value.toString(), value.getClass().getName()));
+
+        Bundle bundleArgs = getBundleArgs();
+
+        if (!equalsBundles(bundleArgs, prevArgs))
+            getActivity().getSupportLoaderManager()
+                    .restartLoader(loaderId, bundleArgs, this)
+                    .forceLoad();
+
+        prevArgs = bundleArgs;
+    }
+
+    private static boolean equalsBundles(Bundle current, Bundle previous) {
+
+        if (current == null || previous == null)
+            return false;
+
+        Set<String> setCurrent = current.keySet();
+        Set<String> setPrev = previous.keySet();
+
+        if (!setCurrent.containsAll(setPrev)) {
+            return false;
         }
-        */
-        getActivity().getSupportLoaderManager()
-                .restartLoader(loaderId, getBundleArgs(), this)
-                .forceLoad();
+
+        Object objCurrent, objPrev;
+
+        for (String key : setCurrent) {
+
+            objCurrent = current.get(key);
+            objPrev = previous.get(key);
+            if (objCurrent == null && objPrev != null || objCurrent != null && objPrev == null)
+                return false;
+
+            if (!objCurrent.equals(objPrev)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected abstract Bundle getBundleArgs();

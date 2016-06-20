@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
@@ -27,6 +26,7 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
     }
 
     public void setModels(List<DailyExRatesOnDateModel> models) {
+
         this.models = models;
         notifyDataSetChanged();
     }
@@ -38,13 +38,7 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-
-        DailyExRatesOnDateModel model = models.get(position);
-
-        holder.setScale(String.valueOf(model.getScale()));
-        holder.setAbbr(model.getAbbreviation());
-        holder.setRate(model.getRate());
-        holder.setName(model.getQuotName());
+        holder.bind(models.get(position));
     }
 
     @Override
@@ -70,7 +64,6 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
             name = (TextView) itemView.findViewById(R.id.name);
 
             cv.setOnClickListener(this);
-
         }
 
         @Override
@@ -78,28 +71,17 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
 
             Intent intent = new Intent(RatesGraphicFragment.ACTION);
             intent.putExtra(CurrencyModel.ABBR, abbr.getText().toString());
+            intent.putExtra(CurrencyModel.SCALE, scale.getText().toString());
 
             LocalBroadcastManager.getInstance(App.getContext()).sendBroadcast(intent);
-            Toast.makeText(App.getContext(), "onClick", Toast.LENGTH_SHORT).show();
         }
 
-        public void setScale(String scale) {
-            this.scale.setText(scale);
-        }
+        public void bind(DailyExRatesOnDateModel model) {
 
-        public void setAbbr(String abbr) {
-            this.abbr.setText(abbr);
+            scale.setText(String.valueOf(model.getScale()));
+            abbr.setText(model.getAbbreviation());
+            rate.setText(String.valueOf(model.getRate()));
+            name.setText(model.getQuotName());
         }
-
-        public void setRate(float rate) {
-            this.rate.setText(String.valueOf(rate));
-        }
-
-        public void setName(String name) {
-            this.name.setText(name);
-        }
-
     }
-
-
 }
