@@ -130,6 +130,9 @@ public class MySQLiteClass {
 
     public CurrencyModel getCurrencyModelByAbbr(String abbr, String time) {
 
+        // TODO: 21.06.16 проверить, почему сравнивалась дата с милисекундами
+        time = String.valueOf(DateUtils.date2longSafe(time));
+
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
                 new String[]{

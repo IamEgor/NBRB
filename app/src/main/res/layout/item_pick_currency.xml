@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:gravity="center">
 
     <RelativeLayout
         android:id="@+id/container1"
@@ -32,29 +33,11 @@
 
     </RelativeLayout>
 
-    <FrameLayout
-        android:id="@+id/calendar_container"
+    <RelativeLayout
+        android:id="@+id/container2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/container1"
-        android:background="@color/colorPrimary">
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginStart="16dp"
-            android:background="@android:color/white" />
-
-    </FrameLayout>
-
-    <RelativeLayout
-        android:id="@+id/container3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/calendar_container"
         android:background="@color/colorPrimary"
         android:padding="16dp">
 
@@ -83,9 +66,9 @@
                 android:textStyle="bold" />
 
             <View
+                android:id="@+id/strikethrough_line"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
-                android:id="@+id/strikethrough_line"
                 android:layout_gravity="center_vertical"
                 android:background="@android:color/white" />
 
@@ -93,30 +76,26 @@
 
     </RelativeLayout>
 
-    <com.dmitrymalkovich.android.ProgressFloatingActionButton
-        android:id="@+id/loading_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_margin="@dimen/fab_margin"
-        android:clickable="false"
-        android:visibility="invisible">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:background="@android:color/white" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:src="@drawable/ic_cloud_download_black_24dp"
-            android:tint="@android:color/white" />
-
-        <ProgressBar
-            android:id="@+id/progress"
-            style="@style/Widget.AppCompat.ProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="false" />
-
-    </com.dmitrymalkovich.android.ProgressFloatingActionButton>
+    <com.rey.material.widget.ProgressView
+        android:id="@+id/progress"
+        style="@style/LightQueryLinearProgressView"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp" />
 
     <TextView
         android:id="@+id/date"

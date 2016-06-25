@@ -2,7 +2,6 @@ package com.example.yegor.nbrb.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
@@ -14,7 +13,6 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +31,7 @@ import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
+import com.rey.material.widget.ProgressView;
 
 import org.ksoap2.transport.HttpResponseException;
 
@@ -45,7 +44,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     private static final String CURRENCY = "CURRENCY";
     private static final String DATE = "DATE";
 
-    private View loadingView;
+    private ProgressView loadingView;
 
     private TextView rate, abbr, scale;
     private View strikethroughLine;
@@ -75,7 +74,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         mSublimePicker = new SublimePicker(getContext());
 
         coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.main_content);
-        loadingView = rootView.findViewById(R.id.loading_view);
+        loadingView = (ProgressView) rootView.findViewById(R.id.progress);
         rate = (TextView) rootView.findViewById(R.id.rate);
         abbr = (TextView) rootView.findViewById(R.id.abbr);
         scale = (TextView) rootView.findViewById(R.id.scale);
@@ -87,12 +86,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
         ((RelativeLayout) rootView.findViewById(R.id.container)).addView(mSublimePicker, params);
 
-        ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress);
-        progressBar.getIndeterminateDrawable().setColorFilter(
-                getResources().getColor(R.color.colorPrimaryLight),
-                android.graphics.PorterDuff.Mode.SRC_IN);
-
-        rootView.findViewById(R.id.container3).setOnClickListener(v -> {
+        rootView.findViewById(R.id.container2).setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
             startActivityForResult(intent, REQUEST_CODE);
         });
@@ -232,16 +226,18 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     protected void setStatus(Status status) {
         switch (status) {
             case LOADING:
-                loadingView.setVisibility(View.VISIBLE);
                 paintStripe(true);
-                break;
-            case OK:
-                loadingView.setVisibility(View.GONE);
-                paintStripe(false);
+                loadingView.start();
                 break;
             case FAILED:
-                loadingView.setVisibility(View.GONE);
-                rate.setPaintFlags(rate.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                paintStripe(false);
+                loadingView.stop();
+                rate.setText(R.string.rate_not_selected);
+                break;
+            case OK:
+                paintStripe(false);
+                loadingView.stop();
+                break;
         }
     }
 
@@ -256,7 +252,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
             rate.startAnimation(anim);
         } else {
             ResizeWidthAnimation anim = new ResizeWidthAnimation(strikethroughLine, 0);
-            anim.setDuration(5);
+            anim.setDuration(0);
             rate.startAnimation(anim);
         }
     }

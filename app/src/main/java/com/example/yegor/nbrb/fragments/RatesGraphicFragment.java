@@ -36,6 +36,7 @@ import com.example.yegor.nbrb.utils.Utils;
 import com.example.yegor.togglenavigation.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
+import com.rey.material.widget.ProgressView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -60,7 +61,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     private AppCompatImageButton fullscreen;
     private ToggleNavigation toggleNavigation;
 
-    private View loadingView;
+    private ProgressView loadingView;
     private View errorView;
     private TextView errorMessage;
 
@@ -106,12 +107,12 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         mChart = (LineChart) rootView.findViewById(R.id.line_chart);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
         toggleNavigation = (ToggleNavigation) rootView.findViewById(R.id.toggle);
-        loadingView = rootView.findViewById(R.id.loading_view);
+        loadingView = (ProgressView) rootView.findViewById(R.id.progress);
         errorView = rootView.findViewById(R.id.error_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
         rootView.findViewById(R.id.retry_btn).setOnClickListener(v -> restartLoader());
-        rootView.findViewById(R.id.container3).setOnClickListener(v -> {
+        rootView.findViewById(R.id.container2).setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
             startActivityForResult(intent, REQUEST_CODE);
         });
@@ -138,8 +139,11 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         chartAdapter = new ChartAdapter(mChart, this);
         mChart.setOnChartValueSelectedListener(chartAdapter);
 
-        restartLoader(LOADER_1);
+        //mChart.setHighlightPerTapEnabled(false);
+        //mChart.setDragEnabled(false);
+        mChart.setScaleEnabled(false);
 
+        restartLoader(LOADER_1);
     }
 
     @Override
@@ -286,6 +290,8 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     @Override
     public Loader<ContentWrapper<LineData>> onCreateLoader(int id, Bundle args) {
 
+        Utils.logT("Loader", "RatesGraphicFragment.onCreateLoader()");
+
         String abbr = args.getString(ABBR);
         String fromDate = args.getString(FROM_DATE);
         String toDate = args.getString(TO_DATE);
@@ -320,12 +326,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     @Override
     protected void onDataReceived(LineData models) {
-        Utils.logT("onDataReceived", "expectedLength " + ChartUtils.expectedLength(fromDateStr, toDateStr));
-        Utils.logT("onDataReceived", "models.getXValCount().size() " + models.getYValCount());
-
-        Utils.logT("onDataReceived", "DataSets " + models.getDataSets().toString());
-        Utils.logT("onDataReceived", "XVals " + models.getXVals().toString());
-
+        Utils.logT("Loader", "RatesGraphicFragment.onDataReceived()");
         chartAdapter.setDates(models.getXVals());
         ChartUtils.setUpChart(mChart, models);
         setStatus(Status.OK);
@@ -333,6 +334,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     @Override
     protected void onFailure(Exception e) {
+        Utils.logT("Loader", "RatesGraphicFragment.onFailure()");
         if (e instanceof ExchangeRateAssignsOnceInMonth) {
             restartLoader(LOADER_2);
             return;
@@ -348,20 +350,21 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
             case LOADING:
                 ChartUtils.setDisabledColor(mChart);
                 date.setVisibility(View.INVISIBLE);
-                loadingView.setVisibility(View.VISIBLE);
+                loadingView.start();
                 errorView.setVisibility(View.GONE);
                 rate.setText(R.string.rate_not_selected);
                 break;
-            case OK:
-                loadingView.setVisibility(View.INVISIBLE);
-                mChart.setVisibility(View.VISIBLE);
-                errorView.setVisibility(View.GONE);
-                break;
             case FAILED:
                 mChart.setVisibility(View.INVISIBLE);
-                loadingView.setVisibility(View.INVISIBLE);
                 errorView.setVisibility(View.VISIBLE);
+                loadingView.stop();
                 break;
+            case OK:
+                mChart.setVisibility(View.VISIBLE);
+                errorView.setVisibility(View.GONE);
+                loadingView.stop();
+                break;
+
         }
     }
 

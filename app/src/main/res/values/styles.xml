@@ -32,5 +32,20 @@
         <item name="android:textColorPrimaryInverse">#FFFFFF</item>
     </style>
 
+    <style name="LightQueryLinearProgressView">
+        <item name="pv_progressMode">indeterminate</item>
+        <item name="pv_autostart">false</item>
+        <item name="pv_circular">false</item>
+        <item name="pv_progressStyle">@style/LightLinearProgressDrawable</item>
+    </style>
+
+    <style name="LightLinearProgressDrawable" parent="Material.Drawable.LinearProgress">
+        <item name="lpd_strokeColor">@color/colorAccent</item>
+        <item name="lpd_strokeSecondaryColor">@color/white</item>
+        <item name="lpd_reverse">false</item>
+        <item name="lpd_strokeSize">6dp</item>
+        <item name="lpd_verticalAlign">center</item>
+        <item name="lpd_transformInterpolator">@android:anim/accelerate_decelerate_interpolator</item>
+    </style>
 
 </resources>

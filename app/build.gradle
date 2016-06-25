@@ -45,9 +45,10 @@ dependencies {
     compile 'com.github.PhilJay:MPAndroidChart:v2.2.5'
     compile 'com.toptoche.searchablespinner:searchablespinnerlibrary:1.2.0'
 
-    compile 'com.dmitrymalkovich.android:progress-fab:1.6'
-
     compile project(path: ':calendar_view')
     compile project(path: ':material_date_range_picker')
     compile project(path: ':toggle_navigation')
+
+    compile 'com.github.rey5137:material:1.2.4'
+    compile 'com.github.florent37:viewanimator:1.0.4'
 }

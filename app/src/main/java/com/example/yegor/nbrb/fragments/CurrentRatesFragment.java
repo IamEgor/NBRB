@@ -66,6 +66,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
 
         rv.setAdapter(adapter);
 
+        //getLoaderManager().initLoader(LOADER_1, null, this).forceLoad();
         restartLoader();
     }
 
@@ -77,6 +78,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
     @Override
     public Loader<ContentWrapper<List<DailyExRatesOnDateModel>>> onCreateLoader(int id, Bundle args) {
 
+        Utils.log("Loader", "CurrentRatesFragment.onCreateLoader()");
         setStatus(Status.LOADING);
 
         return new AbstractLoader<>(getContext(), SoapUtils::getCurrenciesNow);
@@ -91,6 +93,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
 
     @Override
     protected void onFailure(Exception e) {
+        Utils.log("Loader", "CurrentRatesFragment.onFailure()");
         errorMessage.setText(e.getMessage());
         setStatus(Status.FAILED);
     }

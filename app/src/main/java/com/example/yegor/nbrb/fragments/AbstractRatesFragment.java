@@ -29,7 +29,6 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
             onFailure(data.getException());
         else
             throw new RuntimeException("Unknown exception " + data.getException().getMessage());
-
     }
 
     @Override
@@ -45,7 +44,7 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
         Bundle bundleArgs = getBundleArgs();
 
         if (!equalsBundles(bundleArgs, prevArgs))
-            getActivity().getSupportLoaderManager()
+            getLoaderManager()
                     .restartLoader(loaderId, bundleArgs, this)
                     .forceLoad();
 

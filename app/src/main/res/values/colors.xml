@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorPrimaryLight">#7986CB</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorAccentQuarter">#f8bbd0</color>
 
     <color name="test">#FEFEFE</color>
     <color name="light_grey">#D3D3D3</color>

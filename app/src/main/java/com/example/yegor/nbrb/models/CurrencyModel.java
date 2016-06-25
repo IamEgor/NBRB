@@ -9,7 +9,7 @@ import java.text.ParseException;
 
 public class CurrencyModel {
 
-    public static final String ID = "Cur_Id";
+    public static final String ID = "Cur_ID";
     public static final String QUOT_NAME = "Cur_QuotName";
     public static final String QUOT_NAME_ENG = "Cur_QuotName_Eng";
     public static final String SCALE = "Cur_Scale";
@@ -36,6 +36,7 @@ public class CurrencyModel {
     public CurrencyModel(int id, String quotName, String quotNameEng, int scale, String code,
                          String abbr, String name, String nameEng, long dateStart, long dateEnd,
                          int parentId) {
+
         this.id = id;
         this.quotName = quotName;
         this.quotNameEng = quotNameEng;
