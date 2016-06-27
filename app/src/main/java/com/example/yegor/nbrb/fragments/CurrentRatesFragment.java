@@ -65,8 +65,8 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
             rv.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         rv.setAdapter(adapter);
+        //rv.setItemAnimator(new SlideInUpAnimator());
 
-        //getLoaderManager().initLoader(LOADER_1, null, this).forceLoad();
         restartLoader();
     }
 

@@ -21,6 +21,7 @@ import com.example.yegor.materialdaterangepicker.date.DatePickerDialog;
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.activities.ChooseCurrencyActivity;
+import com.example.yegor.nbrb.activities.FullscreenGraphicActivity;
 import com.example.yegor.nbrb.activities.MainActivity;
 import com.example.yegor.nbrb.adapters.views.ChartAdapter;
 import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
@@ -33,6 +34,7 @@ import com.example.yegor.nbrb.storage.MySQLiteClass;
 import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.Utils;
+import com.example.yegor.nbrb.views.ParcelableLineData;
 import com.example.yegor.togglenavigation.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
@@ -50,25 +52,29 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         ChartAdapter.OnChartSelect {
 
     public static final String ACTION = App.getContext().getPackageName();
-    public static final String ABBR = "ABBR";
-    public static final String FROM_DATE = "FROM_DATE";
-    public static final String TO_DATE = "TO_DATE";
+    public static final String CHART_DATA = "CHART_DATA";
 
-    private static final int REQUEST_CODE = 1;
+    protected static final String ABBR = CurrencyModel.ABBR;
+    protected static final String FROM_DATE = "FROM_DATE";
+    protected static final String TO_DATE = "TO_DATE";
+    protected static final String SCALE = CurrencyModel.SCALE;
+    protected static final String TOGGLE_POS = "TOGGLE_POS";
 
-    private TextView scale, date, abbr, rate;
-    private LineChart mChart;
-    private AppCompatImageButton fullscreen;
-    private ToggleNavigation toggleNavigation;
+    protected static final int REQUEST_CODE = 1;
 
-    private ProgressView loadingView;
-    private View errorView;
-    private TextView errorMessage;
+    protected TextView scale, date, abbr, rate;
+    protected LineChart mChart;
+    protected AppCompatImageButton fullscreen;
+    protected ToggleNavigation toggleNavigation;
 
-    private DatePickerDialog dpd;
-    private ChartAdapter chartAdapter;
-    private Calendar calendar;
-    private String fromDateStr, toDateStr;
+    protected ProgressView loadingView;
+    protected View errorView;
+    protected TextView errorMessage;
+
+    protected DatePickerDialog dpd;
+    protected ChartAdapter chartAdapter;
+    protected Calendar calendar;
+    protected String fromDateStr, toDateStr;
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
@@ -116,6 +122,8 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
             Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
             startActivityForResult(intent, REQUEST_CODE);
         });
+        //TODO может быть NPE
+        restartLoader(LOADER_1);
 
         return rootView;
     }
@@ -129,21 +137,25 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
             add(new ToggleNavigation.ButtonParam("Год", false, false));
             add(new ToggleNavigation.ButtonParam("Период", false, true));
         }});
-        toggleNavigation.setOnChoose(this);
 
-        fullscreen.setOnClickListener(v -> Toast.makeText(getContext(), "Not yet", Toast.LENGTH_SHORT).show());
-
-        dpd.setOnCancelListener(this);
-        dpd.setOnTabChanged(this);
-
+        mChart.setScaleEnabled(false);
         chartAdapter = new ChartAdapter(mChart, this);
         mChart.setOnChartValueSelectedListener(chartAdapter);
 
-        //mChart.setHighlightPerTapEnabled(false);
-        //mChart.setDragEnabled(false);
-        mChart.setScaleEnabled(false);
 
-        restartLoader(LOADER_1);
+        fullscreen.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), FullscreenGraphicActivity.class);
+            intent.putExtra(CHART_DATA, new ParcelableLineData(mChart.getLineData()));
+            intent.putExtra(ABBR, abbr.getText().toString());
+            intent.putExtra(SCALE, scale.getText().toString());
+            //TODO не только position, но и интервал для случая "Период"
+            intent.putExtra(TOGGLE_POS, toggleNavigation.getActivePosition());
+            startActivityForResult(intent, 0);
+        });
+
+        toggleNavigation.setOnChoose(this);
+        dpd.setOnCancelListener(this);
+        dpd.setOnTabChanged(this);
     }
 
     @Override
@@ -306,29 +318,17 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
                 throw new NoDataFoundException();
             });
 
-        AbstractLoader<LineData> loader = null;
         setStatus(Status.LOADING);
 
-        switch (id) {
-            case LOADER_1:
-                loader = new AbstractLoader<>(getContext(),
-                        () -> ChartUtils.getChartContent1(abbr, fromDate, toDate));
-                break;
-
-            case LOADER_2:
-                loader = new AbstractLoader<>(getContext(),
-                        () -> ChartUtils.getChartContent2(abbr, fromDate, toDate));
-                break;
-        }
-
-        return loader;
+        return new AbstractLoader<>(getContext(),
+                () -> ChartUtils.getChartContent(abbr, fromDate, toDate, id == LOADER_2));
     }
 
     @Override
-    protected void onDataReceived(LineData models) {
+    public void onDataReceived(LineData models) {
         Utils.logT("Loader", "RatesGraphicFragment.onDataReceived()");
         chartAdapter.setDates(models.getXVals());
-        ChartUtils.setUpChart(mChart, models);
+        ChartUtils.setUpChart(mChart, models, true);
         setStatus(Status.OK);
     }
 
@@ -345,10 +345,12 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     }
 
     @Override
-    protected void setStatus(Status status) {
+    public void setStatus(Status status) {
+
         switch (status) {
             case LOADING:
                 ChartUtils.setDisabledColor(mChart);
+                mChart.setHighlightPerTapEnabled(false);
                 date.setVisibility(View.INVISIBLE);
                 loadingView.start();
                 errorView.setVisibility(View.GONE);

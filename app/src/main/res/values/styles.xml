@@ -7,6 +7,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="sublimePickerStyle">@style/SPDefaultImpl</item>
+        <item name="android:actionMenuTextColor">@color/white</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -17,6 +18,11 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="ToolbarTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="actionMenuTextColor">@color/white</item>
+    </style>
+    `
 
     <!--Error label text style-->
     <style name="ErrorStyle" parent="TextAppearance.AppCompat.Small">
@@ -45,7 +51,16 @@
         <item name="lpd_reverse">false</item>
         <item name="lpd_strokeSize">6dp</item>
         <item name="lpd_verticalAlign">center</item>
-        <item name="lpd_transformInterpolator">@android:anim/accelerate_decelerate_interpolator</item>
+        <item name="lpd_transformInterpolator">@android:anim/accelerate_decelerate_interpolator
+        </item>
+    </style>
+
+    <style name="ToolbarText">
+        <item name="android:layout_marginLeft">4dp</item>
+        <item name="android:layout_marginRight">4dp</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
 </resources>

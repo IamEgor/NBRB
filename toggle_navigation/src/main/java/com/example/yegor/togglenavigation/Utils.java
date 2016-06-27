@@ -1,7 +1,6 @@
 package com.example.yegor.togglenavigation;
 
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,8 +41,6 @@ class Utils {
 
     private static int getMoreOrEqualsThanPx(int real, int desiredDips, DisplayMetrics metrics) {
         desiredDips = desiredDips * (metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-        Log.w("getMoreOrEqualsThanPx", "real - " + real);
-        Log.w("getMoreOrEqualsThanPx", "desiredDips - " + desiredDips);
         return real > desiredDips ? real : desiredDips;
     }
 

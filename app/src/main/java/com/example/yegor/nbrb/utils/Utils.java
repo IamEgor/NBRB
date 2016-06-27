@@ -51,11 +51,13 @@ public final class Utils {
     }
 
     public static int getStatusBarHeight() {
+
         int result = 0;
         int resourceId = App.getContext().getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
+
+        if (resourceId > 0)
             result = App.getContext().getResources().getDimensionPixelSize(resourceId);
-        }
+
         return result;
     }
 
@@ -73,23 +75,27 @@ public final class Utils {
     }
 
     public static void logT(String tag, Object... objects) {
+
         if (!DEBUG_MODE)
             return;
 
         String message = "";
         for (Object o : objects)
             message += o.toString() + " | ";
+
         System.out.println("[" + tag + "] " + message);
         Log.w(tag, message);
     }
 
     public static void log(Object... objects) {
+
         if (!DEBUG_MODE)
             return;
 
         String message = "";
         for (Object o : objects)
             message += o.toString() + " | ";
+
         System.out.println(TAG + " " + message);
         Log.w(TAG, message);
     }

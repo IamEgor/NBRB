@@ -51,4 +51,5 @@ dependencies {
 
     compile 'com.github.rey5137:material:1.2.4'
     compile 'com.github.florent37:viewanimator:1.0.4'
+    compile 'jp.wasabeef:recyclerview-animators:2.2.3'
 }

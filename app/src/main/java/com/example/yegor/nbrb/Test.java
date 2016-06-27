@@ -7,6 +7,8 @@ import com.example.yegor.nbrb.utils.DateUtils;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Test {
 
@@ -42,6 +44,14 @@ public class Test {
 
         Calendar calendar = Calendar.getInstance();
         System.out.println("Calendar.YEAR = " + calendar.get(Calendar.YEAR));
+
+
+        String mydata = "1000 GFD";
+        Pattern pattern = Pattern.compile("\\S{3}$");
+        Matcher matcher = pattern.matcher(mydata);
+        if (matcher.find()) {
+            System.out.println("matcher = " + matcher.group(0));
+        }
 
     }
 

@@ -7,9 +7,9 @@ import com.annimon.stream.Stream;
 import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
-import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
 import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.views.MyMarkerView;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -19,82 +19,35 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 public final class ChartUtils {
 
-    public static LineData getChartContent1(String abbr, String fromDate, String toDate)
+    public static LineData getChartContent(String abbr, String fromDate, String toDate, boolean inflate)
             throws IOException {
 
-        CurrencyModel currency = MySQLiteClass.getInstance().getCurrencyModelByAbbr(abbr, fromDate);
-        List<ExRatesDynModel> content = SoapUtils.getRatesDyn(currency.getIdStr(), fromDate, toDate);
+        int id = MySQLiteClass.getInstance().getCurrencyModelByAbbr(abbr, fromDate).getId();
 
-        if (expectedLength(fromDate, toDate) != content.size())
+        List<ExRatesDynModel> content = SoapUtils.getRatesDyn(
+                String.valueOf(id),
+                !inflate ? fromDate : DateUtils.getFirstDayOfMonth(fromDate),
+                !inflate ? toDate : DateUtils.getFirstDayOfMonth(toDate));
+
+
+        if (!inflate && expectedLength(fromDate, toDate) != content.size())
             throw new ExchangeRateAssignsOnceInMonth();
 
-        int scale = currency.getScale();
-        float[] floats = new float[content.size()];
-        String[] strings = new String[content.size()];
-
-        for (int i = 0; i < content.size(); i++) {
-            strings[i] = content.get(i).getDate();
-            floats[i] = content.get(i).getRate() / scale;
-        }
-
-        List<Entry> yVals = new ArrayList<>();
-
-        for (int i = 0; i < floats.length; i++) {
-            yVals.add(new Entry(floats[i], i));
-        }
-
-        LineDataSet set1 = new LineDataSet(yVals, null);
-        set1.setDrawValues(false);
-        set1.setFillAlpha(192);
-        set1.enableDashedLine(10f, 5f, 0f);
-        set1.enableDashedHighlightLine(10f, 5f, 0f);
-        set1.setColor(Utils.getColor(R.color.colorAccent));
-        set1.setCircleColor(Utils.getColor(R.color.colorAccent));
-        set1.setLineWidth(1f);
-        set1.setCircleRadius(3f);
-        set1.setDrawCircleHole(false);
-        set1.setValueTextSize(9f);
-        set1.setDrawFilled(true);
-        set1.disableDashedLine();
-
-        if (Utils.getSDKInt() < 18)
-            set1.setFillColor(Utils.getColor(R.color.colorPrimary));
-        else {
-            Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.fade_primary);
-            set1.setFillDrawable(drawable);
-        }
-
-        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-        dataSets.add(set1);
-
-        return new LineData(strings, dataSets);
-    }
-
-    public static LineData getChartContent2(String abbr, String fromDate, String toDate)
-            throws IOException {
-
-        CurrencyModel currency = MySQLiteClass.getInstance().getCurrencyModelByAbbr(abbr, fromDate);
-        List<ExRatesDynModel> content = SoapUtils.getRatesDyn(
-                currency.getIdStr(),
-                DateUtils.getFirstDayOfMonth(fromDate),
-                DateUtils.getFirstDayOfMonth(toDate));
-
-        int scale = currency.getScale();
-        float[]  floats;
-        String[]   strings;
+        float[] floats;
+        String[] strings;
 
         List<InflatedDates> dates = new ArrayList<>(content.size());
 
         for (int i = 0; i < content.size(); i++)
-            dates.add(new InflatedDates(content.get(i).getDate(), content.get(i).getRate() / scale));
+            dates.add(new InflatedDates(content.get(i).getDate(), content.get(i).getRate()));
 
-        inflateSet(fromDate, toDate, dates);//TODO+++++
+        if (inflate)
+            inflateSet(fromDate, toDate, dates);
 
         floats = new float[dates.size()];
         strings = new String[dates.size()];
@@ -110,48 +63,40 @@ public final class ChartUtils {
             yVals.add(new Entry(floats[i], i));
         }
 
-        LineDataSet set1 = new LineDataSet(yVals, null);
-        set1.setDrawValues(false);
-        set1.setFillAlpha(192);
+        return new LineData(strings, getILineDataSet(yVals));
+    }
 
-        // set the line to be drawn like this "- - - - - -"
-        set1.enableDashedLine(10f, 5f, 0f);
-        set1.enableDashedHighlightLine(10f, 5f, 0f);
-        set1.setColor(Utils.getColor(R.color.colorAccent));
-        set1.setCircleColor(Utils.getColor(R.color.colorAccent));
-        set1.setLineWidth(1f);
-        set1.setCircleRadius(3f);
-        set1.setDrawCircleHole(false);
-        set1.setValueTextSize(9f);
-        set1.setDrawFilled(true);
-        set1.disableDashedLine();
+    public static List<ILineDataSet> getILineDataSet(List<Entry> yVals) {
 
-        if (Utils.getSDKInt() >= 18) {
+        LineDataSet set = new LineDataSet(yVals, null);
+
+        set.setDrawValues(false);
+        set.setFillAlpha(192);
+        set.enableDashedLine(10f, 5f, 0f);
+        set.enableDashedHighlightLine(10f, 5f, 0f);
+        set.setColor(Utils.getColor(R.color.colorAccent));
+        set.setCircleColor(Utils.getColor(R.color.colorAccent));
+        set.setLineWidth(1f);
+        set.setCircleRadius(3f);
+        set.setDrawCircleHole(false);
+        set.setValueTextSize(9f);
+        set.setDrawFilled(true);
+        set.disableDashedLine();
+
+        if (Utils.getSDKInt() < 18)
+            set.setFillColor(Utils.getColor(R.color.colorPrimary));
+        else {
             Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.fade_primary);
-            set1.setFillDrawable(drawable);
-        } else {
-            set1.setFillColor(Utils.getColor(R.color.colorPrimary));
+            set.setFillDrawable(drawable);
         }
 
-        ArrayList<ILineDataSet> dataSets = new ArrayList<>();
-        dataSets.add(set1);
+        List<ILineDataSet> dataSets = new ArrayList<>();
+        dataSets.add(set);
 
-        return new LineData(strings, dataSets);
+        return dataSets;
     }
 
-    public static LineData getChartContent3(String abbr, String fromDate, String toDate)
-            throws IOException {
-
-        Calendar calendar1 = DateUtils.getCalendar(fromDate);
-        Calendar calendar2 = DateUtils.getCalendar(toDate);
-
-        calendar1.set(Calendar.DAY_OF_MONTH, 1);
-        calendar2.set(Calendar.DAY_OF_MONTH, 1);
-
-        return getChartContent1(abbr, DateUtils.format(calendar1), DateUtils.format(calendar2));
-    }
-
-    public static void setUpChart(LineChart mChart, LineData content) {
+    public static void setUpChart(LineChart mChart, LineData content, boolean markerView) {
 
         mChart.setData(content);
         mChart.invalidate();
@@ -161,8 +106,11 @@ public final class ChartUtils {
         mChart.getXAxis().setPosition(XAxis.XAxisPosition.TOP);
         mChart.getAxisRight().setEnabled(false);
 
-        //MyMarkerView mv = new MyMarkerView(App.getContext(), R.layout.custom_marker_view, content.getXVals());
-        //mChart.setMarkerView(mv);
+        if (markerView) {
+            MyMarkerView mv = new MyMarkerView(App.getContext(), R.layout.custom_marker_view, content.getXVals());
+            mChart.setMarkerView(mv);
+        }
+
     }
 
     public static void setDisabledColor(LineChart chart) {

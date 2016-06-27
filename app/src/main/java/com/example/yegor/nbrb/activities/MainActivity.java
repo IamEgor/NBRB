@@ -9,7 +9,7 @@ import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.adapters.MainPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
-
+    
     private ViewPager mViewPager;
 
     @Override
@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
 
         mViewPager.setCurrentItem(1);
-
     }
 
     public void setCurrentItem(int item, boolean smoothScroll) {

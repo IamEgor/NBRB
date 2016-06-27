@@ -28,7 +28,6 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
     private List<ButtonParam> params;
     private List<Integer> ids;
 
-
     private int activeId;
     private int previousSelectedId;
     private int canRepeatId;
@@ -65,6 +64,10 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         return activeId;
     }
 
+    public int getActivePosition() {
+        return getPositionById(getActiveId());
+    }
+
     public int getPreviousSelectedId() {
         return previousSelectedId;
     }
@@ -78,7 +81,7 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         this.onChoose = onChoose;
     }
 
-    public void setActive(int activeId) {
+    private void setActive(int activeId) {
 
         previousSelectedId = this.activeId;
         this.setActiveStateless(activeId);
@@ -95,7 +98,6 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
                     resources.getColor(ACTIVE_COLOR) : resources.getColor(IN_ACTIVE_COLOR));
             button.setTextColor(id == activeId ?
                     resources.getColor(IN_ACTIVE_COLOR) : resources.getColor(ACTIVE_COLOR));
-
         }
     }
 
@@ -105,10 +107,9 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
 
     private int getPositionById(int id) {
 
-        for (int i = 0; i < params.size(); i++) {
+        for (int i = 0; i < params.size(); i++)
             if (params.get(i).getId() == id)
                 return i;
-        }
 
         throw new RuntimeException("No such position.");
     }
@@ -149,7 +150,6 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
 
             if (param.isCanRepeat())
                 canRepeatId = param.getId();
-
         }
     }
 

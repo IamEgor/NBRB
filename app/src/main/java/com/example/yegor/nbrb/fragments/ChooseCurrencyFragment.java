@@ -35,14 +35,8 @@ public class ChooseCurrencyFragment extends Fragment implements
 
     private List<SpinnerModel> models;
 
-    public static ChooseCurrencyFragment newInstance(Bundle args) {
-
-        ChooseCurrencyFragment fragment = new ChooseCurrencyFragment();
-
-        if (args != null)
-            fragment.setArguments(args);
-
-        return fragment;
+    public static ChooseCurrencyFragment newInstance() {
+        return new ChooseCurrencyFragment();
     }
 
     @Override
@@ -67,6 +61,7 @@ public class ChooseCurrencyFragment extends Fragment implements
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
         inflater.inflate(R.menu.menu_currencies, menu);
 
         final MenuItem item = menu.findItem(R.id.action_search);
@@ -76,9 +71,12 @@ public class ChooseCurrencyFragment extends Fragment implements
 
     @Override
     public boolean onQueryTextChange(String query) {
+
         final List<SpinnerModel> filteredModelList = filter(models, query);
+
         adapter.animateTo(filteredModelList);
         rv.scrollToPosition(0);
+
         return true;
     }
 
@@ -89,6 +87,7 @@ public class ChooseCurrencyFragment extends Fragment implements
 
     @Override
     public void onItemClick(SpinnerModel model) {
+
         Intent intent = new Intent();
         intent.putExtra(EXTRA, model);
         getActivity().setResult(Activity.RESULT_OK, intent);
@@ -100,15 +99,18 @@ public class ChooseCurrencyFragment extends Fragment implements
         query = query.toLowerCase();
 
         final List<SpinnerModel> filteredModelList = new ArrayList<>();
+
         for (SpinnerModel model : models) {
+
             final String abbr = model.getAbbr().toLowerCase();
             final String name = model.getName().toLowerCase();
+
             if (abbr.contains(query) || name.contains(query)) {
                 filteredModelList.add(model);
             }
         }
+
         return filteredModelList;
     }
-
 
 }

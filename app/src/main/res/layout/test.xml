@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar_content"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:background="@color/colorPrimary">
+
+    <TextView
+        android:id="@+id/rate"
+        style="@style/ToolbarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:gravity="end"
+        android:minWidth="64sp"/>
+
+    <TextView
+        android:id="@+id/byr"
+        style="@style/ToolbarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/rate"
+        android:layout_toRightOf="@+id/rate"
+        android:text="BYR"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/date"
+        style="@style/ToolbarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/byr"
+        android:layout_toLeftOf="@+id/scale"
+        android:layout_toRightOf="@+id/byr"
+        android:layout_toStartOf="@+id/scale"
+        android:gravity="center"
+        android:textStyle="normal" />
+
+    <TextView
+        android:id="@+id/scale"
+        style="@style/ToolbarText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_toLeftOf="@+id/abbr"
+        android:layout_toStartOf="@+id/abbr"
+        android:gravity="end"
+        android:minWidth="32sp"
+        android:text="1" />
+
+    <Button
+        android:id="@+id/abbr"
+        style="@style/ToolbarText"
+        android:layout_width="72dp"
+        android:layout_height="36dp"
+        android:layout_toLeftOf="@+id/fullscreen"
+        android:layout_toStartOf="@+id/fullscreen"
+        android:background="@drawable/layout_bg2"
+        android:text="USD"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold" />
+
+
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/fullscreen"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:background="@null"
+        android:src="@drawable/ic_fullscreen_exit_32dp" />
+
+</RelativeLayout>

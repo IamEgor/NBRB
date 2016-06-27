@@ -9,27 +9,38 @@ import com.example.yegor.nbrb.fragments.ChooseCurrencyFragment;
 
 public class ChooseCurrencyActivity extends AppCompatActivity {
 
+    private final static int ENTER = R.anim.push_up_in;
+    private final static int EXIT = R.anim.push_down_out;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        overridePendingTransition(ENTER, EXIT);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, ChooseCurrencyFragment.newInstance(null))
-                    .commit();
-        }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, ChooseCurrencyFragment.newInstance())
+                .commit();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        finish();
+        overridePendingTransition(ENTER, EXIT);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         if (android.R.id.home == item.getItemId()) {
             finish();
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
