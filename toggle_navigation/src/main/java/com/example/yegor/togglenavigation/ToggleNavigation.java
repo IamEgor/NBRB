@@ -81,13 +81,13 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         this.onChoose = onChoose;
     }
 
-    private void setActive(int activeId) {
+    private void setActiveId(int activeId) {
 
         previousSelectedId = this.activeId;
-        this.setActiveStateless(activeId);
+        this.setActiveIdStateless(activeId);
     }
 
-    public void setActiveStateless(int activeId) {
+    public void setActiveIdStateless(final int activeId) {
         this.activeId = activeId;
 
         for (ButtonParam param : params) {
@@ -101,8 +101,33 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         }
     }
 
+    public void setActivePosition(final int activePosition) {
+
+        if (activePosition < 0 || activePosition > params.size() - 1)
+            throw new RuntimeException("No such position.");
+
+        ButtonParam buttonParam;
+
+        for (int i = 0; i < params.size(); i++) {
+
+            buttonParam = params.get(i);
+
+            int id = buttonParam.getId();
+            Button button = (Button) findViewById(id);
+
+            if (i == activePosition)
+                activeId = id;
+
+            buttonParam.setActive(id == activeId);
+            button.setBackgroundColor(id == activeId ?
+                    resources.getColor(ACTIVE_COLOR) : resources.getColor(IN_ACTIVE_COLOR));
+            button.setTextColor(id == activeId ?
+                    resources.getColor(IN_ACTIVE_COLOR) : resources.getColor(ACTIVE_COLOR));
+        }
+    }
+
     public void setPreviousActive() {
-        setActiveStateless(previousSelectedId);
+        setActiveIdStateless(previousSelectedId);
     }
 
     private int getPositionById(int id) {
@@ -159,7 +184,7 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
         if (activeId == v.getId() && canRepeatId != v.getId())
             return;
 
-        setActive(v.getId());
+        setActiveId(v.getId());
 
         if (onChoose == null)
             throw new UnsupportedOperationException("You must implement callback operation");

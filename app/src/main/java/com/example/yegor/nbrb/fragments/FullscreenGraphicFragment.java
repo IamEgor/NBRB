@@ -74,8 +74,7 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
         abbr.setText(arguments.getString(ABBR));
         scale.setText(arguments.getString(SCALE));
         abbr.setText(arguments.getString(ABBR));
-        toggleNavigation.setActiveStateless(arguments.getInt(TOGGLE_POS));
-
+        toggleNavigation.setActivePosition(arguments.getInt(TOGGLE_POS));
 
         abbr.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
@@ -95,7 +94,7 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case android.R.id.home:
                 Toast.makeText(getActivity(), "Back from fragment", Toast.LENGTH_SHORT).show();
                 getActivity().onBackPressed();
@@ -112,7 +111,7 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
                 ChartUtils.setDisabledColor(mChart);
                 mChart.setHighlightPerTapEnabled(false);
                 date.setVisibility(View.INVISIBLE);
-                loadingView.setVisibility(View.GONE);
+                loadingView.setVisibility(View.VISIBLE);
                 errorView.setVisibility(View.GONE);
                 //TODO
                 //rate.setText(R.string.rate_not_selected);

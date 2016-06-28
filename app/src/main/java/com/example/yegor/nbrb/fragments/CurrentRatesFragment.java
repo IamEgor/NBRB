@@ -57,15 +57,14 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
 
-        adapter = new CurrentRatesAdapter(new ArrayList<>(0));
+        LinearLayoutManager manager = Utils.isPortrait(getActivity()) ?
+                new LinearLayoutManager(getContext()) : new GridLayoutManager(getContext(), 2);
 
-        if (Utils.isPortrait(getActivity()))
-            rv.setLayoutManager(new LinearLayoutManager(getContext()));
-        else
-            rv.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        adapter = new CurrentRatesAdapter(new ArrayList<>(0), manager);
 
+        rv.setHasFixedSize(true);
+        rv.setLayoutManager(manager);
         rv.setAdapter(adapter);
-        //rv.setItemAnimator(new SlideInUpAnimator());
 
         restartLoader();
     }

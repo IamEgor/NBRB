@@ -16,7 +16,7 @@
         app:theme="@style/ToolbarTheme">
 
         <include
-            layout="@layout/test"
+            layout="@layout/include_toolbar_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

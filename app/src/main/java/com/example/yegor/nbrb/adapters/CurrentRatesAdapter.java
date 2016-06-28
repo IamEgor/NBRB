@@ -3,6 +3,7 @@ package com.example.yegor.nbrb.adapters;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,24 +22,22 @@ import java.util.List;
 
 public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapter.ViewHolder> {
 
-    private List<DailyExRatesOnDateModel> models;
+    private final int ANIMATION_DELAY = 100;
 
-    /*
-    private final int DELAY = 120;
-    private final int ANIM_DURATION = 500;
-    private int cur_delay;
-    private long prevTime;
-    */
+    private List<DailyExRatesOnDateModel> models;
+    private LinearLayoutManager manager;
 
     private int lastPosition = -1;
+    private int cur_delay;
 
-    public CurrentRatesAdapter(List<DailyExRatesOnDateModel> models) {
+    public CurrentRatesAdapter(List<DailyExRatesOnDateModel> models, LinearLayoutManager manager) {
         this.models = models;
+        this.manager = manager;
     }
 
     public void setModels(List<DailyExRatesOnDateModel> models) {
-
         this.models = models;
+
         notifyDataSetChanged();
     }
 
@@ -53,37 +52,34 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
         setAnimation(holder.cv, position);
     }
 
-    private void setAnimation(View viewToAnimate, int position) {
+    @Override
+    public void onViewDetachedFromWindow(ViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
 
-        if (position > lastPosition) {
-
-            Animation animation = AnimationUtils.loadAnimation(App.getContext(), R.anim.slide_in_up);
-            /*
-            animation.setAnimationListener(new OnAnimationEnd() {
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    //TODO change 8
-                    if (cur_delay - DELAY > 0 )
-                        cur_delay -= DELAY;
-                }
-            });
-            animation.setStartOffset(cur_delay);
-
-            long curTime = System.currentTimeMillis();
-            if (Math.abs(curTime - prevTime) < ANIM_DURATION / 5 && cur_delay < DELAY * 8)//0.1c 0.960c
-                cur_delay += DELAY;
-            */
-
-            viewToAnimate.startAnimation(animation);
-            lastPosition = position;
-            //prevTime = System.currentTimeMillis();
-        }
-
+        holder.clearAnimation();
     }
 
     @Override
     public int getItemCount() {
         return models.size();
+    }
+
+    private void setAnimation(View viewToAnimate, int position) {
+
+        if (position > lastPosition) {
+
+            Animation animation = AnimationUtils.loadAnimation(App.getContext(), R.anim.slide_in_up);
+
+            if (manager.findFirstVisibleItemPosition() == manager.findFirstCompletelyVisibleItemPosition()) {
+                animation.setStartOffset(cur_delay);
+                cur_delay += ANIMATION_DELAY;
+            } else
+                cur_delay = 0;
+
+            viewToAnimate.startAnimation(animation);
+            lastPosition = position;
+        }
+
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -121,6 +117,10 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
             abbr.setText(model.getAbbreviation());
             rate.setText(String.valueOf(model.getRate()));
             name.setText(model.getQuotName());
+        }
+
+        public void clearAnimation() {
+            itemView.clearAnimation();
         }
 
     }
