@@ -2,10 +2,10 @@ package com.example.yegor.nbrb.utils;
 
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
+import com.example.yegor.nbrb.exceptions.UnknownException;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
@@ -51,7 +51,7 @@ public final class SoapUtils {
 
     public static List<CurrencyModel> getCurrenciesList() throws IOException {
 
-        List<CurrencyModel> list = new ArrayList<>(231);
+        List<CurrencyModel> list;
 
         Map<String, String> map = new HashMap<>();
         map.put(PROPERTY3, String.valueOf(0));
@@ -59,13 +59,15 @@ public final class SoapUtils {
         SoapObject response = getResponse(new RequestProps(METHOD_NAME3, SOAP_ACTION3, map));
         SoapObject dailyExRatesOnDate;
 
-        for (int k = 0; k < response.getPropertyCount(); k++) {
+        int propertiesCount = response.getPropertyCount();
+        list = new ArrayList<>(propertiesCount);
+
+        for (int k = 0; k < propertiesCount; k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
             list.add(new CurrencyModel(dailyExRatesOnDate));
         }
 
         return list;
-
     }
 
     public static DailyExRatesOnDateModel getCurrencyDaily(@NonNull String currency, @NonNull String time)
@@ -77,7 +79,9 @@ public final class SoapUtils {
         SoapObject response = getResponse(new RequestProps(METHOD_NAME, SOAP_ACTION, map));
         SoapObject dailyExRatesOnDate;
 
-        for (int k = 0; k < response.getPropertyCount(); k++) {
+        int propertiesCount = response.getPropertyCount();
+
+        for (int k = 0; k < propertiesCount; k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
             if (currency.equals(dailyExRatesOnDate.getProperty(DailyExRatesOnDateModel.ABBREV).toString()))
                 return new DailyExRatesOnDateModel(dailyExRatesOnDate);
@@ -95,7 +99,9 @@ public final class SoapUtils {
         SoapObject response = getResponse(new RequestProps(METHOD_NAME4, SOAP_ACTION4, map));
         SoapObject dailyExRatesOnDate;
 
-        for (int k = 0; k < response.getPropertyCount(); k++) {
+        int propertiesCount = response.getPropertyCount();
+
+        for (int k = 0; k < propertiesCount; k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
             if (currency.equals(dailyExRatesOnDate.getProperty(DailyExRatesOnDateModel.ABBREV).toString()))
                 return new DailyExRatesOnDateModel(dailyExRatesOnDate);
@@ -115,7 +121,9 @@ public final class SoapUtils {
         SoapObject response = getResponse(new RequestProps(METHOD_NAME, SOAP_ACTION, map));
         SoapObject dailyExRatesOnDate;
 
-        for (int k = 0; k < response.getPropertyCount(); k++) {
+        int propertiesCount = response.getPropertyCount();
+
+        for (int k = 0; k < propertiesCount; k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
             list.add(new DailyExRatesOnDateModel(dailyExRatesOnDate));
         }
@@ -127,7 +135,7 @@ public final class SoapUtils {
     public static List<ExRatesDynModel> getRatesDyn(String curId, String fromDate, String toDate)
             throws IOException {
 
-        List<ExRatesDynModel> list = new ArrayList<>(16);
+        List<ExRatesDynModel> list;
 
         Map<String, String> map = new HashMap<>(3);
 
@@ -138,7 +146,10 @@ public final class SoapUtils {
         SoapObject response = getResponse(new RequestProps(METHOD_NAME2, SOAP_ACTION2, map));
         SoapObject dailyExRatesOnDate;
 
-        for (int k = 0; k < response.getPropertyCount(); k++) {
+        int propertiesCount = response.getPropertyCount();
+        list = new ArrayList<>(propertiesCount);
+
+        for (int k = 0; k < propertiesCount; k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
             list.add(new ExRatesDynModel(dailyExRatesOnDate));
         }
@@ -152,13 +163,12 @@ public final class SoapUtils {
 
         System.setProperty("http.keepAlive", "false");
 
-        for (String key : props.getProperties().keySet()) {
+        for (String key : props.getProperties().keySet())
             request.addProperty(key, props.getProperties().get(key));
-        }
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.setOutputSoapObject(request);
-        envelope.dotNet = true;//-
+        envelope.dotNet = true;
 
         HttpTransportSE httpTransport = new HttpTransportSE(URL);
         httpTransport.debug = true;
@@ -169,22 +179,17 @@ public final class SoapUtils {
 
             SoapObject response = (SoapObject) envelope.getResponse();
 
-            System.out.println("[SoapUtils]  envelope.getResponse() - " + envelope.getResponse());
-            Log.w("SoapUtils", "  envelope.getResponse() - " + envelope.getResponse());
-
             if (response == null)
                 throw new NoDataFoundException();
 
-            //if (!response.hasProperty("diffgram"))
-            //  throw new NoDataFoundException();
             response = (SoapObject) response.getProperty(1);//anyType
             response = (SoapObject) response.getProperty(0);//newDataSet
 
             return response;
 
         } catch (XmlPullParserException e) {
-            Log.e(TAG, "XmlPullParserException : " + e.getMessage());
-            throw new RuntimeException();
+            Utils.logT(UnknownException.TAG, e.getMessage());
+            throw new UnknownException(e.getMessage());
         }
 
     }

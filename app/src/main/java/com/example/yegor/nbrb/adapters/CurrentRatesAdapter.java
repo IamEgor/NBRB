@@ -22,13 +22,12 @@ import java.util.List;
 
 public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapter.ViewHolder> {
 
-    private final int ANIMATION_DELAY = 100;
-
     private List<DailyExRatesOnDateModel> models;
     private LinearLayoutManager manager;
 
     private int lastPosition = -1;
     private int cur_delay;
+    private boolean firstBind = true;
 
     public CurrentRatesAdapter(List<DailyExRatesOnDateModel> models, LinearLayoutManager manager) {
         this.models = models;
@@ -70,11 +69,17 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
 
             Animation animation = AnimationUtils.loadAnimation(App.getContext(), R.anim.slide_in_up);
 
-            if (manager.findFirstVisibleItemPosition() == manager.findFirstCompletelyVisibleItemPosition()) {
-                animation.setStartOffset(cur_delay);
-                cur_delay += ANIMATION_DELAY;
-            } else
-                cur_delay = 0;
+            if (firstBind) {
+
+                if (manager.findFirstVisibleItemPosition() ==
+                        manager.findFirstCompletelyVisibleItemPosition()) {
+
+                    animation.setStartOffset(cur_delay);
+                    int ANIMATION_DELAY = 100;
+                    cur_delay += ANIMATION_DELAY;
+                } else
+                    firstBind = false;
+            }
 
             viewToAnimate.startAnimation(animation);
             lastPosition = position;

@@ -64,7 +64,6 @@ public class MySQLiteClass {
         values.put(CurrencyModel.PARENT_ID, currency.getParentId());
 
         thisDataBase.insert(CURRENCY_TABLE, null, values);
-
     }
 
     public void addCurrencies(List<CurrencyModel> currencies) {
@@ -73,7 +72,6 @@ public class MySQLiteClass {
 
         for (CurrencyModel currency : currencies)
             addCurrency(currency);
-
     }
 
     public List<SpinnerModel> getCurrenciesDescription() {
@@ -101,7 +99,6 @@ public class MySQLiteClass {
         cursor.close();
 
         return list;
-
     }
 
     public Cursor getCurrenciesDescriptionCursor() {

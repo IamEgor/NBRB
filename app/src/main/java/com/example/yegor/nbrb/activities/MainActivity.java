@@ -9,7 +9,7 @@ import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.adapters.MainPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
-    
+
     private ViewPager mViewPager;
 
     @Override
@@ -17,11 +17,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        MainPagerAdapter mSectionsPagerAdapter = new MainPagerAdapter(getSupportFragmentManager());
+        MainPagerAdapter pagerAdapter = new MainPagerAdapter(getSupportFragmentManager(), this);
 
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setOffscreenPageLimit(2);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setAdapter(pagerAdapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);

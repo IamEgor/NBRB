@@ -35,6 +35,7 @@ public final class Utils {
     }
 
     public static boolean hasConnection() {
+
         ConnectivityManager cm =
                 (ConnectivityManager) App.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <array name="tab_icon">
+        <item>@drawable/tab_icon_by_date_24dp</item>
+        <item>@drawable/tab_icon_current_rates_24dp</item>
+        <item>@drawable/tab_icon_graphic_24dp</item>
+    </array>
+
+    <string-array name="tab_text">
+        <item>@string/main_pager_by_date</item>
+        <item>@string/main_pager_current_rates</item>
+        <item>@string/main_pager_graphic</item>
+    </string-array>
+    
+</resources>

@@ -1,5 +1,6 @@
 package com.example.yegor.nbrb.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -69,26 +70,31 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
         Bundle arguments = getArguments();
         ParcelableLineData models = arguments.getParcelable(CHART_DATA);
 
+        mChart.setScaleEnabled(false);
         chartAdapter.setDates(models.getLineData().getXVals());
-        ChartUtils.setUpChart(mChart, models.getLineData(), true);
+        ChartUtils.setUpChart(mChart, models.getLineData(), false);
         abbr.setText(arguments.getString(ABBR));
         scale.setText(arguments.getString(SCALE));
         abbr.setText(arguments.getString(ABBR));
         toggleNavigation.setActivePosition(arguments.getInt(TOGGLE_POS));
 
+
         abbr.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
-            startActivityForResult(intent, REQUEST_CODE);
+            startActivityForResult(intent, REQUEST_CODE_CURRENCY);
         });
 
         fullscreen.setOnClickListener(v -> {
             Toast.makeText(getActivity(), "intent.putExtra(CHART_DATA)", Toast.LENGTH_SHORT).show();
-            /*
+
             Intent intent = new Intent();
-            intent.putExtra(CHART_DATA, model);
+            intent.putExtra(CHART_DATA, new ParcelableLineData(mChart.getLineData()));
+            intent.putExtra(ABBR, abbr.getText().toString());
+            intent.putExtra(SCALE, scale.getText().toString());
+            //TODO не только position, но и интервал для случая "Период"
+            intent.putExtra(TOGGLE_POS, toggleNavigation.getActivePosition());
             getActivity().setResult(Activity.RESULT_OK, intent);
             getActivity().finish();
-            */
         });
     }
 
@@ -96,7 +102,6 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Toast.makeText(getActivity(), "Back from fragment", Toast.LENGTH_SHORT).show();
                 getActivity().onBackPressed();
                 return true;
         }

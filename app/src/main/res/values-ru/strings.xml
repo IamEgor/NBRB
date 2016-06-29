@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="main_pager_by_date">По дате</string>
+    <string name="main_pager_current_rates">Текущие курсы</string>
+    <string name="main_pager_graphic">График</string>
+
+    <string name="retry">Повторить</string>
+    <string name="fragment_by_date_wrong_input">Неверный формат даты</string>
+    <string name="date_end">До %s</string>
+    <string name="action_search">Поиск</string>
+    <string name="title_tab_start_date">Начальная дата</string>
+    <string name="ttile_tab_end_date">Конечная дата</string>
+
+</resources>

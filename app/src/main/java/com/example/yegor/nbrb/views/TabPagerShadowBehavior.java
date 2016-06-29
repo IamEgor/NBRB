@@ -26,10 +26,12 @@ public class TabPagerShadowBehavior extends CoordinatorLayout.Behavior<View> {
 
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
+
         if (dependency instanceof AppBarLayout) {
             dependency.getGlobalVisibleRect(rect);
             child.setY(rect.bottom - Utils.getStatusBarHeight());
         }
+
         return true;
     }
 

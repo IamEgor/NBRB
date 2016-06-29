@@ -2,10 +2,8 @@ package com.example.yegor.nbrb.views;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 import com.example.yegor.nbrb.utils.ChartUtils;
-import com.example.yegor.nbrb.utils.Utils;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -36,6 +34,7 @@ public class ParcelableLineData implements Parcelable {
     }
 
     public ParcelableLineData(LineData lineData) {
+
         String[] xVals = lineData.getXVals().toArray(new String[lineData.getXVals().size()]);
 
         LineDataSet set = (LineDataSet) lineData.getDataSetByIndex(0);
@@ -51,11 +50,6 @@ public class ParcelableLineData implements Parcelable {
     }
 
     public LineData getLineData() {
-        Utils.logT("getLineData", "xVals = " + TextUtils.join(", ", xVals));
-        Utils.logT("getLineData", "yVals = " + TextUtils.join(", ", yVals));
-        Utils.logT("getLineData", "ChartUtils.getILineDataSet(yVals) = " +
-                TextUtils.join(", ", ChartUtils.getILineDataSet(yVals)));
-
         return new LineData(xVals, ChartUtils.getILineDataSet(yVals));
     }
 

@@ -1,6 +1,7 @@
 package com.example.yegor.nbrb.utils;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.WorkerThread;
 import android.support.v4.content.ContextCompat;
 
 import com.annimon.stream.Stream;
@@ -24,6 +25,7 @@ import java.util.NoSuchElementException;
 
 public final class ChartUtils {
 
+    @WorkerThread
     public static LineData getChartContent(String abbr, String fromDate, String toDate, boolean inflate)
             throws IOException {
 
@@ -35,32 +37,30 @@ public final class ChartUtils {
                 !inflate ? toDate : DateUtils.getFirstDayOfMonth(toDate));
 
 
-        if (!inflate && expectedLength(fromDate, toDate) != content.size())
+        int contentSize = content.size();
+
+        if (!inflate && expectedLength(fromDate, toDate) != contentSize)
             throw new ExchangeRateAssignsOnceInMonth();
 
-        float[] floats;
-        String[] strings;
 
-        List<InflatedDates> dates = new ArrayList<>(content.size());
+        List<InflatedDates> dates = new ArrayList<>(contentSize);
 
-        for (int i = 0; i < content.size(); i++)
-            dates.add(new InflatedDates(content.get(i).getDate(), content.get(i).getRate()));
+        for (ExRatesDynModel model : content)
+            dates.add(new InflatedDates(model.getDate(), model.getRate()));
 
-        if (inflate)
+        if (inflate) {
             inflateSet(fromDate, toDate, dates);
-
-        floats = new float[dates.size()];
-        strings = new String[dates.size()];
-
-        for (int i = 0; i < dates.size(); i++) {
-            floats[i] = dates.get(i).rate;
-            strings[i] = DateUtils.format(dates.get(i).date);
+            contentSize = dates.size();
         }
 
-        List<Entry> yVals = new ArrayList<>();
+        InflatedDates inflatedDate;
+        String[] strings = new String[contentSize];
+        List<Entry> yVals = new ArrayList<>(contentSize);
 
-        for (int i = 0; i < floats.length; i++) {
-            yVals.add(new Entry(floats[i], i));
+        for (int i = 0; i < contentSize; i++) {
+            inflatedDate = dates.get(i);
+            yVals.add(new Entry(inflatedDate.rate, i));
+            strings[i] = DateUtils.format(inflatedDate.date);
         }
 
         return new LineData(strings, getILineDataSet(yVals));
@@ -123,11 +123,13 @@ public final class ChartUtils {
         for (ILineDataSet iSet : sets) {
 
             LineDataSet set = (LineDataSet) iSet;
+
             set.setFillAlpha(128);
             set.setFillColor(Utils.getColor(R.color.dark_grey));
             set.setColor(Utils.getColor(R.color.midi_grey));
             set.setCircleColor(Utils.getColor(R.color.midi_grey));
         }
+
         chart.invalidate();
     }
 
@@ -136,7 +138,7 @@ public final class ChartUtils {
         long date1 = DateUtils.date2longSafe(fromDate);
         long date2 = DateUtils.date2longSafe(toDate);
 
-        return (int) ((date2 - date1 + DateUtils.ONE_DAY) / (1000 * 60 * 60 * 24));
+        return (int) ((date2 - date1 + DateUtils.ONE_DAY) / DateUtils.ONE_DAY);
     }
 
     public static List<InflatedDates> inflateSet(String from, String to, List<InflatedDates> initialArray)

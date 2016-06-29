@@ -53,6 +53,9 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     public static final String ACTION = App.getContext().getPackageName();
     public static final String CHART_DATA = "CHART_DATA";
+    public static final int REQUEST_CODE_CURRENCY = 1;
+    public static final int REQUEST_CODE_FULLSCREEN = 2;
+
 
     protected static final String ABBR = CurrencyModel.ABBR;
     protected static final String FROM_DATE = "FROM_DATE";
@@ -60,7 +63,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     protected static final String SCALE = CurrencyModel.SCALE;
     protected static final String TOGGLE_POS = "TOGGLE_POS";
 
-    protected static final int REQUEST_CODE = 1;
 
     protected TextView scale, date, abbr, rate;
     protected LineChart mChart;
@@ -106,6 +108,8 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
         View rootView = inflater.inflate(R.layout.fragment_rates_graphic, container, false);
 
+        //TODO ViewStub
+
         scale = (TextView) rootView.findViewById(R.id.scale);
         date = (TextView) rootView.findViewById(R.id.date);
         abbr = (TextView) rootView.findViewById(R.id.abbr);
@@ -120,7 +124,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         rootView.findViewById(R.id.retry_btn).setOnClickListener(v -> restartLoader());
         rootView.findViewById(R.id.container2).setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
-            startActivityForResult(intent, REQUEST_CODE);
+            startActivityForResult(intent, REQUEST_CODE_CURRENCY);
         });
         //TODO может быть NPE
         restartLoader(LOADER_1);
@@ -150,7 +154,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
             intent.putExtra(SCALE, scale.getText().toString());
             //TODO не только position, но и интервал для случая "Период"
             intent.putExtra(TOGGLE_POS, toggleNavigation.getActivePosition());
-            startActivityForResult(intent, 0);
+            startActivityForResult(intent, REQUEST_CODE_FULLSCREEN);
         });
 
         toggleNavigation.setOnChoose(this);
@@ -162,19 +166,38 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
 
-            SpinnerModel spinnerModel = data.getParcelableExtra(ChooseCurrencyFragment.EXTRA);
-            abbr.setText(spinnerModel.getAbbr());
-            scale.setText(String.valueOf(spinnerModel.getScale()));
+            Utils.logT("onActivityResult", "requestCode = " + requestCode);
 
-            if (spinnerModel.getDateEnd() != -1) {
-                Toast.makeText(getActivity(), "Обработать случай с dateEnd", Toast.LENGTH_SHORT).show();
+            if (requestCode == REQUEST_CODE_CURRENCY) {
+
+                SpinnerModel spinnerModel = data.getParcelableExtra(ChooseCurrencyFragment.EXTRA);
+                abbr.setText(spinnerModel.getAbbr());
+                scale.setText(String.valueOf(spinnerModel.getScale()));
+
+                if (spinnerModel.getDateEnd() != -1) {
+                    Toast.makeText(getActivity(), "Обработать случай с dateEnd", Toast.LENGTH_SHORT).show();
+                }
+
+                restartLoader(LOADER_1);
+            } else if (requestCode == REQUEST_CODE_FULLSCREEN) {
+
+                Bundle arguments = data.getExtras();
+                ParcelableLineData models = arguments.getParcelable(CHART_DATA);
+
+                mChart.setScaleEnabled(false);
+                chartAdapter.setDates(models.getLineData().getXVals());
+                ChartUtils.setUpChart(mChart, models.getLineData(), true);
+                abbr.setText(arguments.getString(ABBR));
+                scale.setText(arguments.getString(SCALE));
+                toggleNavigation.setActivePosition(arguments.getInt(TOGGLE_POS));
+
+                Utils.logT("onActivityResult", "abbr = " + abbr.getText().toString());
+                Utils.logT("onActivityResult", "scale = " + scale.getText().toString());
+                Utils.logT("onActivityResult", "toggleNavigation ActivePosition= " + toggleNavigation.getActivePosition());
             }
-
-            restartLoader(LOADER_1);
         }
-
     }
 
     @Override
@@ -328,7 +351,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     public void onDataReceived(LineData models) {
         Utils.logT("Loader", "RatesGraphicFragment.onDataReceived()");
         chartAdapter.setDates(models.getXVals());
-        ChartUtils.setUpChart(mChart, models, true);
+        ChartUtils.setUpChart(mChart, models, false);
         setStatus(Status.OK);
     }
 

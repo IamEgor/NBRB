@@ -3,8 +3,6 @@ package com.example.yegor.nbrb.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.example.yegor.nbrb.App;
-import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.utils.DateUtils;
 
 public class SpinnerModel implements Parcelable {
@@ -58,16 +56,6 @@ public class SpinnerModel implements Parcelable {
 
     public String getDateEndStr() {
         return dateEnd == -1 ? "" : DateUtils.format(dateEnd);
-    }
-
-    @Override
-    public String toString() {
-
-        if (dateEnd == -1)
-            return String.format(App.getContext().getString(R.string.searchable_spinner_item_text1), abbr, name);
-        else
-            return String.format(App.getContext().getString(R.string.searchable_spinner_item_text2), abbr, name, DateUtils.format(dateEnd));
-
     }
 
     @Override

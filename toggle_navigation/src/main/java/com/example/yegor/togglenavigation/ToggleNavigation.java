@@ -30,6 +30,7 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
 
     private int activeId;
     private int previousSelectedId;
+    //Invoke callback even on active view
     private int canRepeatId;
 
     public ToggleNavigation(Context context, List<ButtonParam> labels) {
@@ -65,7 +66,7 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
     }
 
     public int getActivePosition() {
-        return getPositionById(getActiveId());
+        return getPositionById(activeId);
     }
 
     public int getPreviousSelectedId() {
@@ -84,13 +85,14 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
     private void setActiveId(int activeId) {
 
         previousSelectedId = this.activeId;
-        this.setActiveIdStateless(activeId);
+        setActiveIdStateless(activeId);
     }
 
     public void setActiveIdStateless(final int activeId) {
         this.activeId = activeId;
 
         for (ButtonParam param : params) {
+
             int id = param.getId();
             param.setActive(id == activeId);
             Button button = (Button) findViewById(id);
@@ -107,6 +109,7 @@ public class ToggleNavigation extends LinearLayout implements View.OnClickListen
             throw new RuntimeException("No such position.");
 
         ButtonParam buttonParam;
+        activeId = 0;
 
         for (int i = 0; i < params.size(); i++) {
 
