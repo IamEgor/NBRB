@@ -4,8 +4,10 @@ import com.annimon.stream.Stream;
 import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.utils.DateUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,42 +17,38 @@ public class Test {
     static String[] givenDates = {"2000-05-06", "2000-05-16", "2000-05-18", "2000-05-26"};
     static float[] givenRates = {2.5f, 11.15f, 6.25f, 7.15f};
 
+    static String[] givenDates2 = {"2007-11-30T00:00:00+03:00", "2016-06-30T00:00:00+03:00",
+            "2050-01-01T00:00:00+03:00", "2013-05-31T00:00:00+03:00"};
+
+    static SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+    static SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+
     public static void main(String[] args) {
-
-        String fromDate = "2016-06-10";
-        String toDate = "2016-06-15";
-
-        List<InflatedDates> list = new ArrayList<>(givenDates.length);
-        /*
-        for (int i = 0; i < givenDates.length; i++) {
-            list.add(new InflatedDates(Utils.date2longSafe(givenDates[i]), givenRates[i]));
-        }
-        */
-        list.add(new InflatedDates(DateUtils.date2longSafe("2016-06-01"), 178.85f));
-
-        Calendar calendar1 = DateUtils.getCalendar(fromDate);
-        Calendar calendar2 = DateUtils.getCalendar(toDate);
-
-        calendar1.set(Calendar.DAY_OF_MONTH, 1);
-
-        calendar2.set(Calendar.DAY_OF_MONTH, 1);
-
-
-        System.out.println(fromDate + " " + DateUtils.format(calendar1));
-        System.out.println(toDate + " " + DateUtils.format(calendar2));
-
-
-        System.out.println(f(fromDate, toDate, list));
-
-        Calendar calendar = Calendar.getInstance();
-        System.out.println("Calendar.YEAR = " + calendar.get(Calendar.YEAR));
-
 
         String mydata = "1000 GFD";
         Pattern pattern = Pattern.compile("\\S{3}$");
         Matcher matcher = pattern.matcher(mydata);
-        if (matcher.find()) {
+
+        if (matcher.find())
             System.out.println("matcher = " + matcher.group(0));
+
+        for (String s : givenDates2)
+            ff(s);
+
+    }
+
+    private static void ff(String s) {
+
+        try {
+
+            Date date1 = format1.parse(s);
+            Date date2 = format2.parse(s);
+
+            System.out.println("format1 = " + format1.format(date1) + " " + format1.format(date2));
+            System.out.println("format2 = " + format2.format(date1) + " " + format2.format(date2));
+
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
     }

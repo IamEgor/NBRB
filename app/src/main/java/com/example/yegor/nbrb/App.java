@@ -3,7 +3,7 @@ package com.example.yegor.nbrb;
 import android.app.Application;
 import android.content.Context;
 
-import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.storage.DatabaseManager;
 
 public class App extends Application {
 
@@ -12,19 +12,15 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
         context = this;
 
-        MySQLiteClass.getInstance();
+        DatabaseManager.initializeInstance(this);
 
-    }
-
-    @Override
-    public void onTerminate() {
-        MySQLiteClass.getInstance().close();
-        super.onTerminate();
     }
 
     public static Context getContext() {
         return context;
     }
+
 }

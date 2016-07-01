@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.adapters.ChooseCurrencyAdapter;
 import com.example.yegor.nbrb.models.SpinnerModel;
-import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.storage.DatabaseManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class ChooseCurrencyFragment extends Fragment implements
         setHasOptionsMenu(true);
 
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
-        models = MySQLiteClass.getInstance().getCurrenciesDescription();
+        models = DatabaseManager.getInstance().getCurrenciesDescription();
         adapter = new ChooseCurrencyAdapter(models, this);
         rv.setAdapter(adapter);
     }

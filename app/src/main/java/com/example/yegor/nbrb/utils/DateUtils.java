@@ -26,7 +26,7 @@ public class DateUtils {
 
         defaultFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         defaultFormat.setLenient(false);
-        unixFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss Z", Locale.getDefault());
+        unixFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
         calendar = Calendar.getInstance();
 

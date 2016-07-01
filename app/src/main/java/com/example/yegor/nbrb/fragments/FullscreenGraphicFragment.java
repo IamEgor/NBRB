@@ -15,7 +15,7 @@ import android.widget.Toast;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.activities.ChooseCurrencyActivity;
 import com.example.yegor.nbrb.utils.ChartUtils;
-import com.example.yegor.nbrb.views.ParcelableLineData;
+import com.example.yegor.nbrb.models.ParcelableLineData;
 import com.example.yegor.togglenavigation.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 

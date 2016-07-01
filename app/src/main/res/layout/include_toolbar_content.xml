@@ -55,7 +55,7 @@
         android:layout_height="36dp"
         android:layout_toLeftOf="@+id/fullscreen"
         android:layout_toStartOf="@+id/fullscreen"
-        android:background="@drawable/layout_bg2"
+        android:background="@drawable/backgroung_button_abbr"
         android:text="USD"
         android:textColor="@color/colorAccent"
         android:textStyle="bold" />
@@ -70,6 +70,6 @@
         android:layout_centerVertical="true"
         android:layout_gravity="center"
         android:background="@null"
-        android:src="@drawable/ic_fullscreen_exit_32dp" />
+        android:src="@drawable/icon_button_fullscreen_exit_32dp" />
 
 </RelativeLayout>

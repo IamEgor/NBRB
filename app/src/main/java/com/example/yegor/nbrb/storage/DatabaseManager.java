@@ -4,11 +4,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
+import android.support.annotation.WorkerThread;
 import android.text.TextUtils;
 
-import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.utils.DateUtils;
@@ -17,37 +17,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MySQLiteClass {
+public class DatabaseManager {
 
     private static final String DATABASE_NAME = "CURRENCY_DB";
     private static final int DATABASE_VERSION = 1;
     private static final String CURRENCY_TABLE = "CURRENCY_TABLE";
 
-    private Context context;
-    private DBHelp dbhelp;
     private SQLiteDatabase thisDataBase;
 
-    private MySQLiteClass(Context context) {
-        this.context = context;
+    private DatabaseManager() {
     }
 
-    public MySQLiteClass open(boolean writable) throws SQLiteException {
-
-        dbhelp = new DBHelp(context);
-
-        if (writable)
-            thisDataBase = dbhelp.getWritableDatabase();
-        else
-            thisDataBase = dbhelp.getReadableDatabase();
-
-        return this;
+    private synchronized SQLiteDatabase getDatabase(boolean writable) {
+        return writable ? dbhelp.getWritableDatabase() : dbhelp.getReadableDatabase();
     }
 
+    /*
     public void close() {
         dbhelp.close();
     }
+    */
 
-    public void addCurrency(CurrencyModel currency) {
+    private void addCurrencyUnsafe(CurrencyModel currency) {
 
         ContentValues values = new ContentValues();
 
@@ -66,15 +57,54 @@ public class MySQLiteClass {
         thisDataBase.insert(CURRENCY_TABLE, null, values);
     }
 
-    public void addCurrencies(List<CurrencyModel> currencies) {
+    @WorkerThread
+    public void addCurrency(CurrencyModel currency) {
+
+        thisDataBase = getDatabase(true);
+        addCurrencyUnsafe(currency);
+        thisDataBase.close();
+    }
+
+    private void addCurrenciesBulkUnsafe(List<CurrencyModel> currencies) {
 
         Collections.sort(currencies, (lhs, rhs) -> lhs.getName().compareTo(rhs.getName()));
 
-        for (CurrencyModel currency : currencies)
-            addCurrency(currency);
+        String sql = "INSERT INTO " + CURRENCY_TABLE + " VALUES (?,?,?,?,?,?,?,?,?,?,?);";
+        SQLiteStatement statement = thisDataBase.compileStatement(sql);
+
+        thisDataBase.beginTransaction();
+
+        for (CurrencyModel model : currencies) {
+
+            statement.clearBindings();
+            statement.bindLong(1, model.getId());
+            statement.bindString(2, model.getQuotName());
+            statement.bindString(3, model.getQuotNameEng());
+            statement.bindLong(4, model.getScale());
+            statement.bindString(5, model.getCode());
+            statement.bindString(6, model.getAbbr());
+            statement.bindString(7, model.getName());
+            statement.bindString(8, model.getNameEng());
+            statement.bindLong(9, model.getDateStart());
+            statement.bindLong(10, model.getDateEnd());
+            statement.bindLong(11, model.getParentId());
+
+            statement.execute();
+        }
+
+        thisDataBase.setTransactionSuccessful();
+        thisDataBase.endTransaction();
     }
 
-    public List<SpinnerModel> getCurrenciesDescription() {
+    @WorkerThread
+    public void addCurrenciesBulk(List<CurrencyModel> currencies) {
+
+        thisDataBase = getDatabase(true);
+        addCurrenciesBulkUnsafe(currencies);
+        thisDataBase.close();
+    }
+
+    private List<SpinnerModel> getCurrenciesDescriptionUnsafe() {
 
         List<SpinnerModel> list = new ArrayList<>();
 
@@ -101,7 +131,17 @@ public class MySQLiteClass {
         return list;
     }
 
-    public Cursor getCurrenciesDescriptionCursor() {
+    @WorkerThread
+    public List<SpinnerModel> getCurrenciesDescription() {
+
+        thisDataBase = getDatabase(false);
+        List<SpinnerModel> descriptionModels = getCurrenciesDescriptionUnsafe();
+        thisDataBase.close();
+
+        return descriptionModels;
+    }
+
+    private Cursor getCurrenciesDescriptionCursor() {
 
         return thisDataBase.query(
                 CURRENCY_TABLE,
@@ -111,7 +151,7 @@ public class MySQLiteClass {
                 CurrencyModel.NAME);
     }
 
-    public Cursor getCurrenciesDescriptionCursor(String string) {
+    private Cursor getCurrenciesDescriptionCursor(String string) {
 
         if (TextUtils.isEmpty(string))
             return null;
@@ -125,7 +165,7 @@ public class MySQLiteClass {
                 CurrencyModel.NAME);
     }
 
-    public CurrencyModel getCurrencyModelByAbbr(String abbr, String time) {
+    private CurrencyModel getCurrencyModelByAbbrUnsafe(String abbr, String time) {
 
         // TODO: 21.06.16 проверить, почему сравнивалась дата с милисекундами
         time = String.valueOf(DateUtils.date2longSafe(time));
@@ -163,8 +203,18 @@ public class MySQLiteClass {
         return model;
     }
 
+    @WorkerThread
+    public CurrencyModel getCurrencyModelByAbbr(String abbr, String time) {
+
+        thisDataBase = getDatabase(false);
+        CurrencyModel currencyModel = getCurrencyModelByAbbrUnsafe(abbr, time);
+        thisDataBase.close();
+
+        return currencyModel;
+    }
+
     //дата < чем дата окончания и > чем дата начала
-    public boolean isDateValid(String abbr, String dateString) {
+    private boolean isDateValidUnsafe(String abbr, String dateString) {
 
         Cursor cursor = thisDataBase.query(
                 CURRENCY_TABLE,
@@ -197,23 +247,44 @@ public class MySQLiteClass {
             return true;
         else
             return false;
-
-        //TODO что это?
-        //return dateL <- dateEnd;
     }
 
-    private static MySQLiteClass instance;
+    @WorkerThread
+    public boolean isDateValid(String abbr, String dateString) {
 
-    public static MySQLiteClass getInstance() {
+        thisDataBase = getDatabase(false);
+        boolean isDateValid = isDateValidUnsafe(abbr, dateString);
+        thisDataBase.close();
 
-        if (instance == null)
-            instance = new MySQLiteClass(App.getContext());
-
-        return instance.open(true);
-
+        return isDateValid;
     }
 
-    private class DBHelp extends SQLiteOpenHelper {
+    private static DatabaseManager instance;
+    private static DBHelp dbhelp;
+
+    public static synchronized void initializeInstance(Context context) {
+
+        if (instance == null) {
+            instance = new DatabaseManager();
+            dbhelp = new DBHelp(context);
+        }
+    }
+
+    public static synchronized DatabaseManager getInstance() {
+
+        if (instance == null) {
+            throw new IllegalStateException(DatabaseManager.class.getSimpleName() +
+                    " is not initialized, call initialize(Context) method first.");
+        }
+
+        return instance;
+    }
+
+    private interface Executor<T> {
+        T safeExecute();
+    }
+
+    private static class DBHelp extends SQLiteOpenHelper {
 
         private final String CREATE_CURRENCY_TABLE =
                 "CREATE TABLE " + CURRENCY_TABLE + "(" +

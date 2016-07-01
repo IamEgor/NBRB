@@ -10,9 +10,6 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.Transformation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,10 +24,10 @@ import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
-import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.storage.DatabaseManager;
 import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.SoapUtils;
-import com.example.yegor.nbrb.utils.Utils;
+import com.example.yegor.nbrb.views.ResizeWidthAnimation;
 import com.rey.material.widget.ProgressView;
 
 import org.ksoap2.transport.HttpResponseException;
@@ -148,15 +145,13 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     @Override
     public Loader<ContentWrapper<DailyExRatesOnDateModel>> onCreateLoader(int id, Bundle args) {
 
-        Utils.logT("Loader", "onFailure");
-
         String currency = args.getString(CURRENCY);
         String date = args.getString(DATE);
 
         assert currency != null;
         assert date != null;
 
-        if (!MySQLiteClass.getInstance().isDateValid(currency, date))
+        if (!DatabaseManager.getInstance().isDateValid(currency, date))
             return new AbstractLoader<>(getContext(), () -> {
                 throw new NoDataFoundException();
             });
@@ -182,8 +177,6 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     @Override
     protected void onDataReceived(DailyExRatesOnDateModel model) {
 
-        Utils.logT("Loader", "onDataReceived");
-
         abbr.setText(model.getAbbreviation());
         rate.setText(String.valueOf(model.getRate()));
         scale.setText(String.valueOf(model.getScale()));
@@ -194,9 +187,8 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     @Override
     protected void onFailure(Exception e) {
 
-        Utils.logT("Loader", "onFailure");
-
         Snackbar snackbar;
+
         if (e instanceof ExchangeRateAssignsOnceInMonth) {
             restartLoader(LOADER_2);
             return;
@@ -257,33 +249,4 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         }
     }
 
-    class ResizeWidthAnimation extends Animation {
-
-        private int mWidth;
-        private int mStartWidth;
-        private View mView;
-
-        public ResizeWidthAnimation(View view, int width) {
-
-            mView = view;
-            mWidth = width;
-            mStartWidth = view.getWidth();
-
-            setInterpolator(new AccelerateDecelerateInterpolator());
-        }
-
-        @Override
-        protected void applyTransformation(float interpolatedTime, Transformation t) {
-            int newWidth = mStartWidth + (int) ((mWidth - mStartWidth) * interpolatedTime);
-
-            mView.getLayoutParams().width = newWidth;
-            mView.requestLayout();
-        }
-
-        @Override
-        public boolean willChangeBounds() {
-            return true;
-        }
-
-    }
 }

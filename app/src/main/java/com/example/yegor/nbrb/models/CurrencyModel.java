@@ -116,6 +116,7 @@ public class CurrencyModel {
 
         if (s.length() == 0)
             return -1;
+        //return DateUtils.unixTime2longSafe(s);
 
         try {
             return DateUtils.date2long(s.substring(0, 10));
@@ -123,6 +124,7 @@ public class CurrencyModel {
             Utils.logT(CurrencyModel.class.getSimpleName(), s + " " + e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
+
     }
 
     @Override

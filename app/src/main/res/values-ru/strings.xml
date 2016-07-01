@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="exception_exchange_rate_assigns_once_in_month">Обменный курс устанавливаетя раз в месяц</string>
+    <string name="exception_no_connection">Нет интернет соединения</string>
+    <string name="exception_no_data_found">Данные не найдены</string>
+
     <string name="main_pager_by_date">По дате</string>
     <string name="main_pager_current_rates">Текущие курсы</string>
     <string name="main_pager_graphic">График</string>
 
     <string name="retry">Повторить</string>
+    <string name="database_update">Обновление базы данных</string>
     <string name="fragment_by_date_wrong_input">Неверный формат даты</string>
     <string name="date_end">До %s</string>
     <string name="action_search">Поиск</string>

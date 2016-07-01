@@ -30,11 +30,11 @@ import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.CurrencyModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
-import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.storage.DatabaseManager;
 import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.Utils;
-import com.example.yegor.nbrb.views.ParcelableLineData;
+import com.example.yegor.nbrb.models.ParcelableLineData;
 import com.example.yegor.togglenavigation.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
@@ -331,12 +331,12 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         String fromDate = args.getString(FROM_DATE);
         String toDate = args.getString(TO_DATE);
 
-        if (!MySQLiteClass.getInstance().isDateValid(abbr, fromDate))
+        if (!DatabaseManager.getInstance().isDateValid(abbr, fromDate))
             return new AbstractLoader<>(getContext(), () -> {
                 throw new NoDataFoundException();
             });
 
-        if (!MySQLiteClass.getInstance().isDateValid(abbr, toDate))
+        if (!DatabaseManager.getInstance().isDateValid(abbr, toDate))
             return new AbstractLoader<>(getContext(), () -> {
                 throw new NoDataFoundException();
             });

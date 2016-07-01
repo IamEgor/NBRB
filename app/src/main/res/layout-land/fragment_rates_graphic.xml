@@ -40,7 +40,7 @@
             android:layout_below="@+id/progress"
             android:layout_margin="2dp"
             android:background="@null"
-            android:src="@drawable/ic_fullscreen_black_24dp"
+            android:src="@drawable/icon_button_fullscreen_black_24dp"
             android:tint="@color/colorAccent"
             android:visibility="invisible" />
 

@@ -29,5 +29,9 @@
     <string name="date_end">Till %s</string>
     <string name="action_search">Search</string>
     <string name="rate_not_selected">____.__</string>
+    <string name="exception_exchange_rate_assigns_once_in_month">The exchange rate is assigned once a month</string>
+    <string name="exception_no_connection">No internet connection</string>
+    <string name="exception_no_data_found">"No data found exception "</string>
+    <string name="database_update">Database update</string>
 
 </resources>

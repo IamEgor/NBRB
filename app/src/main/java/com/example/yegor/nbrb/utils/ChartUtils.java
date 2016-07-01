@@ -9,7 +9,7 @@ import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
-import com.example.yegor.nbrb.storage.MySQLiteClass;
+import com.example.yegor.nbrb.storage.DatabaseManager;
 import com.example.yegor.nbrb.views.MyMarkerView;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -29,7 +29,7 @@ public final class ChartUtils {
     public static LineData getChartContent(String abbr, String fromDate, String toDate, boolean inflate)
             throws IOException {
 
-        int id = MySQLiteClass.getInstance().getCurrencyModelByAbbr(abbr, fromDate).getId();
+        int id = DatabaseManager.getInstance().getCurrencyModelByAbbr(abbr, fromDate).getId();
 
         List<ExRatesDynModel> content = SoapUtils.getRatesDyn(
                 String.valueOf(id),
@@ -86,7 +86,7 @@ public final class ChartUtils {
         if (Utils.getSDKInt() < 18)
             set.setFillColor(Utils.getColor(R.color.colorPrimary));
         else {
-            Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.fade_primary);
+            Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.background_chart_fade_primary);
             set.setFillDrawable(drawable);
         }
 
@@ -262,7 +262,7 @@ public final class ChartUtils {
 
         if (Utils.getSDKInt() >= 18) {
             // fill drawable only supported on api level 18 and above
-            Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.fade_primary);
+            Drawable drawable = ContextCompat.getDrawable(App.getContext(), R.drawable.background_chart_fade_primary);
             set1.setFillDrawable(drawable);
         } else {
             set1.setFillColor(Color.BLACK);

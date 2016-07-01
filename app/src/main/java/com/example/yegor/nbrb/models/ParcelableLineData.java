@@ -1,4 +1,4 @@
-package com.example.yegor.nbrb.views;
+package com.example.yegor.nbrb.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
