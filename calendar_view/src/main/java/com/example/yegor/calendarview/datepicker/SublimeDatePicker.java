@@ -457,12 +457,9 @@ public class SublimeDatePicker extends FrameLayout {
      * @param callback     How user is notified date is changed by
      *                     user, can be null.
      */
-    //public void init(int year, int monthOfYear, int dayOfMonth, boolean canPickRange,
     public void init(SelectedDate selectedDate, boolean canPickRange,
                      SublimeDatePicker.OnDateChangedListener callback) {
-        //mCurrentDate.set(Calendar.YEAR, year);
-        //mCurrentDate.set(Calendar.MONTH, monthOfYear);
-        //mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
         mCurrentDate = new SelectedDate(selectedDate);
 
         mDayPickerView.setCanPickRange(canPickRange);
@@ -480,11 +477,20 @@ public class SublimeDatePicker extends FrameLayout {
      */
     @SuppressWarnings("unused")
     public void updateDate(int year, int month, int dayOfMonth) {
+
         mCurrentDate.set(Calendar.YEAR, year);
         mCurrentDate.set(Calendar.MONTH, month);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
         onDateChanged(false, true, true);
+    }
+
+    public void updateDateByYegor(int year, int month, int dayOfMonth) {
+
+        mCurrentDate.set(Calendar.YEAR, year);
+        mCurrentDate.set(Calendar.MONTH, month);
+        mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        onDateChanged(true, false, true);
     }
 
     // callbackToClient is useless for now & gives us an unnecessary round-trip
@@ -603,6 +609,12 @@ public class SublimeDatePicker extends FrameLayout {
             mCurrentDate.getEndDate().setTimeInMillis(maxDate);
             onDateChanged(false, true, true);
         }
+        mMaxDate.setTimeInMillis(maxDate);
+        mDayPickerView.setMaxDate(maxDate);
+        mYearPickerView.setRange(mMinDate, mMaxDate);
+    }
+
+    public void setMaxDateByYegor(long maxDate) {
         mMaxDate.setTimeInMillis(maxDate);
         mDayPickerView.setMaxDate(maxDate);
         mYearPickerView.setRange(mMinDate, mMaxDate);

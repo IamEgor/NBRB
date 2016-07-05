@@ -16,12 +16,6 @@
             android:layout_height="match_parent" />
 
         <include
-            layout="@layout/include_loading_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
-
-        <include
             layout="@layout/include_error_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -35,7 +29,7 @@
         android:layout_height="match_parent"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="-1dp"
+        android:layout_marginTop="-3dp"
         android:orientation="vertical" />
 
 </RelativeLayout>

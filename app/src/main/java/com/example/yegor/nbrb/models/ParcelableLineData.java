@@ -35,13 +35,21 @@ public class ParcelableLineData implements Parcelable {
 
     public ParcelableLineData(LineData lineData) {
 
-        String[] xVals = lineData.getXVals().toArray(new String[lineData.getXVals().size()]);
+        if (lineData == null) {
 
-        LineDataSet set = (LineDataSet) lineData.getDataSetByIndex(0);
-        List<Entry> yVals = set.getYVals();
+            this.xVals = null;
+            this.yVals = null;
+        } else {
 
-        this.xVals = xVals;
-        this.yVals = yVals;
+            String[] xVals = lineData.getXVals().toArray(new String[lineData.getXVals().size()]);
+
+            LineDataSet set = (LineDataSet) lineData.getDataSetByIndex(0);
+            List<Entry> yVals = set.getYVals();
+
+            this.xVals = xVals;
+            this.yVals = yVals;
+        }
+
     }
 
     public ParcelableLineData(Parcel in) {
@@ -50,7 +58,11 @@ public class ParcelableLineData implements Parcelable {
     }
 
     public LineData getLineData() {
-        return new LineData(xVals, ChartUtils.getILineDataSet(yVals));
+
+        if (xVals == null || yVals == null)
+            return null;
+        else
+            return new LineData(xVals, ChartUtils.getILineDataSet(yVals));
     }
 
     @Override

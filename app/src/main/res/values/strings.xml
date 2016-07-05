@@ -1,37 +1,28 @@
 <resources>
 
-    <string name="app_name">NBRB</string>
+    <string name="app_name">Exchange rates</string>
     <string name="action_settings">Settings</string>
 
     <string name="main_pager_by_date">By date</string>
     <string name="main_pager_current_rates">Current rates</string>
     <string name="main_pager_graphic">Graphic</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="input_date_pattern">yyyy-MM-dd</string>
-    <string name="input_date_pattern_numbers">\\d{4}-\\d{2}-\\d{2}</string>
-
-    <string name="from_date">%s\n Set start date</string>
-    <string name="to_date">%s\n Set end date</string>
     <string name="retry">Retry</string>
-    <string name="select_currency">Select Currency</string>
     <string name="no_rate_exception">Exchange rate hasn\'t been installed on this date</string>
     <string name="input_date_too_early">Exchange rate hasn\'t been installed yet</string>
     <string name="input_date_too_old">Too old date</string>
-    <string name="but_done">Done</string>
 
     <string name="title_tab_start_date">Start Date</string>
     <string name="ttile_tab_end_date">End Date</string>
 
-    <string name="date_picker_dialog">DATE_PICKER_DIALOG</string>
-    <string name="range_picker_dialog">RANGE_PICKER_DIALOG</string>
     <string name="fragment_by_date_wrong_input">Wrong data input</string>
     <string name="date_end">Till %s</string>
     <string name="action_search">Search</string>
-    <string name="rate_not_selected">____.__</string>
     <string name="exception_exchange_rate_assigns_once_in_month">The exchange rate is assigned once a month</string>
     <string name="exception_no_connection">No internet connection</string>
-    <string name="exception_no_data_found">"No data found exception "</string>
+    <string name="exception_no_data_found">No data found exception</string>
+
     <string name="database_update">Database update</string>
+    <string name="could_not_connect_to_server">Could not connect to server</string>
 
 </resources>

@@ -7,8 +7,8 @@ import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.exceptions.UnknownException;
 import com.example.yegor.nbrb.models.CurrencyModel;
-import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
 import com.example.yegor.nbrb.models.ExRatesDynModel;
+import com.example.yegor.nbrb.models.ExRatesOnDateModel;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
@@ -53,7 +53,7 @@ public final class SoapUtils {
 
         List<CurrencyModel> list;
 
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(1);
         map.put(PROPERTY3, String.valueOf(0));
 
         SoapObject response = getResponse(new RequestProps(METHOD_NAME3, SOAP_ACTION3, map));
@@ -70,10 +70,10 @@ public final class SoapUtils {
         return list;
     }
 
-    public static DailyExRatesOnDateModel getCurrencyDaily(@NonNull String currency, @NonNull String time)
+    public static ExRatesOnDateModel getCurrencyDaily(@NonNull String currency, @NonNull String time)
             throws IOException {
 
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(1);
         map.put(PROPERTY, time);
 
         SoapObject response = getResponse(new RequestProps(METHOD_NAME, SOAP_ACTION, map));
@@ -83,17 +83,19 @@ public final class SoapUtils {
 
         for (int k = 0; k < propertiesCount; k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
-            if (currency.equals(dailyExRatesOnDate.getProperty(DailyExRatesOnDateModel.ABBREV).toString()))
-                return new DailyExRatesOnDateModel(dailyExRatesOnDate);
+            if (currency.equals(dailyExRatesOnDate.getProperty(ExRatesOnDateModel.ABBREV).toString())) {
+                ExRatesOnDateModel exRatesOnDateModel = new ExRatesOnDateModel(dailyExRatesOnDate);
+                return exRatesOnDateModel;
+            }
         }
 
         throw new ExchangeRateAssignsOnceInMonth();
     }
 
-    public static DailyExRatesOnDateModel getCurrencyMonthly(@NonNull String currency, @NonNull String time)
+    public static ExRatesOnDateModel getCurrencyMonthly(@NonNull String currency, @NonNull String time)
             throws IOException {
 
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(1);
         map.put(PROPERTY4, time);
 
         SoapObject response = getResponse(new RequestProps(METHOD_NAME4, SOAP_ACTION4, map));
@@ -103,17 +105,17 @@ public final class SoapUtils {
 
         for (int k = 0; k < propertiesCount; k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
-            if (currency.equals(dailyExRatesOnDate.getProperty(DailyExRatesOnDateModel.ABBREV).toString()))
-                return new DailyExRatesOnDateModel(dailyExRatesOnDate);
+            if (currency.equals(dailyExRatesOnDate.getProperty(ExRatesOnDateModel.ABBREV).toString()))
+                return new ExRatesOnDateModel(dailyExRatesOnDate);
         }
 
         return null;
 
     }
 
-    public static List<DailyExRatesOnDateModel> getCurrenciesNow() throws IOException {
+    public static List<ExRatesOnDateModel> getCurrenciesNow() throws IOException {
 
-        List<DailyExRatesOnDateModel> list = new ArrayList<>(16);
+        List<ExRatesOnDateModel> list;
 
         Map<String, String> map = new HashMap<>();
         map.put(PROPERTY, DateUtils.format((Calendar.getInstance().getTimeInMillis())));
@@ -122,10 +124,11 @@ public final class SoapUtils {
         SoapObject dailyExRatesOnDate;
 
         int propertiesCount = response.getPropertyCount();
+        list = new ArrayList<>(propertiesCount);
 
         for (int k = 0; k < propertiesCount; k++) {
             dailyExRatesOnDate = (SoapObject) response.getProperty(k);
-            list.add(new DailyExRatesOnDateModel(dailyExRatesOnDate));
+            list.add(new ExRatesOnDateModel(dailyExRatesOnDate));
         }
 
         return list;
@@ -162,6 +165,8 @@ public final class SoapUtils {
         SoapObject request = new SoapObject(NAMESPACE, props.getMethod());
 
         System.setProperty("http.keepAlive", "false");
+        int MAX_CONNECTIONS = 5;
+        System.setProperty("http.maxConnections", String.valueOf(MAX_CONNECTIONS));
 
         for (String key : props.getProperties().keySet())
             request.addProperty(key, props.getProperties().get(key));

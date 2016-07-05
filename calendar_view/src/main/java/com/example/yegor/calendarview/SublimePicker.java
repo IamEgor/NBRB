@@ -18,6 +18,8 @@ import com.example.yegor.calendarview.helpers.SublimeListener;
 import com.example.yegor.calendarview.helpers.SublimeOptions;
 import com.example.yegor.calendarview.utilities.SUtils;
 
+import java.util.Calendar;
+
 public class SublimePicker extends FrameLayout
         implements SublimeDatePicker.OnDateChangedListener,
         SublimeDatePicker.DatePickerValidationCallback {
@@ -40,7 +42,6 @@ public class SublimePicker extends FrameLayout
 
     // Flags set based on client-set options {SublimeOptions}
     private boolean mDatePickerValid = true,
-            mDatePickerEnabled,
             mDatePickerSyncStateCalled;
 
     public SublimePicker(Context context) {
@@ -66,8 +67,28 @@ public class SublimePicker extends FrameLayout
         mDatePicker.setMinDate(minDate);
     }
 
-    public void setMaxDate(long minDate) {
-        mDatePicker.setMaxDate(minDate);
+    public void setMaxDate(long maxDate) {
+        mDatePicker.setMaxDate(maxDate);
+    }
+
+    public void setMaxDateByYegor(long maxDate) {
+        mDatePicker.setMaxDateByYegor(maxDate);
+    }
+
+    public void setCurrentDate(Calendar calendar) {
+        mDatePicker.updateDate(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+    }
+
+    @SuppressWarnings("unused")
+    public void setCurrentDate3(Calendar calendar) {
+        mDatePicker.updateDateByYegor(
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+
     }
 
     private static ContextThemeWrapper createThemeWrapper(Context context) {
@@ -122,35 +143,20 @@ public class SublimePicker extends FrameLayout
             setLayoutTransition(null);
         }
 
-        mDatePickerEnabled = mOptions.isDatePickerActive();
+        mDatePicker.init(mOptions.getDateParams(), mOptions.canPickDateRange(), this);
+        mDatePicker.setCallback(mListener);
 
-        if (mDatePickerEnabled) {
+        long[] dateRange = mOptions.getDateRange();
 
-            mDatePicker.init(mOptions.getDateParams(), mOptions.canPickDateRange(), this);
-            mDatePicker.setCallback(mListener);
-
-            long[] dateRange = mOptions.getDateRange();
-
-            if (dateRange[0] /* min date */ != Long.MIN_VALUE) {
-                mDatePicker.setMinDate(dateRange[0]);
-            }
-
-            if (dateRange[1] /* max date */ != Long.MIN_VALUE) {
-                mDatePicker.setMaxDate(dateRange[1]);
-            }
-
-            mDatePicker.setValidationCallback(this);
-
-        } else {
-            llMainContentHolder.removeView(mDatePicker);
-            mDatePicker = null;
+        if (dateRange[0] /* min date */ != Long.MIN_VALUE) {
+            mDatePicker.setMinDate(dateRange[0]);
         }
 
-
-        if (!mDatePickerEnabled) {
-            removeView(llMainContentHolder);
-            llMainContentHolder = null;
+        if (dateRange[1] /* max date */ != Long.MIN_VALUE) {
+            mDatePicker.setMaxDate(dateRange[1]);
         }
+
+        mDatePicker.setValidationCallback(this);
 
         mCurrentPicker = mOptions.getPickerToShow();
     }

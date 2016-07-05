@@ -44,7 +44,6 @@ public class ExRatesDynModel {
                 '}';
     }
 
-
     static class Builder {
 
         private String date;

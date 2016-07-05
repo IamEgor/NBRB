@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mdtp_from">С</string>
+    <string name="mdtp_to">По</string>
+</resources>

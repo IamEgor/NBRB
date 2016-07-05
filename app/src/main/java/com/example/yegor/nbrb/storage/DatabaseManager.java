@@ -32,12 +32,6 @@ public class DatabaseManager {
         return writable ? dbhelp.getWritableDatabase() : dbhelp.getReadableDatabase();
     }
 
-    /*
-    public void close() {
-        dbhelp.close();
-    }
-    */
-
     private void addCurrencyUnsafe(CurrencyModel currency) {
 
         ContentValues values = new ContentValues();
@@ -112,8 +106,7 @@ public class DatabaseManager {
                 CURRENCY_TABLE,
                 new String[]{CurrencyModel.ABBR, CurrencyModel.NAME, CurrencyModel.SCALE, CurrencyModel.DATE_END},
                 null, null,
-                CurrencyModel.PARENT_ID, null,
-                CurrencyModel.NAME);
+                CurrencyModel.PARENT_ID, "MAX(" + CurrencyModel.DATE_END + ")", null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -196,7 +189,6 @@ public class DatabaseManager {
                 .setDateEnd(cursor.getLong(9))
                 .setParentId(cursor.getInt(10))
                 .create();
-
 
         cursor.close();
 

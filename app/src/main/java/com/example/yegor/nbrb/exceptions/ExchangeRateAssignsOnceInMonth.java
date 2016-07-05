@@ -11,5 +11,5 @@ public class ExchangeRateAssignsOnceInMonth extends IOException {
     public String getMessage() {
         return Utils.getString(R.string.exception_exchange_rate_assigns_once_in_month);
     }
-
+    
 }

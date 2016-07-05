@@ -15,3 +15,9 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-dontwarn java.lang.invoke.*
+-dontwarn com.annimon.stream.**
+-keep class com.github.mikephil.charting.** { *; }
+-dontwarn io.realm.**
+-keep class org.xmlpull.v1.** { *; }
+-dontwarn org.xmlpull.v1.**

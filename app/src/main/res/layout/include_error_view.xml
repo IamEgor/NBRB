@@ -2,7 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/error_view"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:visibility="gone">
 
     <TextView
         android:id="@+id/error_message"
@@ -13,8 +15,7 @@
 
     <com.rey.material.widget.Button
         android:id="@+id/retry_btn"
-        android:layout_below="@+id/error_message"
-        style="@style/RetryButtonStyle">
-    </com.rey.material.widget.Button>
+        style="@style/RetryButtonStyle"
+        android:layout_below="@+id/error_message" />
 
 </RelativeLayout>

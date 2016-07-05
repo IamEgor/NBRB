@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.TextView;
@@ -18,20 +17,21 @@ import com.example.yegor.nbrb.storage.AppPrefs;
 import com.example.yegor.nbrb.storage.DatabaseManager;
 import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.SoapUtils;
+import com.github.glomadrian.roadrunner.IndeterminateRoadRunner;
 
 import java.util.Calendar;
 import java.util.List;
 
-public class UpdateActivity extends AppCompatActivity implements
+public class UpdateActivity extends BaseActivity implements
         LoaderManager.LoaderCallbacks<ContentWrapper<List<CurrencyModel>>> {
 
     private ViewStub stub;
     private View errorView;
     private TextView errorMessage;
-    private View loaderView;
+    private IndeterminateRoadRunner loaderView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
 
         if (!DateUtils.need2Update()) {
             startActivity(new Intent(this, MainActivity.class));
@@ -43,7 +43,7 @@ public class UpdateActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_update);
 
         stub = (ViewStub) findViewById(R.id.stub);
-        loaderView = findViewById(R.id.loading_view);
+        loaderView = (IndeterminateRoadRunner) findViewById(R.id.loading_view);
 
         getSupportLoaderManager().initLoader(0, null, this).forceLoad();
     }
@@ -52,6 +52,8 @@ public class UpdateActivity extends AppCompatActivity implements
     public Loader<ContentWrapper<List<CurrencyModel>>> onCreateLoader(int id, Bundle args) {
 
         loaderView.setVisibility(View.VISIBLE);
+        //loaderView.start();
+
         if (errorView != null)
             errorView.setVisibility(View.GONE);
 
@@ -71,10 +73,15 @@ public class UpdateActivity extends AppCompatActivity implements
             errorView = stub.inflate();
             errorMessage = (TextView) errorView.findViewById(R.id.error_message);
             errorView.findViewById(R.id.retry_btn).setOnClickListener(
-                    v -> getSupportLoaderManager().restartLoader(0, null, this).forceLoad());
+                    v -> {
+                        getSupportLoaderManager().restartLoader(0, null, this).forceLoad();
+                        loaderView.restart();
+                    });
         }
 
-        loaderView.setVisibility(View.GONE);
+        loaderView.stop();
+        loaderView.setVisibility(View.INVISIBLE);
+
         errorView.setVisibility(View.VISIBLE);
         errorMessage.setText(data.getException().getMessage());
     }

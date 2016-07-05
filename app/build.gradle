@@ -6,16 +6,20 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        applicationId "com.example.yegor.nbrb"
+        applicationId "yegorka.gruk.nbrb"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
+        manifestPlaceholders = [HOCKEYAPP_APP_ID: "11d14013a5c74bb1958eaaea4480cd36"]
     }
     buildTypes {
         release {
             minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //proguardFiles 'retrolambda.pro'
+            //proguardFiles 'mpandroidchart.pro'
         }
     }
     compileOptions {
@@ -27,15 +31,18 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
+    compile 'net.hockeyapp.android:HockeySDK:4.0.1'
+
 
     compile 'com.annimon:stream:1.0.9'
-    compile 'com.google.code.ksoap2-android:ksoap2-android:3.4.0'
+    compile 'com.google.code.ksoap2-android:ksoap2-android:3.6.1'
 
 
+    compile 'com.android.support:support-v4:23.4.0'
     compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:support-v4:23.3.0'
-    compile 'com.android.support:design:23.3.0'
-    compile 'com.android.support:cardview-v7:23.3.0'
+    compile 'com.android.support:design:23.4.0'
+    compile 'com.android.support:recyclerview-v7:23.4.0'
+    compile 'com.android.support:cardview-v7:23.4.0'
 
 
     compile 'com.wang.avi:library:1.0.5'
@@ -43,6 +50,7 @@ dependencies {
     compile 'com.github.PhilJay:MPAndroidChart:v2.2.5'
     compile 'com.github.rey5137:material:1.2.4'
     compile 'com.github.glomadrian:roadrunner:1.0@aar'
+
 
 
     compile project(path: ':calendar_view')

@@ -5,14 +5,27 @@
     android:layout_height="?attr/actionBarSize"
     android:background="@color/colorPrimary">
 
+    <android.support.v7.widget.AppCompatImageButton
+        android:id="@+id/back_button"
+        style="?android:borderlessButtonStyle"
+        android:layout_width="?attr/actionBarSize"
+        android:layout_height="?attr/actionBarSize"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_arrow_back_black_24dp"
+        android:tint="@color/white" />
+
     <TextView
         android:id="@+id/rate"
         style="@style/ToolbarText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/byr"
         android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/back_button"
+        android:layout_toRightOf="@+id/back_button"
         android:gravity="end"
-        android:minWidth="64sp"/>
+        android:minWidth="64sp"
+        android:textSize="17sp" />
 
     <TextView
         android:id="@+id/byr"
@@ -41,12 +54,13 @@
         style="@style/ToolbarText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/byr"
         android:layout_centerHorizontal="true"
         android:layout_toLeftOf="@+id/abbr"
         android:layout_toStartOf="@+id/abbr"
         android:gravity="end"
         android:minWidth="32sp"
-        android:text="1" />
+        android:textSize="16sp" />
 
     <Button
         android:id="@+id/abbr"
@@ -56,20 +70,25 @@
         android:layout_toLeftOf="@+id/fullscreen"
         android:layout_toStartOf="@+id/fullscreen"
         android:background="@drawable/backgroung_button_abbr"
-        android:text="USD"
         android:textColor="@color/colorAccent"
         android:textStyle="bold" />
 
-
     <android.support.v7.widget.AppCompatImageButton
         android:id="@+id/fullscreen"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        style="?android:borderlessButtonStyle"
+        android:layout_width="?attr/actionBarSize"
+        android:layout_height="?attr/actionBarSize"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_gravity="center"
-        android:background="@null"
+        android:scaleType="centerInside"
         android:src="@drawable/icon_button_fullscreen_exit_32dp" />
+
+    <com.rey.material.widget.ProgressView
+        android:id="@+id/loading_view"
+        style="@style/FullscreenToolbarLinearProgressView"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_alignParentBottom="true" />
 
 </RelativeLayout>

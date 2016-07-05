@@ -54,6 +54,7 @@ public class ChooseCurrencyFragment extends Fragment implements
         setHasOptionsMenu(true);
 
         rv.setLayoutManager(new LinearLayoutManager(getActivity()));
+        //TODO вынос из UI потока
         models = DatabaseManager.getInstance().getCurrenciesDescription();
         adapter = new ChooseCurrencyAdapter(models, this);
         rv.setAdapter(adapter);

@@ -8,29 +8,25 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class DateUtils {
 
     public static final long START_DATE = 856137600 * 1000L;//17.02.1997
-    public static final long END_DATE = 2524608000L * 1000L;
+    public static final long END_DATE = 2524608000L * 1000L;//01-01-2050
     public static final long ONE_DAY = 24 * 60 * 60 * 1000L;
     public static final long WEEK_LENGTH = 7 * ONE_DAY;
 
     private static final SimpleDateFormat defaultFormat;
-    private static final SimpleDateFormat unixFormat;
-    private static final Calendar calendar;
-
     private static final SimpleDateFormat formatWeekdayAndDate;
 
     static {
 
         defaultFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        defaultFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         defaultFormat.setLenient(false);
-        unixFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
-        calendar = Calendar.getInstance();
-
-        formatWeekdayAndDate = new SimpleDateFormat("EEE, dd MMMM",
+        formatWeekdayAndDate = new SimpleDateFormat("dd MMMM yyyy",
                 new DateFormatSymbols() {
                     @Override
                     public String[] getMonths() {
@@ -38,7 +34,6 @@ public class DateUtils {
                                 "июля", "августа", "сентября", "октября", "ноября", "декабря"};
                     }
                 });
-
     }
 
     public static boolean need2Update() {
@@ -61,6 +56,10 @@ public class DateUtils {
         return formatWeekdayAndDate.format(calendar.getTimeInMillis());
     }
 
+    public static String formatWeekdayAndDate(String s) {
+        return formatWeekdayAndDate.format(getCalendar(s).getTimeInMillis());
+    }
+
     public static long date2long(String date) throws ParseException {
         return defaultFormat.parse(date).getTime();
     }
@@ -68,14 +67,6 @@ public class DateUtils {
     public static long date2longSafe(String date) {
         try {
             return defaultFormat.parse(date).getTime();
-        } catch (ParseException e) {
-            return -1;
-        }
-    }
-
-    public static long unixTime2longSafe(String date) {
-        try {
-            return unixFormat.parse(date).getTime();
         } catch (ParseException e) {
             return -1;
         }

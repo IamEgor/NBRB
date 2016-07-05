@@ -12,7 +12,8 @@
 
 
     <style name="AppTheme.Launcher">
-        <item name="android:windowBackground">@drawable/backgroung_activity_launcher_placeholder</item>
+        <item name="android:windowBackground">@drawable/backgroung_activity_launcher_placeholder
+        </item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -43,14 +44,14 @@
         <item name="android:textColorPrimaryInverse">#FFFFFF</item>
     </style>
 
-    <style name="LightQueryLinearProgressView">
+    <style name="PickCurrencyLinearProgressView">
         <item name="pv_progressMode">indeterminate</item>
         <item name="pv_autostart">false</item>
         <item name="pv_circular">false</item>
-        <item name="pv_progressStyle">@style/LightLinearProgressDrawable</item>
+        <item name="pv_progressStyle">@style/PickCurrencyLinearProgressDrawable</item>
     </style>
 
-    <style name="LightLinearProgressDrawable" parent="Material.Drawable.LinearProgress">
+    <style name="PickCurrencyLinearProgressDrawable" parent="Material.Drawable.LinearProgress">
         <item name="lpd_strokeColor">@color/colorAccent</item>
         <item name="lpd_strokeSecondaryColor">@color/white</item>
         <item name="lpd_reverse">false</item>
@@ -58,6 +59,15 @@
         <item name="lpd_verticalAlign">center</item>
         <item name="lpd_transformInterpolator">@android:anim/accelerate_decelerate_interpolator
         </item>
+    </style>
+
+    <style name="FullscreenToolbarLinearProgressView" parent="PickCurrencyLinearProgressView">
+        <item name="pv_progressStyle">@style/FullscreenToolbarLinearProgressDrawable</item>
+    </style>
+
+    <style name="FullscreenToolbarLinearProgressDrawable" parent="PickCurrencyLinearProgressDrawable">
+        <item name="lpd_strokeSecondaryColor">@android:color/transparent</item>
+        <item name="lpd_strokeSize">2dp</item>
     </style>
 
     <style name="ToolbarText">
@@ -69,19 +79,11 @@
     </style>
 
     <style name="MyCustomTabLayout" parent="Widget.Design.TabLayout">
-        <item name="tabIndicatorColor">?attr/colorAccent</item>
+        <item name="tabIndicatorColor">@color/colorAccent</item>
         <item name="tabIndicatorHeight">2dp</item>
+        <item name="android:background">@color/colorPrimary</item>
         <item name="tabPaddingStart">12dp</item>
         <item name="tabPaddingEnd">12dp</item>
-        <item name="tabBackground">?attr/selectableItemBackground</item>
-        <item name="tabTextAppearance">@style/MyCustomTabTextAppearance</item>
-        <item name="tabSelectedTextColor">?android:textColorPrimary</item>
-    </style>
-
-    <style name="MyCustomTabTextAppearance" parent="TextAppearance.Design.Tab">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?android:textColorSecondary</item>
-        <item name="textAllCaps">false</item>
     </style>
 
     <style name="RetryButtonStyle" parent="AppTheme">

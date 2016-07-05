@@ -21,7 +21,7 @@ public class Test {
             "2050-01-01T00:00:00+03:00", "2013-05-31T00:00:00+03:00"};
 
     static SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
-    static SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    static SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:SSSXXX");
 
     public static void main(String[] args) {
 
@@ -52,7 +52,6 @@ public class Test {
         }
 
     }
-
 
     static List<InflatedDates> f(String from, String to, List<InflatedDates> initialArray) {
 

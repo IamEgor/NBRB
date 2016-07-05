@@ -1,32 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.yegor.nbrb.activities.UpdateActivity">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:id="@+id/container"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:src="@drawable/ic_cloud_24dp"
-            android:tint="@color/colorPrimaryLight" />
-
-        <include layout="@layout/include_loading_view" />
-
-    </FrameLayout>
+    <com.github.glomadrian.roadrunner.IndeterminateRoadRunner
+        android:id="@+id/loading_view"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_centerHorizontal="true"
+        app:animate_on_start="true"
+        app:movement_direction="counter_clockwise"
+        app:path_animation_type="material"
+        app:path_color="@color/colorPrimaryLight"
+        app:path_data="@string/cloud_path"
+        app:path_original_height="@integer/cloud_path_height"
+        app:path_original_width="@integer/cloud_path_width"
+        app:stroke_width="3dp" />
 
     <ViewStub
         android:id="@+id/stub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/container"
-        android:inflatedId="@+id/error_view"
+        android:layout_below="@+id/loading_view"
         android:layout="@layout/include_error_view" />
 
 </RelativeLayout>

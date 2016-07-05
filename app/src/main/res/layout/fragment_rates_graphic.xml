@@ -3,12 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
-        layout="@layout/include_error_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="?actionBarSize" />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -39,6 +33,13 @@
             android:src="@drawable/icon_button_fullscreen_black_24dp"
             android:tint="@color/colorAccent"
             android:visibility="visible" />
+
+        <include
+            layout="@layout/include_error_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/toggle"
+            android:layout_below="@+id/pick_currency" />
 
         <com.example.yegor.togglenavigation.ToggleNavigation
             android:id="@+id/toggle"

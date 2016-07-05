@@ -89,8 +89,8 @@
         android:background="@android:color/white" />
 
     <com.rey.material.widget.ProgressView
-        android:id="@+id/progress"
-        style="@style/LightQueryLinearProgressView"
+        android:id="@+id/loading_view"
+        style="@style/PickCurrencyLinearProgressView"
         android:layout_width="match_parent"
         android:layout_height="6dp"
         android:layout_centerVertical="true"

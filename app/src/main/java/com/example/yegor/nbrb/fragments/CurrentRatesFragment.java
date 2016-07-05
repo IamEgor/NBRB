@@ -15,14 +15,15 @@ import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.adapters.CurrentRatesAdapter;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
-import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
+import com.example.yegor.nbrb.models.ExRatesOnDateModel;
 import com.example.yegor.nbrb.utils.SoapUtils;
 import com.example.yegor.nbrb.utils.Utils;
 
+import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRatesOnDateModel>> {
+public class CurrentRatesFragment extends AbstractRatesFragment<List<ExRatesOnDateModel>> {
 
     private RecyclerView rv;
     private View loadingView;
@@ -49,7 +50,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
         errorView = rootView.findViewById(R.id.error_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
-        rootView.findViewById(R.id.retry_btn).setOnClickListener((view) -> restartLoader(LOADER_1));
+        rootView.findViewById(R.id.retry_btn).setOnClickListener((view) -> retry());
 
         return rootView;
     }
@@ -66,7 +67,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
         rv.setLayoutManager(manager);
         rv.setAdapter(adapter);
 
-        restartLoader();
+        restartLoader(LOADER_1);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
     }
 
     @Override
-    public Loader<ContentWrapper<List<DailyExRatesOnDateModel>>> onCreateLoader(int id, Bundle args) {
+    public Loader<ContentWrapper<List<ExRatesOnDateModel>>> onCreateLoader(int id, Bundle args) {
 
         Utils.log("Loader", "CurrentRatesFragment.onCreateLoader()");
         setStatus(Status.LOADING);
@@ -84,7 +85,7 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
     }
 
     @Override
-    protected void onDataReceived(List<DailyExRatesOnDateModel> models) {
+    protected void onDataReceived(List<ExRatesOnDateModel> models) {
 
         adapter.setModels(models);
         setStatus(Status.OK);
@@ -92,13 +93,17 @@ public class CurrentRatesFragment extends AbstractRatesFragment<List<DailyExRate
 
     @Override
     protected void onFailure(Exception e) {
-        Utils.log("Loader", "CurrentRatesFragment.onFailure()");
-        errorMessage.setText(e.getMessage());
+
+        if (e instanceof EOFException)
+            errorMessage.setText(R.string.could_not_connect_to_server);
+        else
+            errorMessage.setText(e.getMessage());
+
         setStatus(Status.FAILED);
     }
 
     @Override
-    public void onLoaderReset(Loader<ContentWrapper<List<DailyExRatesOnDateModel>>> loader) {
+    public void onLoaderReset(Loader<ContentWrapper<List<ExRatesOnDateModel>>> loader) {
         adapter.setModels(new ArrayList<>(0));
     }
 

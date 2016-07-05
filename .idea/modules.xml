@@ -6,7 +6,6 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/calendar_view/calendar_view.iml" filepath="$PROJECT_DIR$/calendar_view/calendar_view.iml" />
       <module fileurl="file://$PROJECT_DIR$/material_date_range_picker/material_date_range_picker.iml" filepath="$PROJECT_DIR$/material_date_range_picker/material_date_range_picker.iml" />
-      <module fileurl="file://$PROJECT_DIR$/material_date_range_picker/materialdaterangepicker.iml" filepath="$PROJECT_DIR$/material_date_range_picker/materialdaterangepicker.iml" />
       <module fileurl="file://$PROJECT_DIR$/toggle_navigation/toggle_navigation.iml" filepath="$PROJECT_DIR$/toggle_navigation/toggle_navigation.iml" />
     </modules>
   </component>

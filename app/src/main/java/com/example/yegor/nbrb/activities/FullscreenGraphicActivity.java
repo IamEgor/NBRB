@@ -1,17 +1,16 @@
 package com.example.yegor.nbrb.activities;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.fragments.FullscreenGraphicFragment;
 
 
-public class FullscreenGraphicActivity extends AppCompatActivity {
+public class FullscreenGraphicActivity extends BaseActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen_graphic);
 
@@ -22,8 +21,6 @@ public class FullscreenGraphicActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, FullscreenGraphicFragment.newInstance(extras))
                 .commit();
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 }

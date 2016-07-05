@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.yegor.calendarview.SublimePicker;
 import com.example.yegor.calendarview.helpers.SublimeListener;
@@ -22,19 +21,21 @@ import com.example.yegor.nbrb.exceptions.ExchangeRateAssignsOnceInMonth;
 import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
-import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
+import com.example.yegor.nbrb.models.ExRatesOnDateModel;
 import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.DatabaseManager;
 import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.nbrb.utils.SoapUtils;
+import com.example.yegor.nbrb.utils.Utils;
 import com.example.yegor.nbrb.views.ResizeWidthAnimation;
 import com.rey.material.widget.ProgressView;
 
 import org.ksoap2.transport.HttpResponseException;
 
+import java.io.EOFException;
 import java.util.Calendar;
 
-public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDateModel>
+public class RateByDateFragment extends AbstractRatesFragment<ExRatesOnDateModel>
         implements SublimeListener {
 
     private static final int REQUEST_CODE = 1;
@@ -50,7 +51,6 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
     // Picker
     private SublimePicker mSublimePicker;
-
     private Calendar calendar;
 
     public RateByDateFragment() {
@@ -71,7 +71,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         mSublimePicker = new SublimePicker(getContext());
 
         coordinatorLayout = (CoordinatorLayout) getActivity().findViewById(R.id.main_content);
-        loadingView = (ProgressView) rootView.findViewById(R.id.progress);
+        loadingView = (ProgressView) rootView.findViewById(R.id.loading_view);
         rate = (TextView) rootView.findViewById(R.id.rate);
         abbr = (TextView) rootView.findViewById(R.id.abbr);
         scale = (TextView) rootView.findViewById(R.id.scale);
@@ -93,27 +93,40 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
         mSublimePicker.initializePicker(null, this);
-        //mSublimePicker.setSelectedDate(0);
         mSublimePicker.setMaxDate(DateUtils.getDateTomorrow().getTimeInMillis());
+        mSublimePicker.setMinDate(DateUtils.START_DATE);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
 
             SpinnerModel spinnerModel = data.getParcelableExtra(ChooseCurrencyFragment.EXTRA);
+
             abbr.setText(spinnerModel.getAbbr());
             scale.setText(String.valueOf(spinnerModel.getScale()));
 
-            if (spinnerModel.getDateEnd() != -1) {
-                mSublimePicker.setMaxDate(spinnerModel.getDateEnd());
-                Toast.makeText(getActivity(), "добавить date start в spinner model", Toast.LENGTH_SHORT).show();
+            long tomorrow = DateUtils.getDateTomorrow().getTimeInMillis();
+            long date_end = spinnerModel.getDateEnd();
+
+            Utils.logT(RateByDateFragment.class.getName(), "Long tomorrow = " + DateUtils.format(tomorrow) +
+                    ", date_end = " + DateUtils.format(date_end));
+
+            if (date_end < tomorrow) {
+                calendar.setTimeInMillis(date_end);
+                mSublimePicker.setCurrentDate3(DateUtils.getCalendar(date_end));
+                mSublimePicker.setMaxDateByYegor(date_end);
+            } else {
+                calendar.setTimeInMillis(tomorrow);
+                mSublimePicker.setCurrentDate3(Calendar.getInstance());
+                mSublimePicker.setMaxDateByYegor(tomorrow);
             }
 
-            restartLoader();
+            Utils.logT(RateByDateFragment.class.getName(), "new Max Date " + DateUtils.format(calendar));
+            restartLoader(LOADER_1);
         }
     }
 
@@ -136,6 +149,9 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
 
         Bundle bundle = new Bundle();
 
+        Utils.logT("getBundleArgs", "CURRENCY = " + abbr.getText().toString());
+        Utils.logT("getBundleArgs", "DATE = " + DateUtils.format(calendar));
+
         bundle.putString(CURRENCY, abbr.getText().toString());
         bundle.putString(DATE, DateUtils.format(calendar));
 
@@ -143,7 +159,9 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     }
 
     @Override
-    public Loader<ContentWrapper<DailyExRatesOnDateModel>> onCreateLoader(int id, Bundle args) {
+    public Loader<ContentWrapper<ExRatesOnDateModel>> onCreateLoader(int id, Bundle args) {
+
+        setStatus(Status.LOADING);
 
         String currency = args.getString(CURRENCY);
         String date = args.getString(DATE);
@@ -156,8 +174,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
                 throw new NoDataFoundException();
             });
 
-        AbstractLoader<DailyExRatesOnDateModel> loader = null;
-        setStatus(Status.LOADING);
+        AbstractLoader<ExRatesOnDateModel> loader = null;
 
         switch (id) {
             case LOADER_1:
@@ -175,7 +192,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
     }
 
     @Override
-    protected void onDataReceived(DailyExRatesOnDateModel model) {
+    protected void onDataReceived(ExRatesOnDateModel model) {
 
         abbr.setText(model.getAbbreviation());
         rate.setText(String.valueOf(model.getRate()));
@@ -190,6 +207,7 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
         Snackbar snackbar;
 
         if (e instanceof ExchangeRateAssignsOnceInMonth) {
+            Utils.logT(RateByDateFragment.class.getName(), "instanceof ExchangeRateAssignsOnceInMonth");
             restartLoader(LOADER_2);
             return;
         } else if (e instanceof HttpResponseException) {
@@ -202,13 +220,19 @@ public class RateByDateFragment extends AbstractRatesFragment<DailyExRatesOnDate
                     .make(coordinatorLayout,
                             R.string.no_rate_exception,
                             Snackbar.LENGTH_LONG);
+        } else if (e instanceof EOFException) {
+            snackbar = Snackbar
+                    .make(coordinatorLayout,
+                            R.string.could_not_connect_to_server,
+                            Snackbar.LENGTH_LONG);
         } else
             snackbar = Snackbar
                     .make(coordinatorLayout,
-                            e.getMessage(),
+                            e.toString(),
                             Snackbar.LENGTH_LONG)
-                    .setAction("Retry", view -> restartLoader(LOADER_1));
+                    .setAction(R.string.retry, view -> retry());
 
+        Utils.logT("onFailure", e.toString() + " " + e.getMessage());
         snackbar.show();
 
         setStatus(Status.FAILED);

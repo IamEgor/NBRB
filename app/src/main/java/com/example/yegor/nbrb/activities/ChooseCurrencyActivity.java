@@ -1,13 +1,12 @@
 package com.example.yegor.nbrb.activities;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.fragments.ChooseCurrencyFragment;
 
-public class ChooseCurrencyActivity extends AppCompatActivity {
+public class ChooseCurrencyActivity extends BaseActivity {
 
     private final static int ENTER = R.anim.push_up_in;
     private final static int EXIT = R.anim.push_down_out;
@@ -26,7 +25,7 @@ public class ChooseCurrencyActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
 
         finish();

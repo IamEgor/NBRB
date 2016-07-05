@@ -2,7 +2,7 @@ package com.example.yegor.nbrb.models;
 
 import org.ksoap2.serialization.SoapObject;
 
-public class DailyExRatesOnDateModel {
+public class ExRatesOnDateModel {
 
     public static final String NAME = "Cur_Name";
     public static final String SCALE = "Cur_Scale";
@@ -16,7 +16,7 @@ public class DailyExRatesOnDateModel {
     private int code;
     private String abbreviation;
 
-    public DailyExRatesOnDateModel(String quotName, int scale, float rate, int code, String abbreviation) {
+    public ExRatesOnDateModel(String quotName, int scale, float rate, int code, String abbreviation) {
         this.quotName = quotName;
         this.scale = scale;
         this.rate = rate;
@@ -24,7 +24,7 @@ public class DailyExRatesOnDateModel {
         this.abbreviation = abbreviation;
     }
 
-    public DailyExRatesOnDateModel(SoapObject soapObject) {
+    public ExRatesOnDateModel(SoapObject soapObject) {
         quotName = soapObject.getProperty(NAME).toString();
         scale = Integer.parseInt(soapObject.getProperty(SCALE).toString());
         rate = Float.parseFloat(soapObject.getProperty(RATE).toString());
@@ -74,7 +74,7 @@ public class DailyExRatesOnDateModel {
 
     @Override
     public String toString() {
-        return "DailyExRatesOnDateModel{" +
+        return "ExRatesOnDateModel{" +
                 "quotName='" + quotName + '\'' +
                 ", scale=" + scale +
                 ", rate=" + rate +
@@ -116,8 +116,8 @@ public class DailyExRatesOnDateModel {
             return this;
         }
 
-        public DailyExRatesOnDateModel create() {
-            return new DailyExRatesOnDateModel(quotName, scale, rate, code, abbreviation);
+        public ExRatesOnDateModel create() {
+            return new ExRatesOnDateModel(quotName, scale, rate, code, abbreviation);
         }
 
     }

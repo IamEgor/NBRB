@@ -2,26 +2,25 @@
 
 buildscript {
     repositories {
-        //maven { url 'http://ksoap2-android.googlecode.com/svn/m2-repo' }
         jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.2'
         classpath 'me.tatarka:gradle-retrolambda:3.2.5'
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 
 allprojects {
     repositories {
-        maven { url 'http://ksoap2-android.googlecode.com/svn/m2-repo' }
+        //maven { url 'http://ksoap2-android.googlecode.com/svn/m2-repo' }
+        maven { url 'https://oss.sonatype.org/content/repositories/ksoap2-android-releases' }
         maven { url "https://jitpack.io" }
         maven { url "http://dl.bintray.com/glomadrian/maven" }
         jcenter()
     }
 }
-
+/*
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+*/

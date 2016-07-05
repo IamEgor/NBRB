@@ -16,25 +16,25 @@ import com.example.yegor.nbrb.App;
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.fragments.RatesGraphicFragment;
 import com.example.yegor.nbrb.models.CurrencyModel;
-import com.example.yegor.nbrb.models.DailyExRatesOnDateModel;
+import com.example.yegor.nbrb.models.ExRatesOnDateModel;
 
 import java.util.List;
 
 public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapter.ViewHolder> {
 
-    private List<DailyExRatesOnDateModel> models;
+    private List<ExRatesOnDateModel> models;
     private LinearLayoutManager manager;
 
     private int lastPosition = -1;
     private int cur_delay;
     private boolean firstBind = true;
 
-    public CurrentRatesAdapter(List<DailyExRatesOnDateModel> models, LinearLayoutManager manager) {
+    public CurrentRatesAdapter(List<ExRatesOnDateModel> models, LinearLayoutManager manager) {
         this.models = models;
         this.manager = manager;
     }
 
-    public void setModels(List<DailyExRatesOnDateModel> models) {
+    public void setModels(List<ExRatesOnDateModel> models) {
         this.models = models;
 
         notifyDataSetChanged();
@@ -116,7 +116,7 @@ public class CurrentRatesAdapter extends RecyclerView.Adapter<CurrentRatesAdapte
             LocalBroadcastManager.getInstance(App.getContext()).sendBroadcast(intent);
         }
 
-        public void bind(DailyExRatesOnDateModel model) {
+        public void bind(ExRatesOnDateModel model) {
 
             scale.setText(String.valueOf(model.getScale()));
             abbr.setText(model.getAbbreviation());

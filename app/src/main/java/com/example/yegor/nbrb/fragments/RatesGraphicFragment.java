@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.yegor.materialdaterangepicker.date.DatePickerDialog;
 import com.example.yegor.nbrb.App;
@@ -29,17 +28,17 @@ import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.loaders.AbstractLoader;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.models.CurrencyModel;
+import com.example.yegor.nbrb.models.ParcelableLineData;
 import com.example.yegor.nbrb.models.SpinnerModel;
 import com.example.yegor.nbrb.storage.DatabaseManager;
 import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.utils.DateUtils;
-import com.example.yegor.nbrb.utils.Utils;
-import com.example.yegor.nbrb.models.ParcelableLineData;
 import com.example.yegor.togglenavigation.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
 import com.rey.material.widget.ProgressView;
 
+import java.io.EOFException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -108,8 +107,6 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
         View rootView = inflater.inflate(R.layout.fragment_rates_graphic, container, false);
 
-        //TODO ViewStub
-
         scale = (TextView) rootView.findViewById(R.id.scale);
         date = (TextView) rootView.findViewById(R.id.date);
         abbr = (TextView) rootView.findViewById(R.id.abbr);
@@ -117,11 +114,11 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
         mChart = (LineChart) rootView.findViewById(R.id.line_chart);
         fullscreen = (AppCompatImageButton) rootView.findViewById(R.id.fullscreen);
         toggleNavigation = (ToggleNavigation) rootView.findViewById(R.id.toggle);
-        loadingView = (ProgressView) rootView.findViewById(R.id.progress);
+        loadingView = (ProgressView) rootView.findViewById(R.id.loading_view);
         errorView = rootView.findViewById(R.id.error_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
-        rootView.findViewById(R.id.retry_btn).setOnClickListener(v -> restartLoader());
+        rootView.findViewById(R.id.retry_btn).setOnClickListener(v -> retry());
         rootView.findViewById(R.id.container2).setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
             startActivityForResult(intent, REQUEST_CODE_CURRENCY);
@@ -168,17 +165,22 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
         if (resultCode == Activity.RESULT_OK) {
 
-            Utils.logT("onActivityResult", "requestCode = " + requestCode);
-
             if (requestCode == REQUEST_CODE_CURRENCY) {
 
                 SpinnerModel spinnerModel = data.getParcelableExtra(ChooseCurrencyFragment.EXTRA);
                 abbr.setText(spinnerModel.getAbbr());
                 scale.setText(String.valueOf(spinnerModel.getScale()));
 
-                if (spinnerModel.getDateEnd() != -1) {
-                    Toast.makeText(getActivity(), "Обработать случай с dateEnd", Toast.LENGTH_SHORT).show();
-                }
+                Calendar tomorrow = DateUtils.getDateTomorrow();
+                Calendar date_end = DateUtils.getCalendar(spinnerModel.getDateEnd());
+
+                Calendar maxDate = date_end.compareTo(tomorrow) >= 0 || spinnerModel.getDateEnd() == -1
+                        ? tomorrow : date_end;
+
+                //TODO setMinDate
+                dpd.setMaxDate(maxDate);
+                maxDate.add(Calendar.DATE, -1);
+                //dpd.setDate(maxDate);
 
                 restartLoader(LOADER_1);
             } else if (requestCode == REQUEST_CODE_FULLSCREEN) {
@@ -188,14 +190,10 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
                 mChart.setScaleEnabled(false);
                 chartAdapter.setDates(models.getLineData().getXVals());
-                ChartUtils.setUpChart(mChart, models.getLineData(), true);
+                ChartUtils.setUpChart(mChart, models.getLineData());
                 abbr.setText(arguments.getString(ABBR));
                 scale.setText(arguments.getString(SCALE));
                 toggleNavigation.setActivePosition(arguments.getInt(TOGGLE_POS));
-
-                Utils.logT("onActivityResult", "abbr = " + abbr.getText().toString());
-                Utils.logT("onActivityResult", "scale = " + scale.getText().toString());
-                Utils.logT("onActivityResult", "toggleNavigation ActivePosition= " + toggleNavigation.getActivePosition());
             }
         }
     }
@@ -325,7 +323,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
     @Override
     public Loader<ContentWrapper<LineData>> onCreateLoader(int id, Bundle args) {
 
-        Utils.logT("Loader", "RatesGraphicFragment.onCreateLoader()");
+        setStatus(Status.LOADING);
 
         String abbr = args.getString(ABBR);
         String fromDate = args.getString(FROM_DATE);
@@ -341,7 +339,7 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
                 throw new NoDataFoundException();
             });
 
-        setStatus(Status.LOADING);
+        mChart.setTouchEnabled(false);
 
         return new AbstractLoader<>(getContext(),
                 () -> ChartUtils.getChartContent(abbr, fromDate, toDate, id == LOADER_2));
@@ -349,19 +347,23 @@ public class RatesGraphicFragment extends AbstractRatesFragment<LineData> implem
 
     @Override
     public void onDataReceived(LineData models) {
-        Utils.logT("Loader", "RatesGraphicFragment.onDataReceived()");
+
         chartAdapter.setDates(models.getXVals());
-        ChartUtils.setUpChart(mChart, models, false);
+        ChartUtils.setUpChart(mChart, models);
+        mChart.setTouchEnabled(true);
+
         setStatus(Status.OK);
     }
 
     @Override
     protected void onFailure(Exception e) {
-        Utils.logT("Loader", "RatesGraphicFragment.onFailure()");
+
         if (e instanceof ExchangeRateAssignsOnceInMonth) {
             restartLoader(LOADER_2);
             return;
-        } else
+        } else if (e instanceof EOFException)
+            errorMessage.setText(R.string.could_not_connect_to_server);
+        else
             errorMessage.setText(e.getMessage());
 
         setStatus(Status.FAILED);

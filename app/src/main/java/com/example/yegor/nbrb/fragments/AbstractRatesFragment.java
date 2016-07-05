@@ -6,6 +6,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 
 import com.example.yegor.nbrb.models.ContentWrapper;
+import com.example.yegor.nbrb.utils.Utils;
 
 import java.util.Set;
 
@@ -16,6 +17,7 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
     protected static final int LOADER_2 = 2;
 
     protected Bundle prevArgs;
+    protected int prevLoaderId;
 
     public AbstractRatesFragment() {
     }
@@ -35,20 +37,26 @@ public abstract class AbstractRatesFragment<T> extends Fragment implements
     public void onLoaderReset(Loader<ContentWrapper<T>> loader) {
     }
 
-    protected void restartLoader() {
-        restartLoader(LOADER_1);
-    }
-
     protected void restartLoader(int loaderId) {
 
         Bundle bundleArgs = getBundleArgs();
+        Utils.logT("restartLoader", "!equalsBundles(bundleArgs, prevArgs) = " + !equalsBundles(bundleArgs, prevArgs));
+        Utils.logT("restartLoader", "prevLoaderId != loaderId = " + (prevLoaderId != loaderId));
 
-        if (!equalsBundles(bundleArgs, prevArgs))
+        if (!equalsBundles(bundleArgs, prevArgs) || prevLoaderId != loaderId)
             getLoaderManager()
                     .restartLoader(loaderId, bundleArgs, this)
                     .forceLoad();
 
+        prevLoaderId = loaderId;
         prevArgs = bundleArgs;
+    }
+
+    protected void retry() {
+
+        getLoaderManager()
+                .restartLoader(LOADER_1, getBundleArgs(), this)
+                .forceLoad();
     }
 
     private static boolean equalsBundles(Bundle current, Bundle previous) {

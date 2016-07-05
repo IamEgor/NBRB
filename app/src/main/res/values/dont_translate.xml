@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="input_date_pattern" translatable="false">yyyy-MM-dd</string>
+    <string name="input_date_pattern_numbers" translatable="false">\\d{4}-\\d{2}-\\d{2}</string>
+    <string name="rate_not_selected" translatable="false">____.__</string>
+    <string name="date_picker_dialog" translatable="false">DATE_PICKER_DIALOG</string>
+    <string name="range_picker_dialog" translatable="false">RANGE_PICKER_DIALOG</string>
+
+    <string name="cloud_path" translatable="false">M7.1,16.1C5.32,16.51 4,18.1 4,20C4,22.21 5.8,24 8,24L25,24C27.21,24 29,22.2 29,20C29,18.13 27.71,16.56 25.98,16.12L25.98,16.12C25.79,13.81 23.86,12 21.5,12C20.42,12 19.44,12.38 18.66,13.01C17.84,10.67 15.62,9 13,9C9.69,9 7,11.69 7,15C7,15.38 7.03,15.74 7.1,16.1L7.1,16.1ZM26.88,15.37C28.71,16.11 30,17.9 30,20C30,22.76 27.76,25 25,25L8,25C5.23,25 3,22.76 3,20C3,17.95 4.24,16.18 6.01,15.41L6.01,15.41C6,15.28 6,15.14 6,15C6,11.13 9.13,8 13,8C15.61,8 17.89,9.43 19.09,11.55C19.82,11.2 20.64,11 21.5,11C24.15,11 26.36,12.87 26.88,15.37L26.88,15.37L26.88,15.37Z</string>
+</resources>

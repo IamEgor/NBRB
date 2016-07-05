@@ -9,11 +9,13 @@ import com.example.yegor.nbrb.exceptions.NoDataFoundException;
 import com.example.yegor.nbrb.models.ContentWrapper;
 import com.example.yegor.nbrb.utils.Utils;
 
+import java.io.EOFException;
 import java.io.IOException;
 
 public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
 
     private static final int MIN_ANIMATION_DURATION = 1000;
+    private static final int MAX_TRIES = 5;
 
     private ContentWrapper<T> data;
     private AbstractLoaderInterface<T> action;
@@ -22,7 +24,6 @@ public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
         super(context);
 
         this.action = action;
-        Utils.log("MIN_ANIMATION_DURATION = " + MIN_ANIMATION_DURATION);
     }
 
     @Override
@@ -43,12 +44,21 @@ public class AbstractLoader<T> extends AsyncTaskLoader<ContentWrapper<T>> {
         if (!Utils.hasConnection())
             return new ContentWrapper<>(new NoConnectionException());
 
-        T data;
+        T data = null;
 
-        try {
-            data = action.action();
-        } catch (IOException e) {
-            return new ContentWrapper<>(e);
+        for (int i = 1; i <= MAX_TRIES; i++) {
+
+            try {
+
+                data = action.action();
+
+            } catch (IOException e) {
+
+                if (i == MAX_TRIES || !(e instanceof EOFException))
+                    return new ContentWrapper<>(e);
+
+                SystemClock.sleep(100);
+            }
         }
 
         if (data != null)

@@ -6,22 +6,21 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatImageButton;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.yegor.nbrb.R;
 import com.example.yegor.nbrb.activities.ChooseCurrencyActivity;
-import com.example.yegor.nbrb.utils.ChartUtils;
 import com.example.yegor.nbrb.models.ParcelableLineData;
+import com.example.yegor.nbrb.utils.ChartUtils;
+import com.example.yegor.nbrb.utils.DateUtils;
 import com.example.yegor.togglenavigation.ToggleNavigation;
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.LineData;
+import com.rey.material.widget.ProgressView;
 
 public class FullscreenGraphicFragment extends RatesGraphicFragment {
-
-    protected View loadingView;
 
     public static FullscreenGraphicFragment newInstance(Bundle extras) {
 
@@ -29,13 +28,6 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
         fragment.setArguments(extras);
 
         return fragment;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -46,7 +38,6 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
 
         mChart = (LineChart) rootView.findViewById(R.id.line_chart);
         toggleNavigation = (ToggleNavigation) rootView.findViewById(R.id.toggle);
-        loadingView = rootView.findViewById(R.id.loading_view);
         errorView = rootView.findViewById(R.id.error_view);
         errorMessage = (TextView) rootView.findViewById(R.id.error_message);
 
@@ -56,9 +47,11 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
         date = (TextView) toolbarContent.findViewById(R.id.date);
         abbr = (TextView) toolbarContent.findViewById(R.id.abbr);
         rate = (TextView) toolbarContent.findViewById(R.id.rate);
+        loadingView = (ProgressView) toolbarContent.findViewById(R.id.loading_view);
         fullscreen = (AppCompatImageButton) toolbarContent.findViewById(R.id.fullscreen);
 
-        rootView.findViewById(R.id.retry_btn).setOnClickListener(v -> restartLoader());
+        toolbarContent.findViewById(R.id.back_button).setOnClickListener(v1 -> getActivity().finish());
+        rootView.findViewById(R.id.retry_btn).setOnClickListener(v -> retry());
 
         return rootView;
     }
@@ -70,14 +63,20 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
         Bundle arguments = getArguments();
         ParcelableLineData models = arguments.getParcelable(CHART_DATA);
 
-        mChart.setScaleEnabled(false);
-        chartAdapter.setDates(models.getLineData().getXVals());
-        ChartUtils.setUpChart(mChart, models.getLineData(), false);
         abbr.setText(arguments.getString(ABBR));
         scale.setText(arguments.getString(SCALE));
         abbr.setText(arguments.getString(ABBR));
         toggleNavigation.setActivePosition(arguments.getInt(TOGGLE_POS));
 
+        LineData lineData = models.getLineData();
+
+        if (lineData == null)
+            restartLoader(LOADER_1);
+        else {
+            mChart.setScaleEnabled(false);
+            chartAdapter.setDates(lineData.getXVals());
+            ChartUtils.setUpChart(mChart, lineData);
+        }
 
         abbr.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), ChooseCurrencyActivity.class);
@@ -85,53 +84,35 @@ public class FullscreenGraphicFragment extends RatesGraphicFragment {
         });
 
         fullscreen.setOnClickListener(v -> {
-            Toast.makeText(getActivity(), "intent.putExtra(CHART_DATA)", Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent();
+
             intent.putExtra(CHART_DATA, new ParcelableLineData(mChart.getLineData()));
             intent.putExtra(ABBR, abbr.getText().toString());
             intent.putExtra(SCALE, scale.getText().toString());
             //TODO не только position, но и интервал для случая "Период"
             intent.putExtra(TOGGLE_POS, toggleNavigation.getActivePosition());
+
             getActivity().setResult(Activity.RESULT_OK, intent);
             getActivity().finish();
         });
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                getActivity().onBackPressed();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
+    public void onChartValueSelected(String rate, String date) {
+        super.onChartValueSelected(rate, date);
+
+        this.date.setText(DateUtils.formatWeekdayAndDate(date));
     }
 
     @Override
     public void setStatus(Status status) {
+        super.setStatus(status);
 
         switch (status) {
             case LOADING:
-                ChartUtils.setDisabledColor(mChart);
-                mChart.setHighlightPerTapEnabled(false);
-                date.setVisibility(View.INVISIBLE);
-                loadingView.setVisibility(View.VISIBLE);
-                errorView.setVisibility(View.GONE);
-                //TODO
-                //rate.setText(R.string.rate_not_selected);
+                rate.setText("");
                 break;
-            case FAILED:
-                mChart.setVisibility(View.GONE);
-                errorView.setVisibility(View.VISIBLE);
-                loadingView.setVisibility(View.GONE);
-                break;
-            case OK:
-                mChart.setVisibility(View.VISIBLE);
-                errorView.setVisibility(View.GONE);
-                loadingView.setVisibility(View.GONE);
-                break;
-
         }
     }
 
